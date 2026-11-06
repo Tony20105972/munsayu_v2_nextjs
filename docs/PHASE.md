@@ -12,10 +12,10 @@
 | 항목 | 값 |
 |---|---|
 | 현재 Phase | **0 — Harness Bootstrap** |
-| 상태 | `NOT_STARTED` |
-| 마지막 갱신 | — |
-| 다음 행동 | 마스터 프롬프트 실행 → Phase 0 진행 |
-| 막힌 것 | 없음 |
+| 상태 | `GATE_FAIL` |
+| 마지막 갱신 | 2026-11-06 |
+| 다음 행동 | Chrome CDP와 Playwright MCP를 연결한 뒤 Phase 0 Gate FAIL 항목만 재검증 |
+| 막힌 것 | `BLUEPRINT.md` 누락; REA CDP endpoint_unreachable; Playwright MCP 미연결 |
 
 상태 값: `NOT_STARTED` → `IN_PROGRESS` → `GATE_CHECK` → `IN_REVIEW` → `APPROVED`
 (Gate 실패 시 `GATE_FAIL` → 수정 후 다시 `GATE_CHECK`)
@@ -26,7 +26,7 @@
 
 | # | Phase | 상태 | Gate | 독립 리뷰 | 사람 승인 | 보고서 |
 |---|---|---|---|---|---|---|
-| 0 | Harness Bootstrap | NOT_STARTED | — | — | ☐ | `reports/phase-0-report.md` |
+| 0 | Harness Bootstrap | GATE_FAIL | FAIL (0/6) | — | ☐ | `reports/phase-0-report.md` |
 | 1 | PHP Black-Box Reconnaissance | NOT_STARTED | — | — | ☐ | `reports/phase-1-report.md` |
 | 2 | Migration Contract | NOT_STARTED | — | — | ☐ | `reports/phase-2-report.md` |
 | 3 | Frontend Reconstruction | NOT_STARTED | — | — | ☐ | `reports/phase-3-report.md` |
@@ -47,12 +47,12 @@ Phase 0에서 Claude가 채웁니다. 필수 도구가 `정상`이 아니면 Pha
 
 | 도구 | 구분 | 상태 | 버전 | 확인일 | 비고 |
 |---|---|---|---|---|---|
-| REA MCP | 필수 | 미확인 | | | `rea doctor`, 웹 관찰 설정 |
-| Playwright MCP | 필수 | 미확인 | | | `--isolated` |
-| Playwright Test | 필수 | 미확인 | | | |
-| Chrome DevTools MCP | 권장 | 미확인 | | | `--no-usage-statistics` |
-| Next.js DevTools MCP | 권장 | 미확인 | | | Next.js 16 이상 |
-| Context7 | 권장 | 미확인 | | | API 키 필요 |
+| REA MCP | 필수 | 오류 | rea-agents 6.8.0 / MCP server 2.3.1 | 2026-11-06 | Codex 등록·도구 229개는 정상이나 `127.0.0.1:9222`가 `endpoint_unreachable` |
+| Playwright MCP | 필수 | 미설치 | — | 2026-11-06 | 활성 Codex 세션 도구 목록에 `mcp__playwright__*` 없음 |
+| Playwright Test | 필수 | 미확인 | — | 2026-11-06 | 필수 MCP 미연결로 프로젝트·브라우저 설치 미실행 |
+| Chrome DevTools MCP | 권장 | 미설치 | — | 2026-11-06 | 활성 도구 목록에 없음 |
+| Next.js DevTools MCP | 권장 | 미설치 | — | 2026-11-06 | 활성 도구 목록에 없음 |
+| Context7 | 권장 | 미설치 | — | 2026-11-06 | 활성 도구 목록에 없음 |
 
 상태 값: `정상` / `오류` / `미설치` / `미확인`
 
@@ -107,6 +107,8 @@ Claude는 Phase 상태가 바뀔 때마다 한 줄씩 추가합니다. 위쪽이
 
 | 날짜 | Phase | 변경 | 작성 |
 |---|---|---|---|
+| 2026-11-06 | 0 | Gate FAIL: REA CDP endpoint 및 Playwright MCP 미연결 | Codex |
+| 2026-11-06 | 0 | 상태를 IN_PROGRESS로 변경, 하네스 검증 시작 | Codex |
 | — | 0 | 상태판 생성 | 사람 |
 
 ---

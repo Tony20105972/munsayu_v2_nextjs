@@ -9,6 +9,15 @@
 
 ## 1. 필수 도구
 
+### Phase 0 실측 (2026-11-06)
+
+현재 Codex 세션의 REA 도구 이름은 `mcp__rea__list_browser_targets`,
+`mcp__rea__inspect_web_page`, `mcp__rea__analyze_web_bundle`처럼
+`mcp__rea__*` 접두사를 사용한다. 문서의 표에는 기능명을 적는다.
+활성 세션에는 `mcp__playwright__*` 도구가 없으므로, Playwright MCP는
+미연결 상태다. `browser_tools` 등 다른 브라우저 MCP는 Playwright 대체로 쓰지 않는다.
+이는 연결 상태일 뿐, `@playwright/mcp` 등록 후 재시작하면 달라질 수 있다.
+
 ### 1.1 REA — 레거시 사이트 분석 (최우선)
 
 소스 없이 웹사이트·JS 번들·네트워크 기록을 분석하고, 결과마다 증거(Evidence ID)를 붙여 돌려주는 역분석 MCP입니다. 이 프로젝트의 "증거 기반 블랙박스 분석"과 방식이 그대로 맞습니다.
