@@ -1,5 +1,13 @@
 # Phase 0 보고서 — Harness Bootstrap
 
+## 재검증 기록 (2026-11-06)
+
+- REA `list_browser_targets`를 다시 실행했으나 `127.0.0.1:9222`에서 동일한
+  `endpoint_unreachable` 오류가 반환됐다.
+- 활성 Codex MCP 도구 목록에도 `mcp__playwright__*`는 없다.
+- 필수 도구가 여전히 정상화되지 않아 Next.js 생성, Playwright Test 설치,
+  테스트·CI 생성은 규약에 따라 실행하지 않았다.
+
 - 완료한 작업
   - 하네스 문서를 `docs/` 표준 경로에 배치하고, 문서만 포함한 첫 커밋(`ff23c02`)을 `main`에 생성했다.
   - `chore/phase-0` 브랜치를 생성하고 REA MCP·Node·Git·패키지 매니저 상태를 점검했다.
