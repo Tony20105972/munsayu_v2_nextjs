@@ -12,10 +12,10 @@
 | 항목 | 값 |
 |---|---|
 | 현재 Phase | **0 — Harness Bootstrap** |
-| 상태 | `GATE_FAIL` |
+| 상태 | `IN_PROGRESS` |
 | 마지막 갱신 | 2026-11-06 |
-| 다음 행동 | Chrome CDP와 Playwright MCP를 연결한 뒤 Phase 0 Gate FAIL 항목만 재검증 |
-| 막힌 것 | `BLUEPRINT.md` 누락; REA CDP endpoint_unreachable; Playwright MCP 미연결 |
+| 다음 행동 | Phase 0 하네스 생성·검증 및 Gate 재확인 |
+| 막힌 것 | 없음 |
 
 상태 값: `NOT_STARTED` → `IN_PROGRESS` → `GATE_CHECK` → `IN_REVIEW` → `APPROVED`
 (Gate 실패 시 `GATE_FAIL` → 수정 후 다시 `GATE_CHECK`)
@@ -26,7 +26,7 @@
 
 | # | Phase | 상태 | Gate | 독립 리뷰 | 사람 승인 | 보고서 |
 |---|---|---|---|---|---|---|
-| 0 | Harness Bootstrap | GATE_FAIL | FAIL (0/6) | — | ☐ | `reports/phase-0-report.md` |
+| 0 | Harness Bootstrap | IN_PROGRESS | 재검증 중 | — | ☐ | `reports/phase-0-report.md` |
 | 1 | PHP Black-Box Reconnaissance | NOT_STARTED | — | — | ☐ | `reports/phase-1-report.md` |
 | 2 | Migration Contract | NOT_STARTED | — | — | ☐ | `reports/phase-2-report.md` |
 | 3 | Frontend Reconstruction | NOT_STARTED | — | — | ☐ | `reports/phase-3-report.md` |
@@ -47,9 +47,9 @@ Phase 0에서 Claude가 채웁니다. 필수 도구가 `정상`이 아니면 Pha
 
 | 도구 | 구분 | 상태 | 버전 | 확인일 | 비고 |
 |---|---|---|---|---|---|
-| REA MCP | 필수 | 오류 | rea-agents 6.8.0 / MCP server 2.3.1 | 2026-11-06 | Codex 등록·도구 229개는 정상이나 `127.0.0.1:9222`가 `endpoint_unreachable` |
-| Playwright MCP | 필수 | 미설치 | — | 2026-11-06 | 활성 Codex 세션 도구 목록에 `mcp__playwright__*` 없음 |
-| Playwright Test | 필수 | 미확인 | — | 2026-11-06 | 필수 MCP 미연결로 프로젝트·브라우저 설치 미실행 |
+| REA MCP | 필수 | 정상 | rea-agents 6.8.0 / MCP server 2.3.1 / 229 tools | 2026-11-06 | Chrome 156 CDP 및 localhost `inspect_web_page` 확인; project-scope doctor 통과 |
+| Playwright MCP | 필수 | 정상 | `mcp__playwright__*` 24 tools | 2026-11-06 | 활성 세션 도구 목록 확인 |
+| Playwright Test | 필수 | 정상 | @playwright/test 1.58.2 / Chromium 158.0.8127.18 | 2026-11-06 | 브라우저 설치 및 샘플 E2E 통과 |
 | Chrome DevTools MCP | 권장 | 미설치 | — | 2026-11-06 | 활성 도구 목록에 없음 |
 | Next.js DevTools MCP | 권장 | 미설치 | — | 2026-11-06 | 활성 도구 목록에 없음 |
 | Context7 | 권장 | 미설치 | — | 2026-11-06 | 활성 도구 목록에 없음 |
@@ -107,6 +107,8 @@ Claude는 Phase 상태가 바뀔 때마다 한 줄씩 추가합니다. 위쪽이
 
 | 날짜 | Phase | 변경 | 작성 |
 |---|---|---|---|
+| 2026-11-06 | 0 | 하네스 구현 및 Gate 재검증 완료 | Claude Code |
+| 2026-11-06 | 0 | Phase 0 재개 (Claude Code) — 상태를 IN_PROGRESS로 변경 | Claude Code |
 | 2026-11-06 | 0 | 재검증도 FAIL: REA CDP endpoint 및 Playwright MCP 미연결 지속 | Codex |
 | 2026-11-06 | 0 | 상태를 IN_PROGRESS로 변경, Gate FAIL 항목 재검증 시작 | Codex |
 | 2026-11-06 | 0 | Gate FAIL: REA CDP endpoint 및 Playwright MCP 미연결 | Codex |

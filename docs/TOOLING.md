@@ -11,12 +11,17 @@
 
 ### Phase 0 실측 (2026-11-06)
 
-현재 Codex 세션의 REA 도구 이름은 `mcp__rea__list_browser_targets`,
+현재 세션의 REA 도구 이름은 `mcp__rea__list_browser_targets`,
 `mcp__rea__inspect_web_page`, `mcp__rea__analyze_web_bundle`처럼
 `mcp__rea__*` 접두사를 사용한다. 문서의 표에는 기능명을 적는다.
-활성 세션에는 `mcp__playwright__*` 도구가 없으므로, Playwright MCP는
-미연결 상태다. `browser_tools` 등 다른 브라우저 MCP는 Playwright 대체로 쓰지 않는다.
-이는 연결 상태일 뿐, `@playwright/mcp` 등록 후 재시작하면 달라질 수 있다.
+활성 세션에는 `mcp__playwright__*` 도구가 연결되어 있다. `browser_tools` 등
+다른 브라우저 MCP는 Playwright 대체로 쓰지 않는다.
+
+REA 6.8.0에서는 `--approved` 옵션과 `policy` 명령이 없다. Phase 0의 doctor
+판정은 `npx -y rea-agents@6.8.0 doctor --client codex --json`의 `node` healthy 및
+`claude_code`·`codex` 등록 aligned로 한정한다. Ghidra·IDA·jadx·Kuna과 범위 밖
+클라이언트의 경고 때문에 전체 `environment_healthy`가 false여도 이 프로젝트에서는
+doctor 통과다.
 
 ### 1.1 REA — 레거시 사이트 분석 (최우선)
 
@@ -24,8 +29,8 @@
 
 **설치**
 ```bash
-npx -y rea-agents@latest setup   # Claude Code·Codex에 REA MCP 등록
-rea doctor                        # 설치 상태 점검
+npx -y rea-agents@6.8.0 setup   # Claude Code·Codex에 REA MCP 등록
+npx -y rea-agents@6.8.0 doctor --client codex --json  # 설치 상태 점검
 # 등록 후 Claude Code를 완전히 종료했다가 다시 실행해야 도구가 보입니다
 ```
 

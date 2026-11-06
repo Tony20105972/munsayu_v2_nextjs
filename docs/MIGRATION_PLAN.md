@@ -107,7 +107,7 @@
 - [ ] `typecheck`, `lint`, `test`, `e2e:smoke` 명령이 로컬에서 통과
 - [ ] GitHub Actions CI가 PR에서 실행되고 통과
 - [ ] `CLAUDE.md` 8장 디렉터리 구조 생성
-- [ ] **REA:** `rea doctor` 통과, 웹 관찰 설정 완료, localhost 페이지로 `inspect_web_page` 동작 확인
+- [ ] **REA:** `npx -y rea-agents@6.8.0 doctor --client codex --json`에서 `node`가 healthy이고 `claude_code`·`codex` 등록이 aligned, 웹 관찰 설정 완료, localhost 페이지로 `inspect_web_page` 동작 확인. REA 6.8.0의 Ghidra·IDA·jadx·Kuna 및 다른 앱 등록 경고는 이 Gate 범위 밖이다.
 - [ ] **Playwright:** MCP 연결, Playwright Test 브라우저 설치, 샘플 E2E 통과
 - [ ] 권장 도구 연결 상태와 모든 도구의 실제 버전·도구 이름을 보고서에 기록
 - [ ] munsayu.com 접속 이력 없음
