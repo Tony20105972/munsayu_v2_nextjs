@@ -52,12 +52,12 @@
 
 없음.
 
-## Gate: GATE_CHECK
+## Gate: PASS (7/7)
 
 | Gate 항목 | 결과 | 근거 |
 |---|---|---|
 | 로컬 명령 통과 | PASS | typecheck, lint, unit 1/1, E2E 1/1 |
-| PR GitHub Actions CI 실행·통과 | 확인 중 | PR 생성 후 Actions 결과 확인 필요 |
+| PR GitHub Actions CI 실행·통과 | PASS | PR #1 CI run 42208878941 통과 |
 | 디렉터리 구조 | PASS | CLAUDE.md 8장 구조 생성 |
 | REA doctor·웹 관찰·localhost inspect | PASS | EV-0001 |
 | Playwright MCP·브라우저·샘플 E2E | PASS | MCP 24 tools, Chromium 및 E2E 확인 |

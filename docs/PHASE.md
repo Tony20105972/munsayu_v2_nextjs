@@ -12,9 +12,9 @@
 | 항목 | 값 |
 |---|---|
 | 현재 Phase | **0 — Harness Bootstrap** |
-| 상태 | `IN_PROGRESS` |
+| 상태 | `GATE_CHECK` |
 | 마지막 갱신 | 2026-11-06 |
-| 다음 행동 | Phase 0 하네스 생성·검증 및 Gate 재확인 |
+| 다음 행동 | 독립 리뷰 후 사람 승인 대기 |
 | 막힌 것 | 없음 |
 
 상태 값: `NOT_STARTED` → `IN_PROGRESS` → `GATE_CHECK` → `IN_REVIEW` → `APPROVED`
@@ -26,7 +26,7 @@
 
 | # | Phase | 상태 | Gate | 독립 리뷰 | 사람 승인 | 보고서 |
 |---|---|---|---|---|---|---|
-| 0 | Harness Bootstrap | IN_PROGRESS | 재검증 중 | — | ☐ | `reports/phase-0-report.md` |
+| 0 | Harness Bootstrap | GATE_CHECK | PASS (7/7) | — | ☐ | `reports/phase-0-report.md` |
 | 1 | PHP Black-Box Reconnaissance | NOT_STARTED | — | — | ☐ | `reports/phase-1-report.md` |
 | 2 | Migration Contract | NOT_STARTED | — | — | ☐ | `reports/phase-2-report.md` |
 | 3 | Frontend Reconstruction | NOT_STARTED | — | — | ☐ | `reports/phase-3-report.md` |
@@ -107,6 +107,7 @@ Claude는 Phase 상태가 바뀔 때마다 한 줄씩 추가합니다. 위쪽이
 
 | 날짜 | Phase | 변경 | 작성 |
 |---|---|---|---|
+| 2026-11-06 | 0 | Gate PASS (7/7), 상태를 GATE_CHECK로 변경 | Claude Code |
 | 2026-11-06 | 0 | 하네스 구현 및 Gate 재검증 완료 | Claude Code |
 | 2026-11-06 | 0 | Phase 0 재개 (Claude Code) — 상태를 IN_PROGRESS로 변경 | Claude Code |
 | 2026-11-06 | 0 | 재검증도 FAIL: REA CDP endpoint 및 Playwright MCP 미연결 지속 | Codex |
