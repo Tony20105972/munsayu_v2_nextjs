@@ -12,10 +12,10 @@
 | 항목 | 값 |
 |---|---|
 | 현재 Phase | **1 — PHP Black-Box Reconnaissance** |
-| 상태 | `GATE_FAIL` |
+| 상태 | `GATE_CHECK` |
 | 마지막 갱신 | 2026-11-09 |
-| 다음 행동 | 주소 형식별 게시판·인증 REA inspect 증거 보완 |
-| 막힌 것 | Gate 1개 미충족: 게시판·인증 주소 형식 REA 증거 |
+| 다음 행동 | Phase 1 Gate 확인 결과의 사용자 검토 대기 |
+| 막힌 것 | 없음 (Phase 2 시작 전 운영자 답변·D1~D5·D9 결정 필요) |
 
 상태 값: `NOT_STARTED` → `IN_PROGRESS` → `GATE_CHECK` → `IN_REVIEW` → `APPROVED`
 (Gate 실패 시 `GATE_FAIL` → 수정 후 다시 `GATE_CHECK`)
@@ -27,7 +27,7 @@
 | # | Phase | 상태 | Gate | 독립 리뷰 | 사람 승인 | 보고서 |
 |---|---|---|---|---|---|---|
 | 0 | Harness Bootstrap | APPROVED | PASS (7/7) | 차단 0 / 권장 2 | ☑ | `reports/phase-0-report.md` |
-| 1 | PHP Black-Box Reconnaissance | GATE_FAIL | FAIL (5/6, REA 증거 미완료) | — | ☐ | `reports/phase-1-report.md` |
+| 1 | PHP Black-Box Reconnaissance | GATE_CHECK | PASS (6/6) | — | ☐ | `reports/phase-1-report.md` |
 | 2 | Migration Contract | NOT_STARTED | — | — | ☐ | `reports/phase-2-report.md` |
 | 3 | Frontend Reconstruction | NOT_STARTED | — | — | ☐ | `reports/phase-3-report.md` |
 | 4 | Backend Replacement | NOT_STARTED | — | — | ☐ | `reports/phase-4-report.md` |
@@ -122,6 +122,7 @@ Claude는 Phase 상태가 바뀔 때마다 한 줄씩 추가합니다. 위쪽이
 
 | 날짜 | Phase | 변경 | 작성 |
 |---|---|---|---|
+| 2026-11-09 | 1 | 게시판·인증·예약조회 REA 대표 증거 완료, Gate PASS(6/6)로 GATE_CHECK | Codex |
 | 2026-11-09 | 1 | 강좌 예약 POST 주소·전송 항목 확인, REA Gate 기준을 주소 형식별 대표로 조정 | Codex |
 | 2026-11-09 | 1 | Gate 재판정: REA 전수 증거·번들 분석 미완료로 GATE_FAIL | Codex |
 | 2026-11-09 | 1 | 3-5 완료: 공개 자산·강사 대표 정보 정리, 권리 미확인 raw 자산은 미수집 | Codex |

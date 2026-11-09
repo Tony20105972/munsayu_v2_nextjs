@@ -13,6 +13,7 @@
 | EV-0008 | 2026-11-09 | OBSERVED | Playwright MCP | 강좌 예약 form DOM 계약 및 공개 설명회 예약 조회/취소 화면 관찰(입력·조회·취소 없음) | `dom/phase1-course-form-contract.json`, `dom/phase1-course-contract.yml`, `dom/phase1-check.yml`, `har/phase1-final-network.md` |
 | EV-0009 | 2026-11-09 | OBSERVED | Playwright MCP | 공개 페이지 형식별 1440/390 증거(학원·위치·시설·강사·분당 시간표·예약조회) 및 강사 대표 공개 정보 | `screenshots/phase1-*-1440.png`, `screenshots/phase1-*-390.png`, `dom/phase1-{about,location,facility,teachers,schedule-g,check}.yml` |
 | EV-0010 | 2026-11-09 | OBSERVED | REA + curl GET | 강좌 예약 인라인 JS: `./reserve_lecture_update.php` POST, `$form.serialize()` 전송, `tt_id` 클라이언트 검사 | `rea/phase1-schedule-n.md`, `rea/phase1-schedule-n-source.html` |
+| EV-0011 | 2026-11-09 | OBSERVED | REA inspect_web_page | 게시판·인증·예약조회 주소 형식별 대표 페이지 6개 관찰, 모두 성공 | `rea/phase1-board-auth-representatives.md` |
 | EV-ADM-01 | 2026-11-06 | OBSERVED-USER | 사용자 제공 화면 | 관리자 로그인 화면 | `../photo/스크린샷 2026-11-06 오후 8.41.36.png` |
 | EV-ADM-02 | 2026-11-06 | OBSERVED-USER | 사용자 제공 화면 | 회원관리 화면 | `../photo/스크린샷 2026-11-06 오후 8.41.47.png` |
 | EV-ADM-03 | 2026-11-06 | OBSERVED-USER | 사용자 제공 화면 | 설명회관리 화면 | `../photo/스크린샷 2026-11-06 오후 8.41.58.png` |
