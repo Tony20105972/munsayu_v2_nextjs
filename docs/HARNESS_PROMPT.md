@@ -100,7 +100,7 @@ Phase 1을 진행한다. 역할: Legacy Investigator.
 작업:
 1. 공개 경로 전수 조사: 내비게이션, 푸터, sitemap.xml, 페이지 내 링크를
    따라가며 .php / /sub/* / 그누보드 형식 공개 경로(`/bbs/` 등) / 쿼리스트링 경로를 모두 수집.
-   (예: /sub/about, /sub/schedule.n 같은 형태)
+   (예: /sub/about, /sub/schedule.n 같은 형태). 관리자 경로(`/adm/` 등)는 접속하지 않는다.
 2. 페이지별 데스크톱(1440)·모바일(390) 전체 스크린샷과 DOM 스냅샷 저장.
 3. 공통 레이아웃(헤더·푸터·메뉴)과 페이지별 고유 영역 구분.
 4. 모든 폼: action, method, 필드명·타입·필수 여부·maxlength·패턴,
