@@ -1,0 +1,29 @@
+{
+  "status": "partial-observation",
+  "source": "홈·헤더·푸터·모바일 메뉴 Playwright/REA EV-0003, sitemap.xml 404 EV-0004, 대표 공개 경로 EV-0005~0007",
+  "routes": [
+    { "legacy": "/", "kind": "public", "featureId": "PG-001", "evidence": "EV-0003" },
+    { "legacy": "/sub/about", "kind": "public", "featureId": "PG-002", "evidence": "EV-0003" },
+    { "legacy": "/sub/Location", "kind": "public", "featureId": "PG-003", "evidence": "EV-0003" },
+    { "legacy": "/sub/Facility", "kind": "public", "featureId": "PG-004", "evidence": "EV-0003" },
+    { "legacy": "/sub/abouttch1", "kind": "public", "featureId": "PG-005", "evidence": "EV-0003" },
+    { "legacy": "/sub/abouttch2", "kind": "public", "featureId": "PG-006", "evidence": "EV-0003" },
+    { "legacy": "/sub/abouttch3", "kind": "public", "featureId": "PG-007", "evidence": "EV-0003" },
+    { "legacy": "/sub/schedule.n", "kind": "public-form", "featureId": "PG-008", "evidence": "EV-0003, EV-0006" },
+    { "legacy": "/sub/schedule.g", "kind": "public", "featureId": "PG-009", "evidence": "EV-0003" },
+    { "legacy": "/sub/Presentation", "kind": "public-form", "featureId": "PG-010", "evidence": "EV-0003, EV-0005" },
+    { "legacy": "/sub/Check", "kind": "public", "featureId": "PG-011", "evidence": "EV-0003" },
+    { "legacy": "/bbs/board.php?bo_table=notice", "kind": "public-board", "featureId": "PG-012", "evidence": "EV-0003, EV-0007" },
+    { "legacy": "/bbs/board.php?bo_table=notice&wr_id={id}", "kind": "public-board-detail-pattern", "featureId": "RT-001", "evidence": "EV-0007", "representativeObserved": [1, 2] },
+    { "legacy": "/bbs/login.php", "kind": "public-auth", "featureId": "PG-013", "evidence": "EV-0003, EV-0007" },
+    { "legacy": "/bbs/register.php", "kind": "public-auth", "featureId": "PG-014", "evidence": "EV-0003, EV-0007" },
+    { "legacy": "/bbs/password_lost.php", "kind": "public-auth-recovery", "featureId": "RT-002", "evidence": "EV-0007", "observedAs": "login screen link only" },
+    { "legacy": "https://forms.gle/XUjFY9jVStQDKskg8", "kind": "external-public-link", "featureId": "RT-003", "evidence": "EV-0006, EV-0007", "observedAs": "literacy diagnosis application; not opened" }
+  ],
+  "excluded": [
+    { "path": "/uAdmin/", "reason": "robots.txt Disallow; no access", "evidence": "EV-0002" },
+    { "path": "/adm/", "reason": "administrator path; no access", "evidence": "policy" }
+  ],
+  "sitemap": { "url": "/sitemap.xml", "status": 404, "evidence": "EV-0004" },
+  "summary": { "exactPublicPaths": 14, "detailPatterns": 3, "note": "공개 메뉴에서 발견된 상세 페이지는 URL 형식으로 묶었으며, 대표 1~2개만 관찰했다." }
+}

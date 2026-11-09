@@ -12,10 +12,10 @@
 | 항목 | 값 |
 |---|---|
 | 현재 Phase | **1 — PHP Black-Box Reconnaissance** |
-| 상태 | `NOT_STARTED` |
-| 마지막 갱신 | 2026-11-06 |
-| 다음 행동 | Phase 1 지시 대기 |
-| 막힌 것 | 없음 |
+| 상태 | `GATE_FAIL` |
+| 마지막 갱신 | 2026-11-09 |
+| 다음 행동 | Gate 실패 항목(공개 페이지 전수 증거·REA·폼 계약)을 보완하고 운영자 답변 대기 |
+| 막힌 것 | 공개 페이지 전수 증거와 설명회 접수 가능 폼 미관찰; 운영자 답변 대기 |
 
 상태 값: `NOT_STARTED` → `IN_PROGRESS` → `GATE_CHECK` → `IN_REVIEW` → `APPROVED`
 (Gate 실패 시 `GATE_FAIL` → 수정 후 다시 `GATE_CHECK`)
@@ -27,7 +27,7 @@
 | # | Phase | 상태 | Gate | 독립 리뷰 | 사람 승인 | 보고서 |
 |---|---|---|---|---|---|---|
 | 0 | Harness Bootstrap | APPROVED | PASS (7/7) | 차단 0 / 권장 2 | ☑ | `reports/phase-0-report.md` |
-| 1 | PHP Black-Box Reconnaissance | NOT_STARTED | — | — | ☐ | `reports/phase-1-report.md` |
+| 1 | PHP Black-Box Reconnaissance | GATE_FAIL | FAIL (1/7, 2 부분 통과, 1 대기) | — | ☐ | `reports/phase-1-report.md` |
 | 2 | Migration Contract | NOT_STARTED | — | — | ☐ | `reports/phase-2-report.md` |
 | 3 | Frontend Reconstruction | NOT_STARTED | — | — | ☐ | `reports/phase-3-report.md` |
 | 4 | Backend Replacement | NOT_STARTED | — | — | ☐ | `reports/phase-4-report.md` |
@@ -121,6 +121,15 @@ Claude는 Phase 상태가 바뀔 때마다 한 줄씩 추가합니다. 위쪽이
 
 | 날짜 | Phase | 변경 | 작성 |
 |---|---|---|---|
+| 2026-11-09 | 1 | 1-F 완료: 기능 매트릭스·UNKNOWN·자산·SEO 문서화, Gate FAIL 보고서 작성 | Codex |
+| 2026-11-09 | 1 | 1-D 완료: 관찰 자산·SEO 정리 (Chrome DevTools MCP 미설치로 1-E 건너뜀) | Codex |
+| 2026-11-09 | 1 | 1-C 완료: 대표 폼·스크립트·네트워크 관찰, 운영 사이트 쓰기 요청 0건 | Codex |
+| 2026-11-09 | 1 | 1-B 완료: 대표 공개 화면 스크린샷·DOM·REA 증거 수집, 관리자 AD-* 연결 | Codex |
+| 2026-11-09 | 1 | 1-A 완료: 공개 경로 14개, 상세·인증 URL 형식 3개 기록; sitemap.xml 404 | Codex |
+| 2026-11-09 | 1 | 1-B 재개: 공개된 사업자·개인정보관리책임자 정보는 사용자 확인으로 증거 보관 허용 | Codex |
+| 2026-11-09 | 1 | 1-B 중단: 설명회 공개 화면에서 개인정보 노출 확인, 원본 증거 파일 폐기 | Codex |
+| 2026-11-09 | 1 | 1-A 초안: 공개 경로 14개 수집, robots 금지 경로 제외 | Codex |
+| 2026-11-09 | 1 | Phase 1 재개: Chrome CDP·robots.txt 확인, 공개 조사 시작 | Codex |
 | 2026-11-09 | 1 | 범위 보강: 백엔드·관리자 기능 확정, 관리자 화면 EV-ADM-01~07 반영 (사용자 지시) | Codex |
 | 2026-11-06 | 1 | 사용자 제공 관리자 화면 근거(EV-ADM-01~07) 및 조사 항목 반영 | Codex |
 | 2026-11-06 | 1 | 범위 보강: 백엔드·관리자 기능 확정 (사용자 지시) | Codex |

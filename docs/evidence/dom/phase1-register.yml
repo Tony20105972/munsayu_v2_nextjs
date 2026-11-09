@@ -1,0 +1,146 @@
+- generic [active] [ref=f6e1]:
+  - generic [ref=f6e3]:
+    - generic [ref=f6e4]:
+      - generic [ref=f6e5]: 
+      - text: "상담센터 : (대치)02-563-5972 / (분당)031-713-5972"
+    - generic [ref=f6e6]:
+      - link "로그인" [ref=f6e7] [cursor=pointer]:
+        - /url: https://munsayu.com/bbs/login.php
+      - link "회원가입" [ref=f6e8] [cursor=pointer]:
+        - /url: https://munsayu.com/bbs/register.php
+  - navigation [ref=f6e9]:
+    - generic [ref=f6e10]:
+      - link [ref=f6e11] [cursor=pointer]:
+        - /url: https://munsayu.com
+        - img "문사유 아카데미 로고" [ref=f6e12]
+      - list [ref=f6e14]:
+        - listitem [ref=f6e15]:
+          - link "학원안내" [ref=f6e16] [cursor=pointer]:
+            - /url: javascript:;
+        - listitem [ref=f6e17]:
+          - link "강사진안내" [ref=f6e18] [cursor=pointer]:
+            - /url: javascript:;
+        - listitem [ref=f6e19]:
+          - link "시간표" [ref=f6e20] [cursor=pointer]:
+            - /url: javascript:;
+        - listitem [ref=f6e21]:
+          - link "설명회" [ref=f6e22] [cursor=pointer]:
+            - /url: javascript:;
+        - listitem [ref=f6e23]:
+          - link "예약확인/신청" [ref=f6e24] [cursor=pointer]:
+            - /url: javascript:;
+  - banner [ref=f6e25]:
+    - generic [ref=f6e26]:
+      - heading "회원가입 약관동의" [level=1] [ref=f6e27]
+      - paragraph [ref=f6e28]: 문사유 아카데미의 최고급 교육 서비스 이용을 위해 약관에 동의해 주세요.
+  - generic [ref=f6e31]:
+    - generic [ref=f6e32]:
+      - generic [ref=f6e33]: 
+      - generic [ref=f6e34]: 회원가입약관 및 개인정보 수집·이용 동의를 완료하셔야 다음 가입 단계 진행이 가능합니다.
+    - generic [ref=f6e35]:
+      - heading " (필수) 회원가입약관" [level=2] [ref=f6e36]:
+        - generic [ref=f6e37]: 
+        - text: (필수) 회원가입약관
+      - textbox [ref=f6e38]: 해당 홈페이지에 맞는 회원가입약관을 입력합니다.
+      - generic [ref=f6e40] [cursor=pointer]:
+        - checkbox "회원가입약관의 내용에 동의합니다." [ref=f6e41]
+        - generic [ref=f6e42]: 회원가입약관의 내용에 동의합니다.
+    - generic [ref=f6e43]:
+      - heading " (필수) 개인정보 수집 및 이용" [level=2] [ref=f6e44]:
+        - generic [ref=f6e45]: 
+        - text: (필수) 개인정보 수집 및 이용
+      - table [ref=f6e47]:
+        - rowgroup [ref=f6e48]:
+          - row [ref=f6e49]:
+            - columnheader "목적" [ref=f6e50]
+            - columnheader "항목" [ref=f6e51]
+            - columnheader "보유기간" [ref=f6e52]
+        - rowgroup [ref=f6e53]:
+          - row [ref=f6e54]:
+            - cell "이용자 식별 및 본인여부 확인" [ref=f6e55]: 이용자 식별 및본인여부 확인
+            - cell "아이디, 이름, 비밀번호" [ref=f6e56]
+            - cell "회원 탈퇴 시까지" [ref=f6e57]
+          - row [ref=f6e58]:
+            - cell "고객서비스 통지 및 CS 대응 식별" [ref=f6e59]: 고객서비스 통지 및CS 대응 식별
+            - cell "연락처 (이메일, 휴대전화번호)" [ref=f6e60]
+            - cell "회원 탈퇴 시까지" [ref=f6e61]
+      - generic [ref=f6e63] [cursor=pointer]:
+        - checkbox "개인정보 수집 및 이용의 내용에 동의합니다." [ref=f6e64]
+        - generic [ref=f6e65]: 개인정보 수집 및 이용의 내용에 동의합니다.
+    - generic [ref=f6e67] [cursor=pointer]:
+      - checkbox " 문사유 아카데미 회원가입 약관에 모두 동의합니다." [ref=f6e68]
+      - generic [ref=f6e69]:
+        - generic [ref=f6e70]: 
+        - text: 문사유 아카데미 회원가입 약관에 모두 동의합니다.
+    - generic [ref=f6e71]:
+      - link "취소하기" [ref=f6e72] [cursor=pointer]:
+        - /url: https://munsayu.com
+      - button "다음" [ref=f6e73] [cursor=pointer]
+  - contentinfo [ref=f6e74]:
+    - generic [ref=f6e76]:
+      - generic [ref=f6e77]:
+        - generic [ref=f6e78]: 문해와 사유
+        - paragraph [ref=f6e79]: 읽고, 생각하고, 자기 언어로 표현합니다.어휘·독해·사고·토론·글쓰기를 연결하는 초등 고학년 문해력 교육
+        - generic [ref=f6e80]:
+          - generic [ref=f6e81]:
+            - strong [ref=f6e82]: "대치본원 :"
+            - text: 02-563-5972
+          - generic [ref=f6e83]:
+            - strong [ref=f6e84]: "분당점 :"
+            - text: 031-713-5972
+        - paragraph [ref=f6e85]: "상담시간: 월-금 13:00-21:00 / 토·일 9:30-21:00"
+      - generic [ref=f6e86]:
+        - generic [ref=f6e87]:
+          - generic [ref=f6e88]:
+            - heading "ABOUT" [level=6] [ref=f6e89]
+            - list [ref=f6e90]:
+              - listitem [ref=f6e91]:
+                - link "학원 소개" [ref=f6e92] [cursor=pointer]:
+                  - /url: https://munsayu.com/sub/about
+              - listitem [ref=f6e93]:
+                - link "교육 철학" [ref=f6e94] [cursor=pointer]:
+                  - /url: https://munsayu.com/sub/about
+              - listitem [ref=f6e95]:
+                - link "강사진" [ref=f6e96] [cursor=pointer]:
+                  - /url: https://munsayu.com/sub/abouttch1
+              - listitem [ref=f6e97]:
+                - link "오시는 길" [ref=f6e98] [cursor=pointer]:
+                  - /url: https://munsayu.com/sub/Location
+          - generic [ref=f6e99]:
+            - heading "PROGRAM" [level=6] [ref=f6e100]
+            - list [ref=f6e101]:
+              - listitem [ref=f6e102]:
+                - link "대치본원" [ref=f6e103] [cursor=pointer]:
+                  - /url: https://munsayu.com/sub/schedule.n
+              - listitem [ref=f6e104]:
+                - link "분당점" [ref=f6e105] [cursor=pointer]:
+                  - /url: https://munsayu.com/sub/schedule.g
+          - generic [ref=f6e106]:
+            - heading "RESERVE" [level=6] [ref=f6e107]
+            - list [ref=f6e108]:
+              - listitem [ref=f6e109]:
+                - link "문해력 진단 신청" [ref=f6e110] [cursor=pointer]:
+                  - /url: https://forms.gle/XUjFY9jVStQDKskg8
+              - listitem [ref=f6e111]:
+                - link "설명회 신청" [ref=f6e112] [cursor=pointer]:
+                  - /url: https://munsayu.com/sub/Presentation
+              - listitem [ref=f6e113]:
+                - link "상담 문의" [ref=f6e114] [cursor=pointer]:
+                  - /url: https://munsayu.com/sub/schedule.n
+          - generic [ref=f6e115]:
+            - heading "SNS" [level=6] [ref=f6e116]
+            - generic [ref=f6e117]:
+              - link "" [ref=f6e118] [cursor=pointer]:
+                - /url: https://www.instagram.com/munsayu_official/
+              - link "" [ref=f6e120] [cursor=pointer]:
+                - /url: https://blog.naver.com/munsayu
+        - generic [ref=f6e122]:
+          - paragraph [ref=f6e123]:
+            - strong [ref=f6e124]: "대치본원 :"
+            - text: "서울시 강남구 대치동 987-14(도곡로515) 2층 (TEL: 02-563-5972)"
+          - paragraph [ref=f6e125]:
+            - strong [ref=f6e126]: "분당점 :"
+            - text: "경기도 성남시 분당구 수내동 28-1 (내정로173번길1) 5층 (TEL: 031-713-5972)"
+          - paragraph [ref=f6e127]: "대표 : 유시내 | 개인정보관리책임자 : 오동준팀장(edunonsul@daum.net)"
+          - paragraph [ref=f6e128]: "사업자번호 : 385-86-03969 | 학원운영등록증번호: 제15526호"
+          - paragraph [ref=f6e129]: © 2026 MUNSAYU.COM ELEMENTARY LITERACY. All Rights Reserved.

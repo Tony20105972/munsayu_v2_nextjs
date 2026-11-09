@@ -114,7 +114,7 @@
 
 ### Phase 1 — PHP Black-Box Reconnaissance
 **목표:** 레거시 사이트의 관찰 가능한 모든 동작을 증거와 함께 기록한다.
-**추가 조사:** 그누보드 형식 공개 경로(`/bbs/` 등)와 강좌 수강 신청 폼을 확인한다. 관리자 경로(`/adm/` 등)는 접속 금지다.
+**추가 조사:** 그누보드 형식 공개 경로(`/bbs/` 등)와 강좌 수강 신청 폼을 확인한다. 관리자 경로(`/uAdmin/` — robots.txt 확인 EV-0002, `/adm/`)는 접속 금지다.
 **산출물:** `legacy-route-map.json`, `legacy-feature-matrix.md`, `legacy-form-contracts.md`, `legacy-assets.json`, `legacy-seo-map.md`, `legacy-unknowns.md`
 **Gate**
 - [ ] 내비게이션·푸터·sitemap에서 도달 가능한 공개 URL 전부가 route map에 있음

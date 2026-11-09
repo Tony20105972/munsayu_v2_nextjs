@@ -1,0 +1,350 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]: 
+      - text: "상담센터 : (대치)02-563-5972 / (분당)031-713-5972"
+    - generic [ref=e6]:
+      - link "로그인" [ref=e7] [cursor=pointer]:
+        - /url: https://munsayu.com/bbs/login.php
+      - link "회원가입" [ref=e8] [cursor=pointer]:
+        - /url: https://munsayu.com/bbs/register.php
+  - navigation [ref=e9]:
+    - generic [ref=e10]:
+      - link [ref=e11] [cursor=pointer]:
+        - /url: https://munsayu.com
+        - img "문사유 아카데미 로고" [ref=e12]
+      - list [ref=e14]:
+        - listitem [ref=e15]:
+          - link "학원안내" [ref=e16] [cursor=pointer]:
+            - /url: javascript:;
+        - listitem [ref=e17]:
+          - link "강사진안내" [ref=e18] [cursor=pointer]:
+            - /url: javascript:;
+        - listitem [ref=e19]:
+          - link "시간표" [ref=e20] [cursor=pointer]:
+            - /url: javascript:;
+        - listitem [ref=e21]:
+          - link "설명회" [ref=e22] [cursor=pointer]:
+            - /url: javascript:;
+        - listitem [ref=e23]:
+          - link "예약확인/신청" [ref=e24] [cursor=pointer]:
+            - /url: javascript:;
+  - generic [ref=e25]:
+    - generic [ref=e26]:
+      - button [ref=e27] [cursor=pointer]
+      - button [ref=e28] [cursor=pointer]
+      - button [ref=e29] [cursor=pointer]
+    - generic [ref=e30]:
+      - generic [ref=e33]:
+        - generic [ref=e34]: ELEMENTARY LITERACY PROGRAM
+        - heading "읽은 것을 이해하고, 자기 생각으로 표현하는 힘" [level=2] [ref=e35]: 읽은 것을 이해하고,자기 생각으로 표현하는 힘
+        - paragraph [ref=e36]: 어휘·독해·사고 토론·글쓰기를 하나의 흐름으로 연결합니다.읽은 내용을 바탕으로 생각을 나누고, 근거를 갖춘 글로 정리합니다.
+        - generic [ref=e37]:
+          - link "문해력 진단 신청 " [ref=e38] [cursor=pointer]:
+            - /url: https://munsayu.com/sub/about
+          - link "교육과정 알아보기" [ref=e40] [cursor=pointer]:
+            - /url: https://munsayu.com/sub/schedule.n
+      - text:  
+  - generic [ref=e42]:
+    - link " 설명회 알림 신청" [ref=e43] [cursor=pointer]:
+      - /url: https://munsayu.com/sub/Presentation
+      - generic [ref=e44]: 
+      - heading "설명회 알림 신청" [level=6] [ref=e45]
+    - link " 수강 상담" [ref=e46] [cursor=pointer]:
+      - /url: https://munsayu.com/sub/schedule.n
+      - generic [ref=e47]: 
+      - heading "수강 상담" [level=6] [ref=e48]
+    - link " 강사진·교육 철학" [ref=e49] [cursor=pointer]:
+      - /url: https://munsayu.com/sub/abouttch1
+      - generic [ref=e50]: 
+      - heading "강사진·교육 철학" [level=6] [ref=e51]
+    - link " 오시는 길" [ref=e52] [cursor=pointer]:
+      - /url: https://munsayu.com/sub/Location
+      - generic [ref=e53]: 
+      - heading "오시는 길" [level=6] [ref=e54]
+  - generic [ref=e56]:
+    - heading "읽은 뒤, 자기 말로 설명할 수 있나요?" [level=3] [ref=e57]
+    - paragraph [ref=e58]: 내용을 이해하고 생각을 정리해 표현하는 과정에도 연습이 필요합니다. 문사유는 그 과정을 단계별로 연결합니다.
+  - generic [ref=e60]:
+    - generic [ref=e61]:
+      - text: OUR CHARACTERISTICS
+      - heading "읽기에서 글쓰기까지, 하나로 이어지는 5단계 학습" [level=2] [ref=e62]
+      - paragraph [ref=e64]: 한 편의 글에서 출발해 어휘를 이해하고, 질문하고, 토론한 뒤 글로 정리합니다.
+    - generic [ref=e65]:
+      - generic [ref=e67]:
+        - generic [ref=e68]: 
+        - heading "01 어휘 | 문맥 속에서 뜻을 이해합니다" [level=5] [ref=e70]
+        - paragraph [ref=e71]: 개념어와 학습 도구어의 뜻을 글 속에서 확인합니다. 비슷한 말과 반대말을 연결하며 알맞게 사용하는 연습을 합니다.
+      - generic [ref=e73]:
+        - generic [ref=e74]: 
+        - heading "02 독해 | 핵심과 구조를 읽습니다" [level=5] [ref=e76]
+        - paragraph [ref=e77]: 중요한 정보를 찾고 문단 사이의 관계를 살핍니다. 글의 흐름과 글쓴이의 의도를 근거를 들어 설명합니다.
+      - generic [ref=e79]:
+        - generic [ref=e80]: 
+        - heading "03 사고 | 질문하고 비교합니다" [level=5] [ref=e82]
+        - paragraph [ref=e83]: "\"왜 그럴까?\"를 묻고 서로 다른 관점을 비교합니다. 주장에 어떤 근거가 필요한지 살피며 자신의 판단을 정리합니다."
+      - generic [ref=e85]:
+        - generic [ref=e86]: 
+        - heading "04 토론 | 근거를 들어 설명합니다" [level=5] [ref=e88]
+        - paragraph [ref=e89]: 자신의 의견을 이유와 함께 말하고 다른 의견을 듣습니다. 질문과 반론을 통해 생각을 보완합니다.
+      - generic [ref=e91]:
+        - generic [ref=e92]: 
+        - heading "05 글쓰기 | 생각을 글로 완성합니다" [level=5] [ref=e94]
+        - paragraph [ref=e95]: 읽고 토론한 내용을 주장과 근거가 드러나도록 씁니다. 강사의 피드백을 바탕으로 내용과 표현을 고쳐 씁니다.
+      - generic [ref=e97]:
+        - generic [ref=e98]: 
+        - 'heading "모집 학년: 예비 초등 5·6학년" [level=5] [ref=e100]'
+        - paragraph [ref=e101]: 초등 독서논술·문해력 통합 과정으로 중·고등 학습 능력과 서·논술 평가의 강력한 바탕을 완성합니다.
+  - generic [ref=e103]:
+    - generic [ref=e104]:
+      - text: ELEMENTARY CURRICULUM
+      - heading "초등 독서논술·문해력 클래스" [level=2] [ref=e105]
+      - paragraph [ref=e107]: 초등 고학년, 읽기와 표현의 기초를 단단하게초5·초6의 학습 단계에 맞춰 이해·사고·표현을 연결합니다.
+    - generic [ref=e108]:
+      - generic [ref=e110]:
+        - generic [ref=e111]: Elementary Grade 5
+        - heading "초5 | 읽은 내용을 자기 말로" [level=4] [ref=e112]
+        - paragraph [ref=e113]: 핵심 어휘와 글의 구조를 이해하고, 읽은 내용을 설명합니다. 질문 만들기와 문장 문단 쓰기로 생각을 정리합니다.
+        - generic [ref=e114]:
+          - generic [ref=e115]: 초5 과정
+          - link "초5 과정 알아보기" [ref=e116] [cursor=pointer]:
+            - /url: https://munsayu.com/sub/schedule.n
+      - generic [ref=e118]:
+        - generic [ref=e119]: Elementary Grade 6
+        - heading "초6 | 근거를 갖춰 말하고 쓰기" [level=4] [ref=e120]
+        - paragraph [ref=e121]: 서로 다른 관점을 비교하고 자신의 판단을 근거와 함께 표현합니다. 토론과 고쳐 쓰기로 논리적인 글을 완성합니다.
+        - generic [ref=e122]:
+          - generic [ref=e123]: 초6 과정
+          - link "초6 과정 알아보기" [ref=e124] [cursor=pointer]:
+            - /url: https://munsayu.com/sub/schedule.n
+      - generic [ref=e126]:
+        - generic [ref=e127]: Discussion & Debate
+        - heading "독서토론 | 다른 생각을 만나 깊어지는 사고" [level=4] [ref=e128]
+        - paragraph [ref=e129]: 문학·비문학을 읽고 같은 주제를 여러 관점에서 살핍니다. 의견을 나누고 질문하며 생각의 근거를 점검합니다.
+        - generic [ref=e130]:
+          - generic [ref=e131]: 독서토론
+          - link "독서토론 과정 알아보기" [ref=e132] [cursor=pointer]:
+            - /url: https://munsayu.com/sub/schedule.n
+      - generic [ref=e134]:
+        - generic [ref=e135]: Vocabulary Clinic
+        - heading "어휘 | 뜻을 알고, 문맥에 맞게 쓰기" [level=4] [ref=e136]
+        - paragraph [ref=e137]: 교과 개념어와 학습 도구어를 글 속에서 익힙니다. 단어의 관계를 연결하고 문맥에 맞게 활용합니다.
+        - generic [ref=e138]:
+          - generic [ref=e139]: 어휘 클리닉
+          - link "어휘 과정 알아보기" [ref=e140] [cursor=pointer]:
+            - /url: https://munsayu.com/sub/schedule.n
+      - generic [ref=e142]:
+        - generic [ref=e143]: Writing Mastery
+        - heading "글쓰기 | 생각의 순서를 세우는 연습" [level=4] [ref=e144]
+        - paragraph [ref=e145]: 문장과 문단을 연결하고 주장에 알맞은 근거를 배치합니다. 강사와 함께 글을 살피며 내용과 표현을 다듬습니다.
+        - generic [ref=e146]:
+          - generic [ref=e147]: 글쓰기 전담반
+          - link "글쓰기 과정 알아보기" [ref=e148] [cursor=pointer]:
+            - /url: https://munsayu.com/sub/schedule.n
+      - generic [ref=e150]:
+        - generic [ref=e151]: Literacy Assessment
+        - heading "우리 아이의 읽기와 표현, 어디까지 자랐을까요?" [level=4] [ref=e152]
+        - paragraph [ref=e153]: 어휘·독해·추론·글쓰기를 살펴 강점과 보완할 부분을 확인합니다. 진단 결과를 바탕으로 필요한 학습 방향을 안내합니다.
+        - generic [ref=e154]:
+          - generic [ref=e155]: 진단 신청
+          - link "문해력 진단 신청" [ref=e156] [cursor=pointer]:
+            - /url: https://munsayu.com/sub/abouttch3
+  - generic [ref=e158]:
+    - generic [ref=e159]:
+      - text: LEARNING SYSTEM
+      - heading "COSMO Daily 3 Hours Step & System" [level=2] [ref=e160]
+      - paragraph [ref=e162]: 몰입도를 높이는 3시간 체계적 단계별 학습 프로그램
+    - generic [ref=e163]:
+      - generic [ref=e165]:
+        - generic [ref=e166]: STEP 1
+        - heading "1 Hour | 어휘 & 핵심 독해" [level=5] [ref=e167]
+        - paragraph [ref=e168]: 지문 분석을 위한 필수 어휘를 정립하고, 글의 핵심 문단 구조를 파악하는 독해 훈련을 진행합니다.
+      - generic [ref=e170]:
+        - generic [ref=e171]: STEP 2
+        - heading "1 Hour | 사고 확장 & 토론" [level=5] [ref=e172]
+        - paragraph [ref=e173]: 다양한 관점에서 질문을 던지고 논리를 점검하며 논술·토론을 통해 입체적인 사고력을 기릅니다.
+      - generic [ref=e175]:
+        - generic [ref=e176]: STEP 3
+        - heading "1 Hour | 표현 및 1:1 첨삭" [level=5] [ref=e177]
+        - paragraph [ref=e178]: 자신의 생각을 체계적인 논술문으로 완성하고, 1:1 맞춤형 피드백을 받아 글을 즉시 정밀하게 수정합니다.
+  - generic [ref=e180]:
+    - generic [ref=e181]:
+      - text: ELEMENTARY LITERACY PROGRAM
+      - 'heading "초등 문해력의 완성: PROJECT COSMO" [level=2] [ref=e182]'
+      - paragraph [ref=e184]: 초등학교 2015·2022 개정 교과서 데이터베이스 기반 어휘·독해 체계적 정밀 솔루션
+    - generic [ref=e185]:
+      - generic [ref=e187]:
+        - generic [ref=e188]: 
+        - generic [ref=e190]: 51만 개
+        - paragraph [ref=e191]: 표준국어대사전 낱말
+      - generic [ref=e193]:
+        - generic [ref=e194]: 
+        - generic [ref=e196]: 1,000 개
+        - paragraph [ref=e197]: 교과 데이터베이스 추출 어휘
+      - generic [ref=e199]:
+        - generic [ref=e200]: 
+        - generic [ref=e202]: 50 단원
+        - paragraph [ref=e203]: CORE 어휘 교재 단원 수
+      - generic [ref=e205]:
+        - generic [ref=e206]: 
+        - generic [ref=e208]: 750 문항
+        - paragraph [ref=e209]: 객관식 문해력 문항
+    - generic [ref=e210]:
+      - generic [ref=e212]:
+        - generic [ref=e213]:
+          - generic [ref=e214]: 
+          - generic [ref=e216]
+        - paragraph [ref=e219]: 평생 쓸 필수 어휘를 정교하게 체화합니다. 헷갈리는 단어를 짝으로 묶어 비교하며 뜻의 경계를 익힙니다.
+      - generic [ref=e221]:
+        - generic [ref=e222]:
+          - generic [ref=e223]: 
+          - generic [ref=e225]
+        - paragraph [ref=e228]: 엄선된 텍스트를 깊이 읽어내며 구조적 사고와 독해력을 키웁니다. 토론보다 먼저 잘 읽는 근본 실력을 배양합니다.
+    - generic [ref=e229]:
+      - generic [ref=e230]:
+        - generic [ref=e231]: 
+        - heading "우리 아이는 이 차이를 설명할 수 있을까요?" [level=4] [ref=e233]
+      - generic [ref=e234]:
+        - generic [ref=e236]:
+          - generic [ref=e237]
+          - generic [ref=e240]: VS
+          - generic [ref=e241]
+        - generic [ref=e245]:
+          - generic [ref=e246]
+          - generic [ref=e249]: VS
+          - generic [ref=e250]
+        - generic [ref=e254]:
+          - generic [ref=e255]
+          - generic [ref=e258]: VS
+          - generic [ref=e259]
+        - generic [ref=e263]:
+          - generic [ref=e264]
+          - generic [ref=e267]: VS
+          - generic [ref=e268]
+      - 'heading " COSMO: CORE 한 단원의 학습 흐름" [level=5] [ref=e271]':
+        - generic [ref=e272]: 
+        - text: "COSMO: CORE 한 단원의 학습 흐름"
+      - generic [ref=e273]:
+        - generic [ref=e275]:
+          - generic [ref=e276]: "01"
+          - generic [ref=e277]: 단어쌍 비교
+          - generic [ref=e278]: 왜 함께 배우는지, 어떻게 구별하는지 익힙니다.
+        - generic [ref=e280]:
+          - generic [ref=e281]: "02"
+          - generic [ref=e282]: 교과 연계
+          - generic [ref=e283]: 단어쌍마다 관련 교과를 표시해 학교 공부와 잇습니다.
+        - generic [ref=e285]:
+          - generic [ref=e286]: "03"
+          - generic [ref=e287]: 표현 확장
+          - generic [ref=e288]: 관용 표현과 속담으로 쓰임을 넓힙니다.
+        - generic [ref=e290]:
+          - generic [ref=e291]: "04"
+          - generic [ref=e292]: 문해력 문항
+          - generic [ref=e293]: 배운 단어를 지문 속에서 다시 찾아 씁니다.
+    - generic [ref=e294]:
+      - generic [ref=e296]:
+        - generic [ref=e297]:
+          - generic [ref=e298]: 
+          - heading "COSMO의 하루 (3교시 시스템)" [level=4] [ref=e300]
+        - generic [ref=e301]:
+          - strong [ref=e302]: "1교시 (50분): 어휘 (CORE)"
+          - paragraph [ref=e303]: 단어쌍을 비교하며 뜻을 정확히 익힙니다.
+        - generic [ref=e304]:
+          - strong [ref=e305]: "2교시 (50분): 도서 안내와 쓰기"
+          - paragraph [ref=e306]: 함께 읽을 책을 살펴보고 생각을 글로 작성합니다.
+        - generic [ref=e307]:
+          - strong [ref=e308]: "3교시 (50분): 토론과 토의 (FLARE)"
+          - paragraph [ref=e309]: 읽은 내용을 바탕으로 생각을 나누고 넓힙니다.
+      - generic [ref=e311]:
+        - generic [ref=e312]:
+          - generic [ref=e313]: 
+          - heading "학년별 4개 반 편성 및 진도" [level=4] [ref=e315]
+        - generic [ref=e316]:
+          - generic [ref=e317]: 5학년 독해반
+          - generic [ref=e319]: 5학년 논리반
+          - generic [ref=e321]: 6학년 독해반
+          - generic [ref=e323]: 6학년 논리반
+        - generic [ref=e325]: "학기 중: 독서 2주 1권 / 어휘 1주 1단원 | 방학 중: 1주 1권 압축 독서"
+    - generic [ref=e326]:
+      - generic [ref=e327]:
+        - generic [ref=e328]: 
+        - heading "COSMO 스펙트럼 진단평가 영역 (40분 / 24문항 / 100점)" [level=4] [ref=e330]
+      - generic [ref=e331]:
+        - generic [ref=e333]:
+          - generic [ref=e334]: 어휘력
+          - text: 24점
+        - generic [ref=e336]:
+          - generic [ref=e337]: 문학 독해
+          - text: 18점
+        - generic [ref=e339]:
+          - generic [ref=e340]: "비문학: 사회"
+          - text: 5학년 20 / 6학년 14
+        - generic [ref=e342]:
+          - generic [ref=e343]: "비문학: 과학"
+          - text: 5학년 10 / 6학년 16
+        - generic [ref=e345]:
+          - generic [ref=e346]: 논리 표현
+          - text: 8점
+        - generic [ref=e348]:
+          - generic [ref=e349]: 논술 구성
+          - text: 20점
+    - generic [ref=e350]:
+      - generic [ref=e352]:
+        - generic [ref=e353]: CORE 어휘 교재
+        - 'heading "SET 03: 가정 / 가설" [level=5] [ref=e354]'
+        - paragraph [ref=e355]: 과학탐구실험 교과연계. 한자풀이 및 쉬운 풀이로 조건 정하기와 원인 설명의 개념 차이를 익힙니다.
+      - generic [ref=e357]:
+        - generic [ref=e358]: FLARE 독서 교재
+        - 'heading "기준점 찾기: 균형점 기록" [level=5] [ref=e359]'
+        - paragraph [ref=e360]: 합의 문장 작성 및 점검 도구를 통해 독서 후 논리적인 자기 생각을 정립합니다.
+  - generic [ref=e363]:
+    - generic [ref=e364]:
+      - generic [ref=e365]: 
+      - generic [ref=e366]:
+        - heading "어떤 과정이 맞을지 함께 살펴보세요." [level=4] [ref=e367]
+        - paragraph [ref=e368]: 아이의 학년과 읽기·글쓰기 고민을 알려주시면 적합한 과정과 진단 절차를 안내합니다.
+        - paragraph [ref=e369]: "상담 가능시간 : 월-금 14:00-22:00 / 토·일 08:30-22:00"
+    - generic [ref=e370]:
+      - link " 카카오톡 상담" [ref=e371] [cursor=pointer]:
+        - /url: http://pf.kakao.com/_yZKWX/
+        - generic [ref=e372]: 
+        - text: 카카오톡 상담
+      - link " 전화 상담" [ref=e373] [cursor=pointer]:
+        - /url: tel:02-563-5972
+        - generic [ref=e374]: 
+        - text: 전화 상담
+  - generic [ref=e378]:
+    - generic [ref=e379]:
+      - heading "문사유 초등 교육 설명회" [level=3] [ref=e380]
+      - paragraph [ref=e381]: 읽기·토론·글쓰기가 어떻게 하나의 수업으로 이어지는지 소개합니다. 일정이 정해지면 안내해 드립니다.
+    - generic [ref=e383]:
+      - combobox [ref=e384]:
+        - option "학년 선택" [selected]
+        - option "예비 초5"
+        - option "예비 초6"
+        - option "초등 저학년/기타"
+      - textbox "학생 이름" [ref=e385]
+      - textbox "학교명 (선택)" [ref=e386]
+      - textbox "보호자 연락처 (- 제외)" [ref=e387]
+      - button "설명회 알림 신청" [ref=e388] [cursor=pointer]
+  - contentinfo [ref=e389]:
+    - generic [ref=e391]:
+      - generic [ref=e392]:
+        - generic [ref=e393]: 문해와 사유
+        - paragraph [ref=e394]: 읽고, 생각하고, 자기 언어로 표현합니다.어휘·독해·사고·토론·글쓰기를 연결하는 초등 고학년 문해력 교육
+        - generic [ref=e395]:
+          - generic [ref=e396]
+          - generic [ref=e398]
+        - paragraph [ref=e400]: "상담시간: 월-금 13:00-21:00 / 토·일 9:30-21:00"
+      - generic [ref=e401]:
+        - generic [ref=e402]:
+          - generic [ref=e403]
+          - generic [ref=e414]
+          - generic [ref=e421]
+          - generic [ref=e430]
+        - generic [ref=e437]:
+          - paragraph [ref=e438]
+          - paragraph [ref=e440]
+          - paragraph [ref=e442]: "대표 : 유시내 | 개인정보관리책임자 : 오동준팀장(edunonsul@daum.net)"
+          - paragraph [ref=e443]: "사업자번호 : 385-86-03969 | 학원운영등록증번호: 제15526호"
+          - paragraph [ref=e444]: © 2026 MUNSAYU.COM ELEMENTARY LITERACY. All Rights Reserved.
