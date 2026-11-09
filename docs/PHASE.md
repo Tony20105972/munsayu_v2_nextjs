@@ -11,11 +11,11 @@
 
 | 항목 | 값 |
 |---|---|
-| 현재 Phase | **1 — PHP Black-Box Reconnaissance** |
-| 상태 | `GATE_CHECK` |
+| 현재 Phase | **2 — Migration Contract** |
+| 상태 | `NOT_STARTED` |
 | 마지막 갱신 | 2026-11-09 |
-| 다음 행동 | Phase 1 Gate 확인 결과의 사용자 검토 대기 |
-| 막힌 것 | 없음 (Phase 2 시작 전 운영자 답변·D1~D5·D9 결정 필요) |
+| 다음 행동 | Phase 2 시작 조건 확인 및 마이그레이션 계약 작성 준비 |
+| 막힌 것 | D1~D5·D9 및 미답변 운영자 질문 확인 필요 |
 
 상태 값: `NOT_STARTED` → `IN_PROGRESS` → `GATE_CHECK` → `IN_REVIEW` → `APPROVED`
 (Gate 실패 시 `GATE_FAIL` → 수정 후 다시 `GATE_CHECK`)
@@ -27,7 +27,7 @@
 | # | Phase | 상태 | Gate | 독립 리뷰 | 사람 승인 | 보고서 |
 |---|---|---|---|---|---|---|
 | 0 | Harness Bootstrap | APPROVED | PASS (7/7) | 차단 0 / 권장 2 | ☑ | `reports/phase-0-report.md` |
-| 1 | PHP Black-Box Reconnaissance | GATE_CHECK | PASS (6/6) | 차단 0 / 권장 0 | ☐ | `reports/phase-1-report.md` |
+| 1 | PHP Black-Box Reconnaissance | APPROVED | PASS (6/6) | 차단 0 / 권장 0 | ☑ | `reports/phase-1-report.md` |
 | 2 | Migration Contract | NOT_STARTED | — | — | ☐ | `reports/phase-2-report.md` |
 | 3 | Frontend Reconstruction | NOT_STARTED | — | — | ☐ | `reports/phase-3-report.md` |
 | 4 | Backend Replacement | NOT_STARTED | — | — | ☐ | `reports/phase-4-report.md` |
@@ -122,6 +122,7 @@ Claude는 Phase 상태가 바뀔 때마다 한 줄씩 추가합니다. 위쪽이
 
 | 날짜 | Phase | 변경 | 작성 |
 |---|---|---|---|
+| 2026-11-09 | 1 | Phase 1 승인, PR #2 병합 (사용자 지시) | Codex |
 | 2026-11-09 | 1 | Phase 1 리뷰 반영: .gitignore·AD 연결·공개 사업자 정보 예외 처리 | Codex |
 | 2026-11-09 | 1 | 독립 리뷰 완료: 차단 1 / 권장 2, 상태를 IN_REVIEW로 변경 | Codex |
 | 2026-11-09 | 1 | 게시판·인증·예약조회 REA 대표 증거 완료, Gate PASS(6/6)로 GATE_CHECK | Codex |
