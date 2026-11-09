@@ -52,6 +52,12 @@
 
 ## Gate: PASS
 
+## 리뷰 반영
+
+- `.gitignore`에 `/legacy-assets-raw/`를 추가했다. `git check-ignore -v legacy-assets-raw/test.png`로 무시 규칙을 확인했고, `git ls-files | grep legacy-assets-raw`는 출력이 없었다.
+- 기능 매트릭스에 AD-001·AD-006·AD-012 행과 AD-001~013 대조표를 추가했다.
+- 증거 원문을 재검토한 결과 노출된 이름·전화·대표 이메일·주소는 사이트에 공개된 사업자 정보 범위였다. 신청자·학생·학부모·직원 개인 연락처나 쿠키·저장소 값은 발견되지 않았다. CLAUDE.md 조사 규칙에 이 공개 사업자 정보 예외를 명시했다.
+
 | Gate 항목 | 결과 |
 |---|---|
 | sitemap 404 + 내부 링크 포화 추적 | 통과 — 공개 메뉴·푸터·형식별 대표를 추적, 새 공개 경로 없음 |

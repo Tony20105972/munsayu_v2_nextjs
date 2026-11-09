@@ -12,8 +12,29 @@
 | FM-003 | 회원 로그인·가입 | OBSERVED/UNKNOWN | 화면 구조만 관찰 | AD-002 |
 | BZ-001 | 설명회 마감 표시 | OBSERVED | `접수마감` 및 disabled 버튼 | AD-004 |
 | BZ-002 | 강좌 개인정보 보유 | OBSERVED | 종강·정규 등록 안내 완료 시 즉시 파기 문구 | AD-013 |
+| AD-001 | 관리자 로그인·로그아웃·로그인 유지 | OBSERVED-USER | 관리자 전용 — 근거 EV-ADM-01만. 공개 `/bbs/login.php`은 회원 로그인 화면(EV-0007) | EV-ADM-01 |
+| AD-006 | 강사 관리 | OBSERVED-USER + OBSERVED | 관리자 전용 관리 기능은 EV-ADM-04, 공개 강사 소개는 `/sub/abouttch1` EV-0009 | EV-ADM-04, EV-0009 |
 | AD-007/008 | 시간표·강좌 신청 관리 | OBSERVED-USER + OBSERVED | 사용자 제공 관리자 화면과 공개 시간표·예약 모달 연결 | EV-ADM-05, EV-0006 |
 | AD-009 | 입학진단 | 확정(사용자 답변) | Google Forms 외부 링크 연결만, 신규 구현 없음 | EV-0006, EV-0007 |
 | AD-010 | 문자신청내역 | UNKNOWN | 공개 화면에서 범위 미확정 | Q-ADM-07, Q-ADM-11 |
 | AD-011 | 강사지원 | UNKNOWN | 공개 화면에서 범위 미확정 | Q-ADM-07 |
+| AD-012 | 접속자 집계·검색 | OBSERVED-USER | 관리자 전용 — 근거 EV-ADM-06, EV-ADM-07만 | EV-ADM-06, EV-ADM-07 |
 | PG-011 | 설명회 예약 조회/취소 | OBSERVED | 학생 이름·보호자 휴대폰 조회 UI와 취소/알림 안내 문구 | EV-0008 |
+
+## AD 연결 대조
+
+| AD ID | 매트릭스 연결 |
+|---|---|
+| AD-001 | AD-001 행 |
+| AD-002 | PG-013/014, FM-003 |
+| AD-003 | PG-010, FM-002 |
+| AD-004 | PG-010, FM-002, BZ-001 |
+| AD-005 | PG-010, FM-002 |
+| AD-006 | AD-006 행 |
+| AD-007 | PG-008/009, AD-007/008 행 |
+| AD-008 | PG-008/009, FM-001, AD-007/008 행 |
+| AD-009 | AD-009 행 |
+| AD-010 | AD-010 행 |
+| AD-011 | AD-011 행 |
+| AD-012 | AD-012 행 |
+| AD-013 | FM-001, BZ-002 |

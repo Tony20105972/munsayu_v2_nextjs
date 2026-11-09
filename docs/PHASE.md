@@ -27,7 +27,7 @@
 | # | Phase | 상태 | Gate | 독립 리뷰 | 사람 승인 | 보고서 |
 |---|---|---|---|---|---|---|
 | 0 | Harness Bootstrap | APPROVED | PASS (7/7) | 차단 0 / 권장 2 | ☑ | `reports/phase-0-report.md` |
-| 1 | PHP Black-Box Reconnaissance | GATE_CHECK | PASS (6/6) | — | ☐ | `reports/phase-1-report.md` |
+| 1 | PHP Black-Box Reconnaissance | GATE_CHECK | PASS (6/6) | 차단 0 / 권장 0 | ☐ | `reports/phase-1-report.md` |
 | 2 | Migration Contract | NOT_STARTED | — | — | ☐ | `reports/phase-2-report.md` |
 | 3 | Frontend Reconstruction | NOT_STARTED | — | — | ☐ | `reports/phase-3-report.md` |
 | 4 | Backend Replacement | NOT_STARTED | — | — | ☐ | `reports/phase-4-report.md` |
@@ -122,6 +122,8 @@ Claude는 Phase 상태가 바뀔 때마다 한 줄씩 추가합니다. 위쪽이
 
 | 날짜 | Phase | 변경 | 작성 |
 |---|---|---|---|
+| 2026-11-09 | 1 | Phase 1 리뷰 반영: .gitignore·AD 연결·공개 사업자 정보 예외 처리 | Codex |
+| 2026-11-09 | 1 | 독립 리뷰 완료: 차단 1 / 권장 2, 상태를 IN_REVIEW로 변경 | Codex |
 | 2026-11-09 | 1 | 게시판·인증·예약조회 REA 대표 증거 완료, Gate PASS(6/6)로 GATE_CHECK | Codex |
 | 2026-11-09 | 1 | 강좌 예약 POST 주소·전송 항목 확인, REA Gate 기준을 주소 형식별 대표로 조정 | Codex |
 | 2026-11-09 | 1 | Gate 재판정: REA 전수 증거·번들 분석 미완료로 GATE_FAIL | Codex |
