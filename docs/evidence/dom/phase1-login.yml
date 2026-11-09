@@ -1,0 +1,22 @@
+- generic [ref=f5e3]:
+  - heading [level=1] [ref=f5e4]:
+    - link "로그인" [ref=f5e5] [cursor=pointer]:
+      - /url: https://munsayu.com
+  - generic [ref=f5e6]:
+    - heading "회원 로그인" [level=2] [ref=f5e7]
+    - link "회원가입" [ref=f5e8] [cursor=pointer]:
+      - /url: https://munsayu.com/bbs/register.php
+  - group [ref=f5e10]:
+    - textbox "아이디를 입력하세요" [ref=f5e12]
+    - textbox "비밀번호를 입력하세요" [ref=f5e14]
+    - button "로그인" [ref=f5e15] [cursor=pointer]
+    - generic [ref=f5e16]:
+      - generic [ref=f5e17] [cursor=pointer]:
+        - checkbox "로그인 상태 유지" [ref=f5e18]
+        - generic [ref=f5e19]: 로그인 상태 유지
+      - generic [ref=f5e20]:
+        - link "아이디 찾기" [ref=f5e21] [cursor=pointer]:
+          - /url: https://munsayu.com/bbs/password_lost.php
+        - generic [ref=f5e22]: "|"
+        - link "비밀번호 찾기" [ref=f5e23] [cursor=pointer]:
+          - /url: https://munsayu.com/bbs/password_lost.php

@@ -1,0 +1,166 @@
+- generic [active] [ref=f7e1]:
+  - generic [ref=f7e3]:
+    - generic [ref=f7e4]:
+      - generic [ref=f7e5]: 
+      - text: "상담센터 : (대치)02-563-5972 / (분당)031-713-5972"
+    - generic [ref=f7e6]:
+      - link "로그인" [ref=f7e7] [cursor=pointer]:
+        - /url: https://munsayu.com/bbs/login.php
+      - link "회원가입" [ref=f7e8] [cursor=pointer]:
+        - /url: https://munsayu.com/bbs/register.php
+  - navigation [ref=f7e9]:
+    - generic [ref=f7e10]:
+      - link [ref=f7e11] [cursor=pointer]:
+        - /url: https://munsayu.com
+        - img "문사유 아카데미 로고" [ref=f7e12]
+      - list [ref=f7e14]:
+        - listitem [ref=f7e15]:
+          - link "학원안내" [ref=f7e16] [cursor=pointer]:
+            - /url: javascript:;
+        - listitem [ref=f7e17]:
+          - link "강사진안내" [ref=f7e18] [cursor=pointer]:
+            - /url: javascript:;
+        - listitem [ref=f7e19]:
+          - link "시간표" [ref=f7e20] [cursor=pointer]:
+            - /url: javascript:;
+        - listitem [ref=f7e21]:
+          - link "설명회" [ref=f7e22] [cursor=pointer]:
+            - /url: javascript:;
+        - listitem [ref=f7e23]:
+          - link "예약확인/신청" [ref=f7e24] [cursor=pointer]:
+            - /url: javascript:;
+  - banner [ref=f7e25]:
+    - generic [ref=f7e26]:
+      - heading "시설안내" [level=1] [ref=f7e27]
+      - paragraph [ref=f7e28]: 최상의 몰입도를 선사하는 문사유의 프리미엄 교육 공간입니다.
+  - tablist [ref=f7e33]:
+    - tab "대치본원" [selected] [ref=f7e34] [cursor=pointer]
+    - tab "분당점" [ref=f7e35] [cursor=pointer]
+  - generic [ref=f7e36]:
+    - tabpanel "대치본원" [ref=f7e37]:
+      - generic [ref=f7e39]:
+        - generic [ref=f7e41]:
+          - text: 문해와 사유 대치
+          - heading "단정한 공간, 깊이 있는 배움" [level=2] [ref=f7e42]
+          - paragraph [ref=f7e43]: 문해와 사유 대치는 밝은 색조와 투명한 시야, 절제된 목재의 온기를 담았습니다. 책과 글에 마음을 기울 이는 교실부터 안내가 시작되는 입구까지. 필요한 자리를 단정하게 정리해 아이의 배움이 공간의 중심에 놓이도록 했습니다.
+        - generic [ref=f7e46]:
+          - generic [ref=f7e47]:
+            - button "Slide 1" [ref=f7e48] [cursor=pointer]
+            - button "Slide 2" [ref=f7e49] [cursor=pointer]
+            - button "Slide 3" [ref=f7e50] [cursor=pointer]
+            - button "Slide 4" [ref=f7e51] [cursor=pointer]
+          - generic [ref=f7e56]:
+            - heading "공간은 간결하게, 생각은 깊이 있게." [level=3] [ref=f7e57]
+            - paragraph [ref=f7e58]: 문해와 사유 대치는 밝은 색조와 투명한 시야, 절제된 목재의 온기를 담았습니다
+          - button "" [ref=f7e59] [cursor=pointer]
+          - button "" [ref=f7e62] [cursor=pointer]
+      - generic [ref=f7e66]:
+        - generic [ref=f7e67]:
+          - generic [ref=f7e69]:
+            - generic:
+              - generic [ref=f7e70]: ATMOSPHERE
+              - generic:
+                - img "절제된 색감과 따뜻한 소재"
+            - generic [ref=f7e71]:
+              - heading "절제된 색감과 따뜻한 소재" [level=4] [ref=f7e72]
+              - paragraph [ref=f7e73]: 밝은 중성색에 목재의 질감을 더했습니다. 간결한 선과 차분한 색감이 어우러져, 아이가 오래 머물기에도 부담스럽지 않은 분위기입니다.
+          - generic [ref=f7e75]:
+            - generic:
+              - generic [ref=f7e76]: PERSPECTIVE
+              - generic:
+                - img "시야가 이어지는 공간"
+            - generic [ref=f7e77]:
+              - heading "시야가 이어지는 공간" [level=4] [ref=f7e78]
+              - paragraph [ref=f7e79]: 유리 파티션으로 공간의 연결감을 살렸습니다. 교실과 공용 공간의 구분을 유지하면서, 교실로 이어지는 흐름이 한눈에 들어옵니다.
+          - generic [ref=f7e81]:
+            - generic:
+              - generic [ref=f7e82]: CLASSROOM
+              - generic:
+                - img "책과 글을 위한 교실"
+            - generic [ref=f7e83]:
+              - heading "책과 글을 위한 교실" [level=4] [ref=f7e84]
+              - paragraph [ref=f7e85]: 개별 책상과 정돈된 배치로 자신의 읽기와 쓰기에 집중하는 자리를 마련했습니다. 아이의 책과 글이 공간의 중심이 됩니다.
+          - generic [ref=f7e87]:
+            - generic:
+              - generic [ref=f7e88]: FLOW OF MOVEMENT
+              - generic:
+                - img "역할이 분명한 동선"
+            - generic [ref=f7e89]:
+              - heading "역할이 분명한 동선" [level=4] [ref=f7e90]
+              - paragraph [ref=f7e91]: 안내 데스크, 교무 공간, 교실의 역할을 나누었습니다. 방문과 안내, 수업 준비와 학습이 각자의 자리에서 이어집니다.
+        - generic [ref=f7e94]:
+          - heading "문해와 사유 대치를 만나보세요" [level=4] [ref=f7e95]
+          - paragraph [ref=f7e96]: 공간과 방문에 관해 궁금한 점을 들려주세요. 카카오톡으로 문의하시면 안내해 드립니다.
+          - link " 카카오톡 상담" [ref=f7e97] [cursor=pointer]:
+            - /url: http://pf.kakao.com/_yZKWX/
+            - generic [ref=f7e98]: 
+            - text: 카카오톡 상담
+    - text:   
+  - contentinfo [ref=f7e99]:
+    - generic [ref=f7e101]:
+      - generic [ref=f7e102]:
+        - generic [ref=f7e103]: 문해와 사유
+        - paragraph [ref=f7e104]: 읽고, 생각하고, 자기 언어로 표현합니다.어휘·독해·사고·토론·글쓰기를 연결하는 초등 고학년 문해력 교육
+        - generic [ref=f7e105]:
+          - generic [ref=f7e106]:
+            - strong [ref=f7e107]: "대치본원 :"
+            - text: 02-563-5972
+          - generic [ref=f7e108]:
+            - strong [ref=f7e109]: "분당점 :"
+            - text: 031-713-5972
+        - paragraph [ref=f7e110]: "상담시간: 월-금 13:00-21:00 / 토·일 9:30-21:00"
+      - generic [ref=f7e111]:
+        - generic [ref=f7e112]:
+          - generic [ref=f7e113]:
+            - heading "ABOUT" [level=6] [ref=f7e114]
+            - list [ref=f7e115]:
+              - listitem [ref=f7e116]:
+                - link "학원 소개" [ref=f7e117] [cursor=pointer]:
+                  - /url: https://munsayu.com/sub/about
+              - listitem [ref=f7e118]:
+                - link "교육 철학" [ref=f7e119] [cursor=pointer]:
+                  - /url: https://munsayu.com/sub/about
+              - listitem [ref=f7e120]:
+                - link "강사진" [ref=f7e121] [cursor=pointer]:
+                  - /url: https://munsayu.com/sub/abouttch1
+              - listitem [ref=f7e122]:
+                - link "오시는 길" [ref=f7e123] [cursor=pointer]:
+                  - /url: https://munsayu.com/sub/Location
+          - generic [ref=f7e124]:
+            - heading "PROGRAM" [level=6] [ref=f7e125]
+            - list [ref=f7e126]:
+              - listitem [ref=f7e127]:
+                - link "대치본원" [ref=f7e128] [cursor=pointer]:
+                  - /url: https://munsayu.com/sub/schedule.n
+              - listitem [ref=f7e129]:
+                - link "분당점" [ref=f7e130] [cursor=pointer]:
+                  - /url: https://munsayu.com/sub/schedule.g
+          - generic [ref=f7e131]:
+            - heading "RESERVE" [level=6] [ref=f7e132]
+            - list [ref=f7e133]:
+              - listitem [ref=f7e134]:
+                - link "문해력 진단 신청" [ref=f7e135] [cursor=pointer]:
+                  - /url: https://forms.gle/XUjFY9jVStQDKskg8
+              - listitem [ref=f7e136]:
+                - link "설명회 신청" [ref=f7e137] [cursor=pointer]:
+                  - /url: https://munsayu.com/sub/Presentation
+              - listitem [ref=f7e138]:
+                - link "상담 문의" [ref=f7e139] [cursor=pointer]:
+                  - /url: https://munsayu.com/sub/schedule.n
+          - generic [ref=f7e140]:
+            - heading "SNS" [level=6] [ref=f7e141]
+            - generic [ref=f7e142]:
+              - link "" [ref=f7e143] [cursor=pointer]:
+                - /url: https://www.instagram.com/munsayu_official/
+              - link "" [ref=f7e145] [cursor=pointer]:
+                - /url: https://blog.naver.com/munsayu
+        - generic [ref=f7e147]:
+          - paragraph [ref=f7e148]:
+            - strong [ref=f7e149]: "대치본원 :"
+            - text: "서울시 강남구 대치동 987-14(도곡로515) 2층 (TEL: 02-563-5972)"
+          - paragraph [ref=f7e150]:
+            - strong [ref=f7e151]: "분당점 :"
+            - text: "경기도 성남시 분당구 수내동 28-1 (내정로173번길1) 5층 (TEL: 031-713-5972)"
+          - paragraph [ref=f7e152]: "대표 : 유시내 | 개인정보관리책임자 : 오동준팀장(edunonsul@daum.net)"
+          - paragraph [ref=f7e153]: "사업자번호 : 385-86-03969 | 학원운영등록증번호: 제15526호"
+          - paragraph [ref=f7e154]: © 2026 MUNSAYU.COM ELEMENTARY LITERACY. All Rights Reserved.

@@ -1,0 +1,12 @@
+{
+  "status": "partial-public-observation",
+  "evidence": "EV-0009",
+  "adminMapping": "EV-ADM-04",
+  "source": "/sub/abouttch1",
+  "note": "공개 화면에서 관찰 가능한 대표 강사만 기록한다. 사진 원본 URL·전체 명단은 D1/D6 확인 전 이관하지 않는다.",
+  "instructors": [
+    {"name":"김윤환","team":"대치/분당","role":"원장","bio":"문해와 사유 대치/분당학원 원장"},
+    {"name":"김민주","team":"문해와 사유","role":"강사","bio":"문해와 사유 강사"},
+    {"name":"김보민","team":"문해와 사유","role":"강사","bio":"문해와 사유 강사"}
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "status": "partial-observation",
+  "evidence": ["EV-0003", "EV-0005", "EV-0007", "EV-0009"],
+  "assets": [
+    {"type": "logo", "url": "/seo/logo_munsau.png", "observedOn": "public shared layout", "format": "png", "dimensions": "UNKNOWN", "purpose": "site logo", "rights": "미확인(D6)"},
+    {"type": "favicon", "url": "/seo/img/favicon.ico", "observedOn": "/sub/Presentation", "format": "ico", "dimensions": "UNKNOWN", "purpose": "favicon", "rights": "미확인(D6)"},
+    {"type": "hero", "url": "/img/photo-1541339907198-e08756dedf3f.avif", "observedOn": "/sub/Presentation", "format": "avif", "dimensions": "UNKNOWN", "purpose": "page image", "rights": "미확인(D6)"}
+  ],
+  "note": "권리가 확인되지 않은 자산은 신규 저장소에 이관하지 않는다. 원본 사진·서버 백업은 D1 확인 중이며, 공개 이미지 raw 다운로드는 권리 미확인으로 수행하지 않았다."
+}

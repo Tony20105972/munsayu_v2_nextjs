@@ -24,6 +24,7 @@
 | 등급 | 의미 | 예 |
 |---|---|---|
 | `OBSERVED` | 직접 확인했고 증거 파일이 있음 | 스크린샷, HAR, DOM 스냅샷, 응답 본문 |
+| `OBSERVED-USER` | 사용자가 제공한 화면·자료에서 확인. Claude가 직접 관찰한 것은 아님. | `docs/photo/`의 사용자 제공 스크린샷 |
 | `INFERRED` | 관찰 결과에서 추론함. 근거를 함께 적음 | "제출 후 /sub/complete로 이동 → 서버에서 저장 후 리다이렉트로 추정" |
 | `UNKNOWN` | 확인 불가. 사용자 결정이나 추가 정보가 필요함 | 정원 초과 시 서버 동작, 관리자 화면 구성 |
 
@@ -140,6 +141,7 @@ munsayu-v2/
 │  ├─ MIGRATION_PLAN.md
 │  ├─ HARNESS_PROMPT.md
 │  ├─ TOOLING.md
+│  ├─ photo/           사용자 제공 화면(관리자 등)
 │  ├─ evidence/        ledger.md, rea/, screenshots/, har/, dom/
 │  ├─ legacy/          Phase 1 산출물
 │  ├─ contracts/       Phase 2 산출물 (migration-matrix.md, route-compatibility-map.json, openapi.yaml …)

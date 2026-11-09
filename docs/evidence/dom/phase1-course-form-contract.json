@@ -1,0 +1,95 @@
+[
+  {
+    "action": "javascript:void(0);",
+    "method": "POST",
+    "name": null,
+    "inputs": [
+      {
+        "name": "tt_id",
+        "type": "hidden",
+        "value": "",
+        "required": false
+      },
+      {
+        "name": "campus",
+        "type": "hidden",
+        "value": "대치본원",
+        "required": false
+      },
+      {
+        "name": "rl_name",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "rl_hp",
+        "type": "tel",
+        "required": true
+      },
+      {
+        "name": "rl_school",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "department",
+        "type": "radio",
+        "required": false
+      },
+      {
+        "name": "department",
+        "type": "radio",
+        "required": false
+      },
+      {
+        "name": "department",
+        "type": "radio",
+        "required": false
+      },
+      {
+        "name": "grade",
+        "type": "radio",
+        "required": false
+      },
+      {
+        "name": "grade",
+        "type": "radio",
+        "required": false
+      },
+      {
+        "name": "grade",
+        "type": "radio",
+        "required": false
+      },
+      {
+        "name": "grade",
+        "type": "radio",
+        "required": false
+      },
+      {
+        "name": "grade",
+        "type": "radio",
+        "required": false
+      },
+      {
+        "name": "grade",
+        "type": "radio",
+        "required": false
+      },
+      {
+        "name": "grade",
+        "type": "radio",
+        "required": false
+      },
+      {
+        "name": "",
+        "type": "checkbox",
+        "required": true
+      },
+      {
+        "name": "",
+        "type": "submit"
+      }
+    ]
+  }
+]

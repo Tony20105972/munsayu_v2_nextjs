@@ -1,0 +1,148 @@
+- generic [active] [ref=f11e1]:
+  - generic [ref=f11e3]:
+    - generic [ref=f11e4]:
+      - generic [ref=f11e5]: 
+      - text: "상담센터 : (대치)02-563-5972 / (분당)031-713-5972"
+    - generic [ref=f11e6]:
+      - link "로그인" [ref=f11e7] [cursor=pointer]:
+        - /url: https://munsayu.com/bbs/login.php
+      - link "회원가입" [ref=f11e8] [cursor=pointer]:
+        - /url: https://munsayu.com/bbs/register.php
+  - navigation [ref=f11e9]:
+    - generic [ref=f11e10]:
+      - link [ref=f11e11] [cursor=pointer]:
+        - /url: https://munsayu.com
+        - img "문사유 아카데미 로고" [ref=f11e12]
+      - list [ref=f11e14]:
+        - listitem [ref=f11e15]:
+          - link "학원안내" [ref=f11e16] [cursor=pointer]:
+            - /url: javascript:;
+        - listitem [ref=f11e17]:
+          - link "강사진안내" [ref=f11e18] [cursor=pointer]:
+            - /url: javascript:;
+        - listitem [ref=f11e19]:
+          - link "시간표" [ref=f11e20] [cursor=pointer]:
+            - /url: javascript:;
+        - listitem [ref=f11e21]:
+          - link "설명회" [ref=f11e22] [cursor=pointer]:
+            - /url: javascript:;
+        - listitem [ref=f11e23]:
+          - link "예약확인/신청" [ref=f11e24] [cursor=pointer]:
+            - /url: javascript:;
+  - banner [ref=f11e25]:
+    - generic [ref=f11e26]:
+      - heading "예약 확인 / 취소" [level=1] [ref=f11e27]
+      - paragraph [ref=f11e28]: 신청하신 설명회의 예약 내역을 확인하고 안전하게 취소 처리를 진행하실 수 있습니다.
+  - generic [ref=f11e29]:
+    - generic [ref=f11e30]:
+      - heading " 예약 정보 입력 인증" [level=3] [ref=f11e31]:
+        - generic [ref=f11e32]: 
+        - text: 예약 정보 입력 인증
+      - generic [ref=f11e33]:
+        - generic [ref=f11e34]:
+          - generic [ref=f11e35]: 학생 이름
+          - generic [ref=f11e36]:
+            - generic [ref=f11e37]: 
+            - textbox "학생 이름" [ref=f11e39]:
+              - /placeholder: 신청 당시 입력한 학생 이름을 입력하세요.
+        - generic [ref=f11e40]:
+          - generic [ref=f11e41]: 학부모 휴대폰 번호
+          - generic [ref=f11e42]:
+            - generic [ref=f11e43]: 
+            - textbox "학부모 휴대폰 번호" [ref=f11e45]:
+              - /placeholder: 숫자만 입력하거나 하이픈(-)을 포함해도 조회 가능합니다.
+        - button "예약 내역 조회하기" [ref=f11e46] [cursor=pointer]
+    - generic [ref=f11e47]:
+      - heading " 설명회 예약 및 취소 시 주의사항 (필독)" [level=4] [ref=f11e48]:
+        - generic [ref=f11e49]: 
+        - text: 설명회 예약 및 취소 시 주의사항 (필독)
+      - list [ref=f11e50]:
+        - listitem [ref=f11e51]:
+          - text: •
+          - strong [ref=f11e52]: "좌석 선점 및 마감 기준:"
+          - text: 대치동 지점별 설명회 좌석은 한정되어 있어 선착순 예약 확정 방식으로 운영됩니다. 공석 없는 올바른 입시 정보 공유를 위해 신중한 예약을 부탁드립니다.
+        - listitem [ref=f11e53]:
+          - text: •
+          - strong [ref=f11e54]: "예약 취소 가능 기한:"
+          - text: 현장 좌석 배치 및 노쇼 대비 대기자 배정을 위해, 취소는 설명회 개최 전날 오후 6시까지만 가능합니다. 당일 취소는 시스템상 불가능하오니 양해 바랍니다.
+        - listitem [ref=f11e55]:
+          - text: •
+          - strong [ref=f11e56]: "당일 노쇼(No-Show) 불이익 안내:"
+          - text: 사전 취소 없이 불참(노쇼)하시는 경우, 향후 아카데미에서 주관하는 차기 입시 설명회 및 1:1 유료 전략 컨설팅 예약 우선순위에서 제외되는 패널티가 적용될 수 있습니다.
+        - listitem [ref=f11e57]:
+          - text: •
+          - strong [ref=f11e58]: "안내 문자 발송 트랙:"
+          - text: 예약 및 취소가 정상 완료되면 학부모님 연락처로 카카오 알림톡 또는 확인 문자가 실시간 자동 발송됩니다. 문자를 받지 못하셨을 경우 학원 상담실로 직접 연락 주시기 바랍니다.
+        - listitem [ref=f11e59]:
+          - text: •
+          - strong [ref=f11e60]: "자료집 대리 수령 불가:"
+          - text: 설명회 핵심 배치표 및 한정판 전략 자료집은 현장 참석자에게만 1인 1부 제공되며, 불참 시 별도로 우편 발송되거나 대리 수령이 불가능합니다.
+  - text:  
+  - contentinfo [ref=f11e61]:
+    - generic [ref=f11e63]:
+      - generic [ref=f11e64]:
+        - generic [ref=f11e65]: 문해와 사유
+        - paragraph [ref=f11e66]: 읽고, 생각하고, 자기 언어로 표현합니다.어휘·독해·사고·토론·글쓰기를 연결하는 초등 고학년 문해력 교육
+        - generic [ref=f11e67]:
+          - generic [ref=f11e68]:
+            - strong [ref=f11e69]: "대치본원 :"
+            - text: 02-563-5972
+          - generic [ref=f11e70]:
+            - strong [ref=f11e71]: "분당점 :"
+            - text: 031-713-5972
+        - paragraph [ref=f11e72]: "상담시간: 월-금 13:00-21:00 / 토·일 9:30-21:00"
+      - generic [ref=f11e73]:
+        - generic [ref=f11e74]:
+          - generic [ref=f11e75]:
+            - heading "ABOUT" [level=6] [ref=f11e76]
+            - list [ref=f11e77]:
+              - listitem [ref=f11e78]:
+                - link "학원 소개" [ref=f11e79] [cursor=pointer]:
+                  - /url: https://munsayu.com/sub/about
+              - listitem [ref=f11e80]:
+                - link "교육 철학" [ref=f11e81] [cursor=pointer]:
+                  - /url: https://munsayu.com/sub/about
+              - listitem [ref=f11e82]:
+                - link "강사진" [ref=f11e83] [cursor=pointer]:
+                  - /url: https://munsayu.com/sub/abouttch1
+              - listitem [ref=f11e84]:
+                - link "오시는 길" [ref=f11e85] [cursor=pointer]:
+                  - /url: https://munsayu.com/sub/Location
+          - generic [ref=f11e86]:
+            - heading "PROGRAM" [level=6] [ref=f11e87]
+            - list [ref=f11e88]:
+              - listitem [ref=f11e89]:
+                - link "대치본원" [ref=f11e90] [cursor=pointer]:
+                  - /url: https://munsayu.com/sub/schedule.n
+              - listitem [ref=f11e91]:
+                - link "분당점" [ref=f11e92] [cursor=pointer]:
+                  - /url: https://munsayu.com/sub/schedule.g
+          - generic [ref=f11e93]:
+            - heading "RESERVE" [level=6] [ref=f11e94]
+            - list [ref=f11e95]:
+              - listitem [ref=f11e96]:
+                - link "문해력 진단 신청" [ref=f11e97] [cursor=pointer]:
+                  - /url: https://forms.gle/XUjFY9jVStQDKskg8
+              - listitem [ref=f11e98]:
+                - link "설명회 신청" [ref=f11e99] [cursor=pointer]:
+                  - /url: https://munsayu.com/sub/Presentation
+              - listitem [ref=f11e100]:
+                - link "상담 문의" [ref=f11e101] [cursor=pointer]:
+                  - /url: https://munsayu.com/sub/schedule.n
+          - generic [ref=f11e102]:
+            - heading "SNS" [level=6] [ref=f11e103]
+            - generic [ref=f11e104]:
+              - link "" [ref=f11e105] [cursor=pointer]:
+                - /url: https://www.instagram.com/munsayu_official/
+              - link "" [ref=f11e107] [cursor=pointer]:
+                - /url: https://blog.naver.com/munsayu
+        - generic [ref=f11e109]:
+          - paragraph [ref=f11e110]:
+            - strong [ref=f11e111]: "대치본원 :"
+            - text: "서울시 강남구 대치동 987-14(도곡로515) 2층 (TEL: 02-563-5972)"
+          - paragraph [ref=f11e112]:
+            - strong [ref=f11e113]: "분당점 :"
+            - text: "경기도 성남시 분당구 수내동 28-1 (내정로173번길1) 5층 (TEL: 031-713-5972)"
+          - paragraph [ref=f11e114]: "대표 : 유시내 | 개인정보관리책임자 : 오동준팀장(edunonsul@daum.net)"
+          - paragraph [ref=f11e115]: "사업자번호 : 385-86-03969 | 학원운영등록증번호: 제15526호"
+          - paragraph [ref=f11e116]: © 2026 MUNSAYU.COM ELEMENTARY LITERACY. All Rights Reserved.
