@@ -9,8 +9,9 @@
 - 화면상 선택 강좌 정보: 지점, 강좌명, 강의시간, 개강일.
 - 필드: 학생 이름(placeholder `실명을 입력하세요`), 학부모 연락처(`010-0000-0000`), 재학 중인 초등학교명, 희망 수강 과정(초등 문해력·어휘·글쓰기·진단평가), 초등 학년(예비초~초6).
 - 동의: 필수 체크박스. 목적은 좌석 배정 관리와 예약 확정 안내 문자 발송, 수집 항목은 이름·휴대폰 번호·학교/학년/수강과정, 보유기간은 해당 강좌 종강 및 정규 등록 안내 완료 시점 즉시 파기.
-- DOM 계약: `method="POST"`, `action="javascript:void(0);"`; hidden `tt_id`(선택 강좌 ID), `campus`(대치본원), 필수 `rl_name`·`rl_hp`·`rl_school`, radio `department`·`grade`, 필수 동의 체크박스, submit. JS가 실제 서버 주소를 결정하는 부분은 공용·페이지 스크립트 정적 분석 시간 제한으로 `UNKNOWN`이다. `EV-0008`
-- 제출 버튼: `수강 예약 신청서 제출하기`. 서버 검증·제출 후 상태는 `UNKNOWN` (제출 금지). 학부모 후속 연락은 직원 직접 처리로 신규 구현하지 않는다(사용자 답변 2026-11-09).
+- DOM 계약: `method="POST"`, `action="javascript:void(0);"`; hidden `tt_id`(선택 강좌 ID), `campus`(대치본원), 필수 `rl_name`·`rl_hp`·`rl_school`, radio `department`·`grade`, 필수 동의 체크박스, submit. `EV-0008`
+- 전송: `OBSERVED` — `submitReservation`은 `tt_id` 존재를 먼저 검사한 뒤 `$form.serialize()`를 `POST ./reserve_lecture_update.php`로 AJAX 전송하고 JSON 응답의 `success`/`message`를 처리한다. 전송 항목은 `tt_id`, `campus`, `rl_name`, `rl_hp`, `rl_school`, `department`, `grade`, 동의 체크박스다. `EV-0010`
+- 제출 버튼: `수강 예약 신청서 제출하기`. 서버 검증·저장·실제 후속 상태는 `UNKNOWN` (제출 금지). 학부모 후속 연락은 직원 직접 처리로 신규 구현하지 않는다(사용자 답변 2026-11-09).
 - 관리자 연결: `AD-008` 강좌 수강 신청 목록, `AD-013` 개인정보 보존·파기. `EV-ADM-05`의 시간표/신청현황과 연결된다.
 
 ## FM-002 설명회 예약

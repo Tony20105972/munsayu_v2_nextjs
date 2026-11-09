@@ -25,7 +25,7 @@
 - `curl -s http://127.0.0.1:9222/json/list`: 통과 (분석용 Chrome 연결 확인).
 - Playwright MCP GET·스크린샷·DOM 수집: 통과 (입력·동의·제출·로그인 없음).
 - REA `list_browser_targets`, `inspect_web_page`: 통과 (`EV-0003`, `EV-0005`).
-- REA `analyze_web_bundle`: 시간 제한으로 부분 증거만 생성 (`ev_af4ff308bc0cde822013eb06a8ced2e9c00f7a5b171fae46680008031be7c9a1`); 전체 정적 분석 결과는 미완료.
+- REA `analyze_web_bundle`: 시간 제한으로 부분 증거만 생성 (`ev_af4ff308bc0cde822013eb06a8ced2e9c00f7a5b171fae46680008031be7c9a1`). 대신 예약 모달 연결 페이지의 REA inspect 및 공개 인라인 JS GET 분석으로 실제 POST 주소·전송 항목을 기록했다 (`EV-0010`).
 - Playwright 네트워크 기록(`docs/evidence/har/phase1-all-network.md`): 동적 요청 0건, 저장된 관찰에서 운영 사이트로 보낸 POST/PUT/DELETE 0건.
 
 ## 남은 UNKNOWN / 알려진 한계
@@ -42,6 +42,8 @@
 
 ## 2026-11-09 마무리 보정
 
+- 기존 REA 미완료 원인: `analyze_web_bundle`이 60초 총 분석 제한에 도달했고, 시간·토큰 제약으로 주소 형식별 페이지 전수 `inspect_web_page`를 수행하지 못했다. 허용 주소 문제는 아니었다.
+
 - 사용자 답변을 반영했다. 설명회 신청은 레거시 비교 대상에서 제외하고 D9 신규 계약으로, AD-009는 Google Forms 외부 링크만 유지로 확정했다.
 - 강좌 수강 예약 후 학부모 연락은 구현하지 않으며, 직원 신규 신청 알림은 `UNKNOWN`이다.
 - 강좌 예약 모달의 실제 DOM 계약은 POST + `javascript:void(0);`, hidden `tt_id`/`campus`, 필수 `rl_name`/`rl_hp`/`rl_school` 및 과정·학년 radio로 확인했다. 서버 주소는 `UNKNOWN`이다.
@@ -56,6 +58,6 @@
 | 모든 공개 페이지 1440/390 스크린샷 | 통과 — 수집된 공개 경로와 형식별 대표 증거 보관 |
 | 모든 폼의 클라이언트 계약 또는 UNKNOWN 대체 | 통과 — 강좌 DOM 계약 기록, 설명회는 사용자 답변·D9로 대체 |
 | 기능 ID·근거 등급·증거 연결 | 부분 통과 — 수집 범위에는 적용 |
-| 모든 공개 페이지 REA 결과 및 폼 번들 분석 | 실패 — REA `inspect_web_page`는 홈·설명회만 완료, 번들 분석은 시간 제한으로 부분 증거만 생성 |
+| 주소 형식별 대표 REA 결과 및 폼 스크립트 분석 | 실패 — 강좌 예약 대표는 추가 완료했으나 게시판·인증 URL 형식 대표의 REA 증거가 없음 |
 | 운영 사이트 쓰기 요청 0건 | 통과 — 0건 |
 | 운영자 질문 작성 | 통과 — 사용자 답변은 Phase 2 시작 조건으로 이동 |

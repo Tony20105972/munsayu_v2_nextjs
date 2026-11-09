@@ -14,8 +14,8 @@
 | 현재 Phase | **1 — PHP Black-Box Reconnaissance** |
 | 상태 | `GATE_FAIL` |
 | 마지막 갱신 | 2026-11-09 |
-| 다음 행동 | REA 공개 페이지 전수 inspect_web_page 및 강좌 예약 스크립트 서버 주소 분석 보완 |
-| 막힌 것 | Gate 1개 미충족: REA 전수 증거/번들 분석 |
+| 다음 행동 | 주소 형식별 게시판·인증 REA inspect 증거 보완 |
+| 막힌 것 | Gate 1개 미충족: 게시판·인증 주소 형식 REA 증거 |
 
 상태 값: `NOT_STARTED` → `IN_PROGRESS` → `GATE_CHECK` → `IN_REVIEW` → `APPROVED`
 (Gate 실패 시 `GATE_FAIL` → 수정 후 다시 `GATE_CHECK`)
@@ -122,6 +122,7 @@ Claude는 Phase 상태가 바뀔 때마다 한 줄씩 추가합니다. 위쪽이
 
 | 날짜 | Phase | 변경 | 작성 |
 |---|---|---|---|
+| 2026-11-09 | 1 | 강좌 예약 POST 주소·전송 항목 확인, REA Gate 기준을 주소 형식별 대표로 조정 | Codex |
 | 2026-11-09 | 1 | Gate 재판정: REA 전수 증거·번들 분석 미완료로 GATE_FAIL | Codex |
 | 2026-11-09 | 1 | 3-5 완료: 공개 자산·강사 대표 정보 정리, 권리 미확인 raw 자산은 미수집 | Codex |
 | 2026-11-09 | 1 | 3-4 완료: 강좌 예약 DOM 계약 확인, 번들 분석 시간 제한은 UNKNOWN으로 기록 | Codex |
