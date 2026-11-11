@@ -1,10 +1,392 @@
 {
-  "status": "partial-observation",
-  "evidence": ["EV-0003", "EV-0005", "EV-0007", "EV-0009"],
+  "status": "collected",
+  "collectedAt": "2026-11-11",
+  "evidence": ["EV-0003", "EV-0005", "EV-0007", "EV-0009", "EV-0012"],
+  "rightsDecision": "D6 — 레거시 사이트 이미지의 권리는 학원에 귀속된다(사용자 확인 2026-11-11). 커밋 가능.",
+  "collection": {
+    "method": "munsayu.com GET only, 1.2s interval, image files only (사용자 승인 2026-11-11)",
+    "downloaded": 57,
+    "uniqueByMd5": 41,
+    "committed": 31,
+    "rawDumpDir": "legacy-assets-raw/ (gitignore 유지)",
+    "cleanedDir": "legacy-assets-clean/ (중복 제거·EXIF 제거, gitignore 유지)",
+    "privacy": "강사 사진 4개에 GPS EXIF가 있어 커밋본에서 APPn 메타데이터를 제거했다(재인코딩 없음)",
+    "optimization": "용량 최적화는 Phase 6 범위. 형식·화질을 원본 그대로 커밋한다. 최대 파일 23MB."
+  },
   "assets": [
-    {"type": "logo", "url": "/seo/logo_munsau.png", "observedOn": "public shared layout", "format": "png", "dimensions": "UNKNOWN", "purpose": "site logo", "rights": "학원 귀속(사용자 확인 2026-11-11)"},
-    {"type": "favicon", "url": "/seo/img/favicon.ico", "observedOn": "/sub/Presentation", "format": "ico", "dimensions": "UNKNOWN", "purpose": "favicon", "rights": "미확인(D6)"},
-    {"type": "hero", "url": "/img/photo-1541339907198-e08756dedf3f.avif", "observedOn": "/sub/Presentation", "format": "avif", "dimensions": "UNKNOWN", "purpose": "page image", "rights": "학원 귀속(사용자 확인 2026-11-11)"}
+    {
+      "type": "logo",
+      "legacyUrl": "/seo/logo_munsau.png",
+      "committedPath": "public/images/brand/logo-munsayu.png",
+      "format": "png",
+      "bytes": 18614,
+      "purpose": "공통 헤더 로고",
+      "usedOn": ["전체 공개 페이지"],
+      "rights": "학원 귀속(사용자 확인 2026-11-11)"
+    },
+    {
+      "type": "favicon",
+      "legacyUrl": "/seo/img/favicon.ico",
+      "committedPath": "app/favicon.ico",
+      "format": "ico",
+      "bytes": 1150,
+      "purpose": "파비콘 (Next.js 메타데이터 파일 규칙)",
+      "usedOn": ["전체"],
+      "rights": "학원 귀속(사용자 확인 2026-11-11)"
+    },
+    {
+      "type": "icon",
+      "legacyUrl": "/seo/img/android-icon-192x192.png",
+      "committedPath": "app/icon.png",
+      "format": "png",
+      "bytes": 3600,
+      "purpose": "앱 아이콘",
+      "usedOn": ["전체"],
+      "rights": "학원 귀속(사용자 확인 2026-11-11)"
+    },
+    {
+      "type": "apple-touch-icon",
+      "legacyUrl": "/seo/img/apple-icon-180x180.png",
+      "committedPath": "app/apple-icon.png",
+      "format": "png",
+      "bytes": 4542,
+      "purpose": "애플 터치 아이콘",
+      "usedOn": ["전체"],
+      "rights": "학원 귀속(사용자 확인 2026-11-11)"
+    },
+    {
+      "type": "og-image",
+      "legacyUrl": "/seo/img/link-image.png",
+      "committedPath": "app/opengraph-image.png",
+      "format": "png",
+      "bytes": 87287,
+      "purpose": "링크 공유 이미지 (OG)",
+      "usedOn": ["전체"],
+      "rights": "학원 귀속(사용자 확인 2026-11-11)"
+    },
+    {
+      "type": "hero",
+      "legacyUrl": "/img/photo-1541339907198-e08756dedf3f.avif",
+      "committedPath": "public/images/hero/sub-hero.avif",
+      "format": "avif",
+      "bytes": 272960,
+      "purpose": "서브 페이지 공통 상단 배경 (CSS background)",
+      "usedOn": [
+        "/sub/about",
+        "/sub/Location",
+        "/sub/Facility",
+        "/sub/abouttch1~3",
+        "/sub/schedule.n",
+        "/sub/schedule.g",
+        "/sub/Presentation",
+        "/sub/Check"
+      ],
+      "rights": "Unsplash 추정(출처 확인 필요)",
+      "note": "Facility 페이지의 images.unsplash.com 직링크와 같은 사진 ID"
+    },
+    {
+      "type": "hero",
+      "legacyUrl": "/img/yef-xduL0xdx...jpeg",
+      "committedPath": "public/images/hero/home-slide-1.jpeg",
+      "format": "jpeg",
+      "bytes": 37188,
+      "purpose": "홈 상단 배경 1 (CSS background)",
+      "usedOn": ["/"],
+      "rights": "Unsplash 추정(출처 확인 필요)",
+      "note": "파일명이 Unsplash 서명형 해시"
+    },
+    {
+      "type": "hero",
+      "legacyUrl": "/img/photo-1497633762265-9d179a990aa6.avif",
+      "committedPath": "public/images/hero/home-slide-2.avif",
+      "format": "avif",
+      "bytes": 63781,
+      "purpose": "홈 상단 배경 2 (CSS background)",
+      "usedOn": ["/"],
+      "rights": "Unsplash 추정(출처 확인 필요)"
+    },
+    {
+      "type": "hero",
+      "legacyUrl": "/img/n3b1pYX9Kg...jpeg",
+      "committedPath": "public/images/hero/home-slide-3.jpeg",
+      "format": "jpeg",
+      "bytes": 43467,
+      "purpose": "홈 상단 배경 3 (CSS background)",
+      "usedOn": ["/"],
+      "rights": "Unsplash 추정(출처 확인 필요)",
+      "note": "파일명이 Unsplash 서명형 해시"
+    },
+    {
+      "type": "facility-photo",
+      "legacyUrl": "/sub/img/KakaoTalk_20261012_130514336_01.jpg",
+      "committedPath": "public/images/facility/facility-01.jpg",
+      "format": "jpg",
+      "bytes": 258839,
+      "purpose": "시설 사진",
+      "usedOn": ["/sub/Facility"],
+      "rights": "학원 귀속(사용자 확인 2026-11-11)"
+    },
+    {
+      "type": "facility-photo",
+      "legacyUrl": "/sub/img/KakaoTalk_20261012_130514336_03.jpg",
+      "committedPath": "public/images/facility/facility-02.jpg",
+      "format": "jpg",
+      "bytes": 172622,
+      "purpose": "시설 사진",
+      "usedOn": ["/sub/Facility"],
+      "rights": "학원 귀속(사용자 확인 2026-11-11)"
+    },
+    {
+      "type": "facility-photo",
+      "legacyUrl": "/sub/img/KakaoTalk_20261012_130514336_04.jpg",
+      "committedPath": "public/images/facility/facility-03.jpg",
+      "format": "jpg",
+      "bytes": 110614,
+      "purpose": "시설 사진",
+      "usedOn": ["/sub/Facility"],
+      "rights": "학원 귀속(사용자 확인 2026-11-11)"
+    },
+    {
+      "type": "facility-photo",
+      "legacyUrl": "/sub/img/KakaoTalk_20261012_130514336_06.jpg",
+      "committedPath": "public/images/facility/facility-04.jpg",
+      "format": "jpg",
+      "bytes": 138012,
+      "purpose": "시설 사진",
+      "usedOn": ["/sub/Facility"],
+      "rights": "학원 귀속(사용자 확인 2026-11-11)"
+    },
+    {
+      "type": "facility-photo",
+      "legacyUrl": "/sub/img/KakaoTalk_20261012_130514336_09.jpg",
+      "committedPath": "public/images/facility/facility-05.jpg",
+      "format": "jpg",
+      "bytes": 120070,
+      "purpose": "시설 사진",
+      "usedOn": ["/sub/Facility"],
+      "rights": "학원 귀속(사용자 확인 2026-11-11)"
+    },
+    {
+      "type": "facility-photo",
+      "legacyUrl": "/sub/img/KakaoTalk_20261012_130514336_10.jpg",
+      "committedPath": "public/images/facility/facility-06.jpg",
+      "format": "jpg",
+      "bytes": 161825,
+      "purpose": "시설 사진",
+      "usedOn": ["/sub/Facility"],
+      "rights": "학원 귀속(사용자 확인 2026-11-11)"
+    },
+    {
+      "type": "facility-photo",
+      "legacyUrl": "/sub/img/KakaoTalk_20261012_130514336_11.jpg",
+      "committedPath": "public/images/facility/facility-07.jpg",
+      "format": "jpg",
+      "bytes": 165315,
+      "purpose": "시설 사진",
+      "usedOn": ["/sub/Facility"],
+      "rights": "학원 귀속(사용자 확인 2026-11-11)"
+    },
+    {
+      "type": "facility-photo",
+      "legacyUrl": "/sub/img/KakaoTalk_20261012_130514336_13.jpg",
+      "committedPath": "public/images/facility/facility-08.jpg",
+      "format": "jpg",
+      "bytes": 151537,
+      "purpose": "시설 사진",
+      "usedOn": ["/sub/Facility"],
+      "rights": "학원 귀속(사용자 확인 2026-11-11)"
+    },
+    {
+      "type": "instructor-photo",
+      "legacyUrl": "/data/instructor/KYH_1793243080.jpg",
+      "committedPath": "public/images/instructors/kim-yoonhwan.jpg",
+      "format": "jpg",
+      "bytes": 228752,
+      "purpose": "김윤환 원장 사진",
+      "usedOn": ["/sub/abouttch1", "/sub/abouttch2"],
+      "rights": "학원 귀속(사용자 확인 2026-11-11)",
+      "note": "abouttch1·abouttch2에 같은 파일이 다른 이름으로 중복 업로드돼 있다 (ASM-003)"
+    },
+    {
+      "type": "instructor-photo",
+      "legacyUrl": "/data/instructor/KMJ_1793241769.jpg",
+      "committedPath": "public/images/instructors/kim-minju.jpg",
+      "format": "jpg",
+      "bytes": 191974,
+      "purpose": "김민주 선생님 사진",
+      "usedOn": ["/sub/abouttch1", "/sub/abouttch2"],
+      "rights": "학원 귀속(사용자 확인 2026-11-11)",
+      "note": "abouttch1·abouttch2에 같은 파일이 다른 이름으로 중복 업로드돼 있다 (ASM-003)"
+    },
+    {
+      "type": "instructor-photo",
+      "legacyUrl": "/data/instructor/KBM_1793241895.jpg",
+      "committedPath": "public/images/instructors/kim-bomin.jpg",
+      "format": "jpg",
+      "bytes": 231807,
+      "purpose": "김보민 선생님 사진",
+      "usedOn": ["/sub/abouttch1", "/sub/abouttch2"],
+      "rights": "학원 귀속(사용자 확인 2026-11-11)",
+      "note": "abouttch1·abouttch2에 같은 파일이 다른 이름으로 중복 업로드돼 있다 (ASM-003)"
+    },
+    {
+      "type": "instructor-photo",
+      "legacyUrl": "/data/instructor/KSH_1793242005.jpg",
+      "committedPath": "public/images/instructors/kim-sehyun.jpg",
+      "format": "jpg",
+      "bytes": 278616,
+      "purpose": "김세현 선생님 사진",
+      "usedOn": ["/sub/abouttch1", "/sub/abouttch2"],
+      "rights": "학원 귀속(사용자 확인 2026-11-11)",
+      "note": "abouttch1·abouttch2에 같은 파일이 다른 이름으로 중복 업로드돼 있다 (ASM-003)"
+    },
+    {
+      "type": "instructor-photo",
+      "legacyUrl": "/data/instructor/KJM_1793242169.jpg",
+      "committedPath": "public/images/instructors/kim-jimin.jpg",
+      "format": "jpg",
+      "bytes": 190747,
+      "purpose": "김지민 선생님 사진",
+      "usedOn": ["/sub/abouttch1", "/sub/abouttch2"],
+      "rights": "학원 귀속(사용자 확인 2026-11-11)",
+      "note": "abouttch1·abouttch2에 같은 파일이 다른 이름으로 중복 업로드돼 있다 (ASM-003)"
+    },
+    {
+      "type": "instructor-photo",
+      "legacyUrl": "/data/instructor/PSM_1793242252.jpg",
+      "committedPath": "public/images/instructors/park-sunmi.jpg",
+      "format": "jpg",
+      "bytes": 233096,
+      "purpose": "박선미 선생님 사진",
+      "usedOn": ["/sub/abouttch1", "/sub/abouttch2"],
+      "rights": "학원 귀속(사용자 확인 2026-11-11)",
+      "note": "abouttch1·abouttch2에 같은 파일이 다른 이름으로 중복 업로드돼 있다 (ASM-003)"
+    },
+    {
+      "type": "instructor-photo",
+      "legacyUrl": "/data/instructor/SSJ_1793242473.jpg",
+      "committedPath": "public/images/instructors/shin-seojin.jpg",
+      "format": "jpg",
+      "bytes": 23005913,
+      "purpose": "신서진 선생님 사진",
+      "usedOn": ["/sub/abouttch1", "/sub/abouttch2"],
+      "rights": "학원 귀속(사용자 확인 2026-11-11)",
+      "note": "abouttch1·abouttch2에 같은 파일이 다른 이름으로 중복 업로드돼 있다 (ASM-003)"
+    },
+    {
+      "type": "instructor-photo",
+      "legacyUrl": "/data/instructor/YH_1793243069.jpg",
+      "committedPath": "public/images/instructors/yoo-hyun.jpg",
+      "format": "jpg",
+      "bytes": 246925,
+      "purpose": "유 현 선생님 사진",
+      "usedOn": ["/sub/abouttch1", "/sub/abouttch2"],
+      "rights": "학원 귀속(사용자 확인 2026-11-11)",
+      "note": "abouttch1·abouttch2에 같은 파일이 다른 이름으로 중복 업로드돼 있다 (ASM-003)"
+    },
+    {
+      "type": "instructor-photo",
+      "legacyUrl": "/data/instructor/WDH_1793243391.jpg",
+      "committedPath": "public/images/instructors/won-dahyun.jpg",
+      "format": "jpg",
+      "bytes": 221542,
+      "purpose": "원다현 선생님 사진",
+      "usedOn": ["/sub/abouttch1", "/sub/abouttch2"],
+      "rights": "학원 귀속(사용자 확인 2026-11-11)",
+      "note": "abouttch1·abouttch2에 같은 파일이 다른 이름으로 중복 업로드돼 있다 (ASM-003)"
+    },
+    {
+      "type": "instructor-photo",
+      "legacyUrl": "/data/instructor/JGW_1793243458.jpg",
+      "committedPath": "public/images/instructors/jung-geonwoo.jpg",
+      "format": "jpg",
+      "bytes": 245071,
+      "purpose": "정건우 선생님 사진",
+      "usedOn": ["/sub/abouttch1", "/sub/abouttch2"],
+      "rights": "학원 귀속(사용자 확인 2026-11-11)",
+      "note": "abouttch1·abouttch2에 같은 파일이 다른 이름으로 중복 업로드돼 있다 (ASM-003)"
+    },
+    {
+      "type": "instructor-photo",
+      "legacyUrl": "/data/instructor/CEJ_1793246279.jpg",
+      "committedPath": "public/images/instructors/choi-eunji.jpg",
+      "format": "jpg",
+      "bytes": 215443,
+      "purpose": "최은지 선생님 사진",
+      "usedOn": ["/sub/abouttch1", "/sub/abouttch2"],
+      "rights": "학원 귀속(사용자 확인 2026-11-11)",
+      "note": "abouttch1·abouttch2에 같은 파일이 다른 이름으로 중복 업로드돼 있다 (ASM-003)"
+    },
+    {
+      "type": "instructor-photo",
+      "legacyUrl": "/data/instructor/CJN_1793553113.jpg",
+      "committedPath": "public/images/instructors/choi-jina.jpg",
+      "format": "jpg",
+      "bytes": 15986406,
+      "purpose": "최지나 선생님 사진",
+      "usedOn": ["/sub/abouttch1", "/sub/abouttch2"],
+      "rights": "학원 귀속(사용자 확인 2026-11-11)",
+      "note": "abouttch1·abouttch2에 같은 파일이 다른 이름으로 중복 업로드돼 있다 (ASM-003)"
+    },
+    {
+      "type": "instructor-photo",
+      "legacyUrl": "/data/instructor/SHS_1793769158.jpg",
+      "committedPath": "public/images/instructors/seok-hyeseon.jpg",
+      "format": "jpg",
+      "bytes": 608952,
+      "purpose": "석혜선 선생님 사진",
+      "usedOn": ["/sub/abouttch1", "/sub/abouttch2"],
+      "rights": "학원 귀속(사용자 확인 2026-11-11)",
+      "note": "`문해와 사유 사진`과 바이트 단위로 같은 파일이다. 자리표시용으로 보여 원장님 확인이 필요하다"
+    },
+    {
+      "type": "brand-photo",
+      "legacyUrl": "/data/instructor/MSY_1793246393.jpg",
+      "committedPath": "public/images/instructors/munsayu-class.jpg",
+      "format": "jpg",
+      "bytes": 608952,
+      "purpose": "`문해와 사유 사진` 카드",
+      "usedOn": ["/sub/abouttch1", "/sub/abouttch2"],
+      "rights": "학원 귀속(사용자 확인 2026-11-11)",
+      "note": "석혜선 선생님 사진과 같은 파일"
+    }
   ],
-  "note": "권리가 확인되지 않은 자산은 신규 저장소에 이관하지 않는다. 원본 사진·서버 백업은 D1 확인 중이며, 공개 이미지 raw 다운로드는 권리 미확인으로 수행하지 않았다."
+  "notCommitted": [
+    {
+      "legacyUrl": "https://images.unsplash.com/photo-1427504494785-3a9ca7044f45",
+      "reason": "외부 호스트(Unsplash) 직링크. 학원 소유가 아니고 사용자 승인 범위(munsayu.com)에도 없어 내려받지 않았다",
+      "usedOn": ["/sub/about"]
+    },
+    {
+      "legacyUrl": "https://images.unsplash.com/photo-1541339907198-e08756dedf3f",
+      "reason": "외부 호스트(Unsplash) 직링크. 학원 소유가 아니고 사용자 승인 범위(munsayu.com)에도 없어 내려받지 않았다",
+      "usedOn": ["/sub/Facility"]
+    },
+    {
+      "legacyUrl": "https://images.unsplash.com/photo-1577896851231-70ef18881754",
+      "reason": "외부 호스트(Unsplash) 직링크. 학원 소유가 아니고 사용자 승인 범위(munsayu.com)에도 없어 내려받지 않았다",
+      "usedOn": ["/sub/Facility"]
+    },
+    {
+      "legacyUrl": "https://images.unsplash.com/photo-1517502884422-41eaacad0168",
+      "reason": "외부 호스트(Unsplash) 직링크. 학원 소유가 아니고 사용자 승인 범위(munsayu.com)에도 없어 내려받지 않았다",
+      "usedOn": ["/sub/Facility"]
+    },
+    {
+      "legacyUrl": "https://images.unsplash.com/photo-1497366216548-37526070297c",
+      "reason": "외부 호스트(Unsplash) 직링크. 학원 소유가 아니고 사용자 승인 범위(munsayu.com)에도 없어 내려받지 않았다",
+      "usedOn": ["/sub/Facility"]
+    },
+    {
+      "legacyUrl": "https://images.unsplash.com/photo-1524178232363-1fb2b075b655",
+      "reason": "외부 호스트(Unsplash) 직링크. 학원 소유가 아니고 사용자 승인 범위(munsayu.com)에도 없어 내려받지 않았다",
+      "usedOn": ["/sub/Facility"]
+    },
+    {
+      "legacyUrl": "https://images.unsplash.com/photo-1531482615713-2afd69097998",
+      "reason": "외부 호스트(Unsplash) 직링크. 학원 소유가 아니고 사용자 승인 범위(munsayu.com)에도 없어 내려받지 않았다",
+      "usedOn": ["/sub/Facility"]
+    }
+  ],
+  "note": "파일명이 `photo-<숫자>-<해시>` 형식이거나 Unsplash 서명형 해시인 것은 rights를 `Unsplash 추정(출처 확인 필요)`로 적었다. 사용은 유지한다."
 }
