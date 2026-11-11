@@ -312,6 +312,31 @@ describe("AD-013 개인정보 열람·내보내기·파기", () => {
     expect(response.status).toBe(401);
   });
 
+  test("AD-013 파기 실행: 비밀값이 설정되지 않은 환경에서는 헤더 경로가 동작하지 않는다", async () => {
+    const previous = process.env.PRIVACY_PURGE_SECRET;
+    delete process.env.PRIVACY_PURGE_SECRET;
+
+    const unset = await purgeRoute(
+      makeRequest("POST", "/api/admin/privacy/purge", {
+        headers: { "x-purge-secret": previous ?? "whatever" },
+        body: { dryRun: true },
+      }),
+    );
+    expect(unset.status).toBe(401);
+    expect((await unset.json()).code).toBe("UNAUTHENTICATED");
+
+    process.env.PRIVACY_PURGE_SECRET = "";
+    const empty = await purgeRoute(
+      makeRequest("POST", "/api/admin/privacy/purge", {
+        headers: { "x-purge-secret": "" },
+        body: { dryRun: true },
+      }),
+    );
+    expect(empty.status).toBe(401);
+
+    process.env.PRIVACY_PURGE_SECRET = previous;
+  });
+
   test("AD-013 파기 실행: 회원 세션으로는 403", async () => {
     const memberSession = await memberCookie();
 

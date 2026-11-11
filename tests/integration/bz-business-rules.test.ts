@@ -98,6 +98,47 @@ describe("BZ-001 수동 마감 규칙", () => {
     expect(await db.eventReservation.count()).toBe(1);
   });
 
+  test("AD-004 설명회 상태 수동 전환은 양방향이다: 접수마감 뒤 다시 접수중이면 예약이 된다", async () => {
+    const closeResponse = await eventStatusRoute(
+      makeRequest("POST", "/api/admin/events/status", {
+        cookie,
+        body: {
+          eventId: content.openEventId,
+          statusOptionId: content.closedStatusOptionId,
+        },
+      }),
+    );
+    expect(closeResponse.status).toBe(200);
+
+    const blocked = await createEventReservation(
+      makeRequest("POST", "/api/event-reservations", {
+        body: eventReservationBody(content.openEventId),
+      }),
+    );
+    expect(blocked.status).toBe(409);
+    expect((await blocked.json()).code).toBe("INTAKE_CLOSED");
+    expect(await db.eventReservation.count()).toBe(0);
+
+    const reopenResponse = await eventStatusRoute(
+      makeRequest("POST", "/api/admin/events/status", {
+        cookie,
+        body: {
+          eventId: content.openEventId,
+          statusOptionId: content.openStatusOptionId,
+        },
+      }),
+    );
+    expect(reopenResponse.status).toBe(200);
+
+    const allowed = await createEventReservation(
+      makeRequest("POST", "/api/event-reservations", {
+        body: eventReservationBody(content.openEventId),
+      }),
+    );
+    expect(allowed.status).toBe(201);
+    expect(await db.eventReservation.count()).toBe(1);
+  });
+
   test("BZ-001 예약이 쌓여도 상태는 자동으로 바뀌지 않는다", async () => {
     for (let index = 0; index < 5; index += 1) {
       await createEventReservation(
