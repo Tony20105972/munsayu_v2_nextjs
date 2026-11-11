@@ -11,7 +11,30 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: munsayu
+          POSTGRES_PASSWORD: munsayu
+          POSTGRES_DB: munsayu_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://munsayu:munsayu@127.0.0.1:5432/munsayu_test?schema=public
+      DATABASE_URL_TEST: postgresql://munsayu:munsayu@127.0.0.1:5432/munsayu_test?schema=public
+      AUTH_SECRET: ci-only-secret
+      MAIL_ADAPTER: console
+      MAIL_FROM: no-reply@munsayu.local
+      NOTIFY_ADAPTER: console
+      STORAGE_ADAPTER: local
+      PRIVACY_PURGE_SECRET: ci-only-purge-secret
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -19,6 +42,8 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      - run: npx prisma migrate deploy
+      - run: npx prisma generate
       - run: npx playwright install --with-deps chromium
       - run: npm run typecheck
       - run: npm run lint

@@ -15,6 +15,7 @@
 /test-results
 /playwright-report
 /legacy-assets-raw/
+/.playwright-mcp/
 
 # next.js
 /.next/
@@ -26,6 +27,9 @@
 # misc
 .DS_Store
 *.pem
+
+# local postgres cluster (ASM-012)
+/.tmp/
 
 # debug
 npm-debug.log*

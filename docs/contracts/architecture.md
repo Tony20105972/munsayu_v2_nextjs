@@ -11,7 +11,7 @@ app/layout.tsx
    │  ├─ InstructorDirectory → InstructorCard
    │  ├─ TimetablePage → CourseCard → CourseReservationForm
    │  ├─ EventListPage → EventCard → EventReservationForm
-   │  ├─ ReservationLookup → ReservationCancelDialog
+   │  ├─ ReservationLookup → ReservationList → ReservationCancelDialog
    │  ├─ NoticeList / NoticeDetail
    │  └─ Login / Register / AccountRecovery / AccountProfile
    └─ Footer (강좌·설명회·외부 진단 링크)
@@ -20,6 +20,8 @@ app/admin/layout.tsx
 ```
 
 Header/footer and public route evidence: EV-0003, EV-0007. Forms are client UI plus Server Action; public programmatic endpoints are Route Handlers.
+
+입력 스키마의 실행 가능한 원본은 `src/lib/contracts/`이고 HTTP 계약은 `openapi.yaml`이다. 두 곳은 공유 소유이며, 바꿀 때는 이 문서를 먼저 고치고 ADR을 남긴다.
 
 ## 서버 모듈
 
@@ -50,10 +52,10 @@ Header/footer and public route evidence: EV-0003, EV-0007. Forms are client UI p
 
 | 흐름 | 필수 입력 | 결과 |
 |---|---|---|
-| FM-001 강좌 신청 | `courseId`, 학생 이름, 보호자 연락처, 학교, 과정, 학년, 동의, idempotency key | 201 신청 생성; 마감 409; 중복 409; 유효성 422 |
-| FM-002 설명회 예약 | `eventId`, 이름, 연락처, 학년, 참석 인원(1~2), 동의, idempotency key | 201 예약 생성; 마감/중복 409; 유효성 422 |
-| PG-011 예약 조회·취소 | 조회: 이름·보호자 연락처·예약 식별자. 취소: 같은 본인 확인 정보 | 본인 예약만 요약 반환; 취소는 상태 변경 |
-| FM-003 회원 | 아이디, 비밀번호, 이름, 이메일, 휴대폰(가입); 자격증명(로그인) | 가입·세션 생성, 중복/검증 오류 반환 |
+| FM-001 강좌 신청 | `courseId`, 학생 이름, 보호자 연락처, 학교, 과정, 학년, 동의, idempotency key | 201 신청 생성; 접수마감 409; 유효성 422. 같은 idempotency key 재전송은 201 + `replayed: true`로 기존 건 반환 |
+| FM-002 설명회 예약 | `eventId`, 이름, 연락처, 학년, 참석 인원(1~2), 동의, idempotency key | 201 예약 생성; 마감 409; 유효성 422. 같은 idempotency key 재전송은 기존 건 반환 |
+| PG-011 예약 조회·취소 | 조회: 이름·연락처. 취소: 같은 본인 확인 정보 + `kind`·예약 식별자 | 같은 연락처의 강좌 신청·설명회 예약을 목록으로 반환(ASM-013); 취소는 건별 상태 변경, 불일치는 404 |
+| FM-003 회원 | 아이디, 비밀번호, 이름, 이메일, 휴대폰(가입); 자격증명(로그인) | 가입·세션 생성, 아이디/이메일 중복 409, 검증 422. 찾기·수정·탈퇴도 같은 계약 묶음 |
 
 PII는 응답·로그에 원문을 쓰지 않고 관리자 목록은 마스킹한다. CSV와 원문 조회는 단일 관리자 역할에서도 매 요청 인증·감사기록을 남긴다.
 
