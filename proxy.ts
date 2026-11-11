@@ -12,8 +12,12 @@ import { NextResponse, type NextRequest } from "next/server";
  * - `/uAdmin/**`, `/adm/**` → 410 Gone. 응답에 `/admin` 이 있다는 사실을 드러내지 않는다. (RT-004, EV-0002)
  *
  * 같은 규칙을 Route Handler 로 중복 구현하지 않는다. 처리는 여기 한 곳에서만 한다.
- * (Next.js 16 은 `middleware.ts` 와 `proxy.ts` 를 모두 인식한다 —
- *  node_modules/next/dist/lib/constants.js 의 MIDDLEWARE_FILENAME/PROXY_FILENAME 확인)
+ *
+ * Next.js 16 은 `middleware` 파일 규칙을 deprecated 로 보고 `proxy` 를 쓰라고 안내한다.
+ * 파일은 default export 또는 `proxy` 라는 이름의 함수를 내보내야 한다
+ * (node_modules/next/dist/build/analysis/get-page-static-info.js 의
+ *  `validateMiddlewareProxyExports` 확인). `config.matcher` 는 그대로 쓸 수 있고
+ * `runtime` 같은 세그먼트 설정만 금지된다 — proxy 는 항상 Node.js 런타임이다.
  */
 
 const GONE_BODY = "요청하신 주소는 더 이상 제공되지 않습니다.";
@@ -41,7 +45,7 @@ function gone(): NextResponse {
   });
 }
 
-export function middleware(request: NextRequest): NextResponse {
+export function proxy(request: NextRequest): NextResponse {
   const { pathname, searchParams } = request.nextUrl;
 
   if (pathname === "/uAdmin" || pathname.startsWith("/uAdmin/")) {
