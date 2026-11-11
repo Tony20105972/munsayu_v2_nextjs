@@ -1,6 +1,24 @@
-import { z } from "zod";
-import { db } from "@/server/db";
-import { createSession, hashPassword } from "@/server/auth";
-import { invalidResponse, jsonError } from "@/server/http";
-const schema = z.object({ loginId: z.string().min(4).max(40), password: z.string().min(10).max(128), name: z.string().min(1).max(80), email: z.string().email(), phone: z.string().min(9).max(20) });
-export async function POST(request: Request) { try { const input = schema.parse(await request.json()); const user = await db.user.create({ data: { ...input, passwordHash: hashPassword(input.password) } }); await createSession(user.id); return Response.json({ id: user.id }, { status: 201, headers: { "Cache-Control": "no-store" } }); } catch (e: unknown) { const code = typeof e === "object" && e !== null && "code" in e ? (e as { code?: string }).code : undefined; return code === "P2002" ? jsonError(409, "ACCOUNT_EXISTS") : invalidResponse(e); } }
+import { registerSchema } from "@/lib/contracts";
+import { issueSession, sessionCookieHeader, withCookies } from "@/server/auth";
+import { registerMember } from "@/server/services/accounts";
+import { errorResponse, jsonNoStore, parseJsonBody } from "@/server/http";
+import { enforceRateLimit } from "@/server/rate-limit";
+
+/** FM-003 회원가입. 가입과 동시에 회원 세션을 발급한다. */
+export async function POST(request: Request): Promise<Response> {
+  try {
+    enforceRateLimit(request, "auth-register");
+    const input = await parseJsonBody(request, registerSchema);
+    const user = await registerMember(input);
+    const session = await issueSession(user.id, "MEMBER", false);
+    const response = jsonNoStore(
+      { id: user.id, loginId: user.loginId, name: user.name, role: user.role },
+      201,
+    );
+    return withCookies(response, [
+      sessionCookieHeader("MEMBER", session.token, session.cookieMaxAgeSeconds),
+    ]);
+  } catch (error) {
+    return errorResponse(error);
+  }
+}

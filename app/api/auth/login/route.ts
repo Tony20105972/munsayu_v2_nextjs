@@ -1,7 +1,30 @@
-import { z } from "zod";
-import { db } from "@/server/db";
-import { createSession, verifyPassword } from "@/server/auth";
-import { invalidResponse, jsonError } from "@/server/http";
-const schema = z.object({ loginId: z.string().min(1), password: z.string().min(1) });
-const attempts = new Map<string, { count: number; resetAt: number }>();
-export async function POST(request: Request) { try { const input = schema.parse(await request.json()); const bucket = attempts.get(input.loginId); if (bucket && bucket.resetAt > Date.now() && bucket.count >= 5) return jsonError(429, "RATE_LIMITED"); const user = await db.user.findUnique({ where: { loginId: input.loginId } }); if (!user || user.status !== "ACTIVE" || !verifyPassword(input.password, user.passwordHash)) { attempts.set(input.loginId, { count: (bucket?.count ?? 0) + 1, resetAt: Date.now() + 15 * 60_000 }); return jsonError(401, "INVALID_CREDENTIALS"); } attempts.delete(input.loginId); await createSession(user.id); return Response.json({ id: user.id, role: user.role }, { headers: { "Cache-Control": "no-store" } }); } catch (e) { return invalidResponse(e); } }
+import { loginSchema } from "@/lib/contracts";
+import {
+  issueSession,
+  sessionCookieHeader,
+  toSessionUser,
+  withCookies,
+} from "@/server/auth";
+import { authenticate } from "@/server/services/accounts";
+import { errorResponse, jsonNoStore, parseJsonBody } from "@/server/http";
+import { enforceRateLimit } from "@/server/rate-limit";
+
+/**
+ * FM-003 / AD-001 로그인.
+ * 역할에 따라 회원 쿠키와 관리자 쿠키를 나눠 발급한다. 회원 쿠키로는 관리자 요청이 통과하지 않는다.
+ */
+export async function POST(request: Request): Promise<Response> {
+  try {
+    enforceRateLimit(request, "auth-login");
+    const input = await parseJsonBody(request, loginSchema);
+    const user = await authenticate(input);
+    const scope = user.role === "ADMIN" ? "ADMIN" : "MEMBER";
+    const session = await issueSession(user.id, scope, input.rememberMe);
+    const response = jsonNoStore(toSessionUser(user), 200);
+    return withCookies(response, [
+      sessionCookieHeader(scope, session.token, session.cookieMaxAgeSeconds),
+    ]);
+  } catch (error) {
+    return errorResponse(error);
+  }
+}
