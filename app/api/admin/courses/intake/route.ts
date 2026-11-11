@@ -9,7 +9,10 @@ export async function POST(request: Request): Promise<Response> {
     await requireAdmin(request);
     const input = await parseJsonBody(request, courseIntakeChangeSchema);
     const course = await setCourseIntake(input);
-    return jsonNoStore({ id: course.id, intakeOpen: course.intakeStatus === "OPEN" }, 200);
+    return jsonNoStore(
+      { id: course.id, intakeOpen: course.intakeStatus === "OPEN" },
+      200,
+    );
   } catch (error) {
     return errorResponse(error);
   }
