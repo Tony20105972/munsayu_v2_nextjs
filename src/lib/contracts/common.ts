@@ -8,12 +8,20 @@ import { z } from "zod";
 /** 같은 신청서의 재전송만 막는 키. 의도적인 재신청은 막지 않는다. (ASM-001) */
 export const idempotencyKeySchema = z.string().min(16).max(128);
 
-/** 레거시 placeholder `010-0000-0000` 기준. 하이픈 유무를 모두 받고 표준형으로 바꾼다. (EV-0006) */
+/**
+ * 레거시 placeholder `010-0000-0000` 기준. 하이픈·공백 유무를 모두 받고 표준형으로 바꾼다. (EV-0006)
+ *
+ * `010`은 가입자 번호가 8자리로 통일돼 있어 11자리만 받고,
+ * 구 번호대(`011`·`016`~`019`)는 10자리와 11자리를 모두 받는다.
+ * 유선번호(02·031 등)는 휴대폰 항목이 아니므로 받지 않는다.
+ */
+const MOBILE_PHONE_PATTERN = /^(?:010[0-9]{8}|01[16789][0-9]{7,8})$/;
+
 export const phoneSchema = z
   .string()
   .trim()
   .transform((value) => value.replace(/[^0-9]/g, ""))
-  .refine((digits) => /^01[016789][0-9]{7,8}$/.test(digits), {
+  .refine((digits) => MOBILE_PHONE_PATTERN.test(digits), {
     message: "휴대폰 번호 형식이 올바르지 않습니다.",
   })
   .transform((digits) =>
