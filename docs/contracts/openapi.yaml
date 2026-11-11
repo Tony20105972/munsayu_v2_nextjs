@@ -1,0 +1,33 @@
+openapi: 3.1.0
+info: {title: Munsayu public/admin API, version: 0.1.0}
+paths:
+  /api/course-applications:
+    post:
+      summary: FM-001 강좌 신청
+      requestBody: {required: true, content: {application/json: {schema: {$ref: '#/components/schemas/CourseApplicationInput'}}}}
+      responses: {'201': {description: created}, '409': {description: closed or duplicate}, '422': {description: invalid}}
+  /api/event-reservations:
+    post:
+      summary: FM-002 설명회 예약 (ASM-001)
+      requestBody: {required: true, content: {application/json: {schema: {$ref: '#/components/schemas/EventReservationInput'}}}}
+      responses: {'201': {description: created}, '409': {description: closed or duplicate}, '422': {description: invalid}}
+  /api/reservations/lookup:
+    post:
+      summary: PG-011 예약 조회
+      responses: {'200': {description: masked reservation summary}, '404': {description: not found}}
+  /api/reservations/{id}/cancel:
+    post: {summary: PG-011 예약 취소, responses: {'200': {description: cancelled}, '404': {description: not found}}}
+  /api/admin/applications/export:
+    get: {summary: AD-013 filtered CSV export with audit record, responses: {'200': {description: csv}, '401': {description: admin required}}}
+  /api/admin/privacy/purge:
+    post: {summary: AD-013 manual purge, responses: {'200': {description: purge summary}, '401': {description: admin required}}}
+components:
+  schemas:
+    CourseApplicationInput:
+      type: object
+      required: [courseId, studentName, guardianPhone, schoolName, department, grade, privacyConsent, idempotencyKey]
+      properties: {courseId: {type: string}, studentName: {type: string}, guardianPhone: {type: string}, schoolName: {type: string}, department: {type: string}, grade: {type: string}, privacyConsent: {const: true}, idempotencyKey: {type: string}}
+    EventReservationInput:
+      type: object
+      required: [eventId, name, phone, grade, attendeeCount, privacyConsent, idempotencyKey]
+      properties: {eventId: {type: string}, name: {type: string}, phone: {type: string}, grade: {type: string}, attendeeCount: {type: integer, minimum: 1, maximum: 2}, privacyConsent: {const: true}, idempotencyKey: {type: string}}
