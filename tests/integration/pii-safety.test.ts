@@ -163,19 +163,49 @@ function collectSourceFiles(root: string): string[] {
 }
 
 describe("레거시 의존 제거", () => {
-  test("신규 앱 코드에 레거시 PHP 호출이 없다", () => {
+  /** 주석을 지운 뒤 검사한다. 주석의 레거시 URL 설명은 호출이 아니다. */
+  function stripComments(source: string): string {
+    return source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/.*$/gm, "$1");
+  }
+
+  test("BZ 신규 앱 코드가 런타임에 레거시 PHP 서버를 호출하지 않는다", () => {
     const roots = ["app", "src", "prisma"];
+    // 레거시 경로를 "출발지"로 받아 308하는 코드는 호출이 아니다. 목적지로 쓰는 것만 금지한다.
+    const callPatterns = [
+      /fetch\(\s*[`"'][^`"']*munsayu\.com/,
+      /fetch\(\s*[`"'][^`"']*\.php/,
+      /(?:redirect|permanentRedirect)\(\s*[`"'][^`"']*\.php/,
+      /(?:href|action)\s*=\s*[`"'][^`"']*\.php/,
+      /[`"']https?:\/\/munsayu\.com\/[^`"']+[`"']/,
+    ];
     const offenders: string[] = [];
 
     for (const root of roots) {
       for (const file of collectSourceFiles(root)) {
-        const source = readFileSync(file, "utf8");
-        if (/munsayu\.com/.test(source) || /\.php\b/.test(source)) {
-          offenders.push(file);
-        }
+        const code = stripComments(readFileSync(file, "utf8"));
+        if (callPatterns.some((pattern) => pattern.test(code))) offenders.push(file);
       }
     }
 
     expect(offenders).toEqual([]);
+  });
+
+  test("BZ 레거시 경로 대응표는 목적지가 아니라 출발지로만 쓴다", () => {
+    // proxy.ts 는 레거시 `/bbs/*.php` 를 신규 경로로 308 하는 유일한 지점이다.
+    const proxySource = stripComments(readFileSync("proxy.ts", "utf8"));
+    const phpOccurrences = proxySource.match(/[`"'][^`"']*\.php[^`"']*[`"']/g) ?? [];
+    expect(phpOccurrences.length).toBeGreaterThan(0);
+
+    // 모든 .php 문자열은 비교 대상(출발지)이고, 어떤 것도 리다이렉트 목적지가 되지 않아야 한다.
+    expect(
+      /(?:redirect|rewrite|NextResponse\.redirect)\([^)]*\.php/.test(proxySource),
+    ).toBe(false);
+  });
+
+  test("BZ canonical 도메인만 munsayu.com 을 쓰고 경로는 붙이지 않는다", () => {
+    const config = stripComments(readFileSync("src/lib/site-config.ts", "utf8"));
+    expect(config).toContain('"https://munsayu.com"');
+    // 오리진 뒤에 경로가 붙으면 레거시 엔드포인트를 가리킬 수 있다.
+    expect(/https:\/\/munsayu\.com\/\S/.test(config)).toBe(false);
   });
 });
