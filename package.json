@@ -18,7 +18,7 @@
     "db:stop": "pg_ctl -D .tmp/pgdata stop",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
-    "db:seed": "tsx prisma/seed.ts",
+    "db:seed": "tsx --conditions=react-server prisma/seed.ts",
     "db:reset": "prisma migrate reset --force",
     "postinstall": "prisma generate",
     "test:unit": "vitest run --project unit",
@@ -34,6 +34,7 @@
     "prisma": "7.10.1",
     "react": "19.3.0",
     "react-dom": "19.3.0",
+    "server-only": "^0.0.1",
     "zod": "^4.6.7"
   },
   "devDependencies": {
@@ -54,6 +55,6 @@
     "vitest": "^5.1.0"
   },
   "prisma": {
-    "seed": "tsx prisma/seed.ts"
+    "seed": "tsx --conditions=react-server prisma/seed.ts"
   }
 }

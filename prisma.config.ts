@@ -7,6 +7,8 @@ import { defineConfig, env } from "prisma/config";
  */
 export default defineConfig({
   schema: "prisma/schema.prisma",
-  migrations: { seed: "tsx prisma/seed.ts" },
+  // seed는 Next 번들러 밖(node)에서 돌기 때문에 `server-only`를 해석할 수 있도록
+  // react-server 조건을 켠다. 이게 없으면 서버 모듈을 import하는 순간 실패한다.
+  migrations: { seed: "tsx --conditions=react-server prisma/seed.ts" },
   datasource: { url: env("DATABASE_URL") },
 });
