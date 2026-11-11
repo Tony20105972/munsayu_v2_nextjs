@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { PUBLIC_PAGES, waitForPage } from "./public-pages";
+import { hideDevOverlay, PUBLIC_PAGES, waitForPage } from "./public-pages";
 
 /**
  * 공개 화면의 이미지가 실제로 뜨는지 확인한다. (EV-0012 이미지 반영 검증)
@@ -76,8 +76,17 @@ test.describe("공개 화면 이미지", () => {
    */
   test("PG-004 시설안내: 분당점 탭에서도 깨진 이미지가 없다", async ({ page }) => {
     await page.goto("/sub/Facility", { waitUntil: "domcontentloaded" });
+    await hideDevOverlay(page);
+    // 대치본원 패널이 그려진 뒤(= 하이드레이션 완료 뒤)에 탭을 누른다.
+    await page.getByText("절제된 색감과 따뜻한 소재").first().waitFor({
+      state: "visible",
+      timeout: 15_000,
+    });
     await page.getByRole("tab", { name: "분당점" }).click();
-    await page.getByText("책과 가까워지는 북카페").waitFor({ state: "visible" });
+    await page.getByText("책과 가까워지는 북카페").first().waitFor({
+      state: "visible",
+      timeout: 15_000,
+    });
 
     await page.evaluate(async () => {
       const step = window.innerHeight;

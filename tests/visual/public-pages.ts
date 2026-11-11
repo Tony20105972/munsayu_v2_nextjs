@@ -44,16 +44,17 @@ export const PUBLIC_PAGES: readonly PublicPageCase[] = [
     readyText: "시설안내",
   },
   {
+    // seed 강사 이름. Suspense 로 흘러오는 본문 안에 있어야 다 그려진 뒤에 찍는다.
     featureId: "PG-005",
     name: "강사진 안내",
     path: "/sub/abouttch1",
-    readyText: "문사유 학원 대표강사 라인업",
+    readyText: "가상강사A",
   },
   {
     featureId: "PG-006",
     name: "분당점 강사진",
     path: "/sub/abouttch2",
-    readyText: "전체 강사진 보기",
+    readyText: "가상강사C",
   },
   {
     featureId: "PG-007",
@@ -136,6 +137,15 @@ export async function waitForPage(page: Page, testCase: PublicPageCase): Promise
     state: "visible",
     timeout: 15_000,
   });
+  // 자리표시(Suspense fallback)가 사라질 때까지 기다린다.
+  await page
+    .getByRole("status")
+    .filter({ hasText: "불러오고 있습니다" })
+    .first()
+    .waitFor({ state: "detached", timeout: 15_000 })
+    .catch(() => {
+      // 자리표시가 처음부터 없는 정적 화면도 있다.
+    });
   // 글꼴이 다 올라온 뒤에 찍는다. 반환값은 직렬화할 수 있는 값으로 바꾼다.
   await page.evaluate(() => document.fonts.ready.then(() => true));
 }
