@@ -14,7 +14,7 @@
 | 현재 Phase | **3·4 — Frontend Reconstruction · Backend Replacement (병렬)** |
 | 상태 | `IN_PROGRESS` |
 | 마지막 갱신 | 2026-11-11 |
-| 다음 행동 | 공유 계약 확정 후 Phase 3·4 병렬 구현 |
+| 다음 행동 | 공유 계약 확정 완료 → FE·BE 워크트리 병렬 구현 |
 | 막힌 것 | 없음 — 남은 의문은 ASM으로 기록하고 Phase 안에서 진행 |
 
 상태 값: `NOT_STARTED` → `IN_PROGRESS` → `GATE_CHECK` → `IN_REVIEW` → `APPROVED`
@@ -122,6 +122,7 @@ Claude는 Phase 상태가 바뀔 때마다 한 줄씩 추가합니다. 위쪽이
 
 | 날짜 | Phase | 변경 | 작성 |
 |---|---|---|---|
+| 2026-11-11 | 3·4 | C-1 공유 계약 확정(Zod 전체·예약 조회 목록 계약), Prisma 7 설정·로컬/CI DB·테스트 하네스 정비, ASM-012~015 기록 | Claude Code |
 | 2026-11-11 | 2→3·4 | Phase 2 승인, PR #3 병합 (사용자 지시) | Codex |
 | 2026-11-11 | 2 | Gate PASS(7/7), 독립 리뷰 차단 3건 수정 후 GATE_CHECK로 전환 | Codex |
 | 2026-11-11 | 2 | Phase 2 시작: 확정 답변 및 ASM 기본안 반영, 상태를 IN_PROGRESS로 변경 | Codex |
