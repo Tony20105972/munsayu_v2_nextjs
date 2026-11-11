@@ -7,6 +7,7 @@ import { DELETE as adminDelete } from "../../app/api/admin/admins/[id]/route";
 import {
   FAKE,
   adminCookie,
+  createAdminUser,
   createMemberUser,
   login,
   makeRequest,
@@ -150,7 +151,7 @@ describe("AD-002 회원 관리", () => {
       makeRequest("DELETE", `/api/admin/admins/${id}`, { cookie }),
       routeContext({ id }),
     );
-    expect(response.status).toBe(204);
+    expect(response.status).toBe(200);
     expect(await db.user.findUnique({ where: { id } })).toBeNull();
     expect(
       await db.auditLog.count({
@@ -160,14 +161,50 @@ describe("AD-002 회원 관리", () => {
   });
 
   test("AD-002 관리자 계정 삭제: 자기 계정은 지울 수 없다", async () => {
-    const admin = await db.user.findFirstOrThrow({ where: { role: "ADMIN" } });
+    // 마지막 관리자 규칙과 섞이지 않게 관리자를 한 명 더 만들어 둔다.
+    await createAdminUser("backupadmin", "fake-admin-pw-0006");
+    const admin = await db.user.findFirstOrThrow({
+      where: { loginId: FAKE.adminLoginId },
+    });
 
     const response = await adminDelete(
       makeRequest("DELETE", `/api/admin/admins/${admin.id}`, { cookie }),
       routeContext({ id: admin.id }),
     );
     expect(response.status).toBe(403);
+    expect((await response.json()).code).toBe("FORBIDDEN");
     expect(await db.user.findUnique({ where: { id: admin.id } })).not.toBeNull();
+  });
+
+  test("AD-002 관리자 계정 삭제: 마지막 관리자 계정은 409로 막는다", async () => {
+    const admin = await db.user.findFirstOrThrow({ where: { role: "ADMIN" } });
+    expect(await db.user.count({ where: { role: "ADMIN" } })).toBe(1);
+
+    const response = await adminDelete(
+      makeRequest("DELETE", `/api/admin/admins/${admin.id}`, { cookie }),
+      routeContext({ id: admin.id }),
+    );
+    expect(response.status).toBe(409);
+    expect((await response.json()).code).toBe("CONFLICT");
+    expect(await db.user.count({ where: { role: "ADMIN" } })).toBe(1);
+  });
+
+  test("AD-002 관리자 계정 삭제: 관리자가 둘이면 다른 관리자는 지울 수 있고 마지막 한 명은 남는다", async () => {
+    const second = await createAdminUser("backupadmin", "fake-admin-pw-0006");
+
+    const deleted = await adminDelete(
+      makeRequest("DELETE", `/api/admin/admins/${second.id}`, { cookie }),
+      routeContext({ id: second.id }),
+    );
+    expect(deleted.status).toBe(200);
+    expect(await db.user.count({ where: { role: "ADMIN" } })).toBe(1);
+
+    const last = await db.user.findFirstOrThrow({ where: { role: "ADMIN" } });
+    const blocked = await adminDelete(
+      makeRequest("DELETE", `/api/admin/admins/${last.id}`, { cookie }),
+      routeContext({ id: last.id }),
+    );
+    expect(blocked.status).toBe(409);
   });
 
   test("AD-002 관리자 계정 삭제: 회원 계정은 이 경로로 지울 수 없다", async () => {

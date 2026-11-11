@@ -1,4 +1,4 @@
-import "@/server/server-only";
+import "server-only";
 import type { AccountStatus, UserRole } from "@prisma/client";
 import {
   maskName,
@@ -150,19 +150,29 @@ export async function createAdminAccount(
   return created;
 }
 
+/**
+ * AD-002 관리자 계정 삭제.
+ * 관리자가 한 명도 남지 않는 상태를 만들 수 없으므로 마지막 관리자는 409로 막는다.
+ * 자기 계정 삭제는 실수 방지를 위해 403으로 막는다.
+ */
 export async function deleteAdminAccount(
   actorUserId: string,
   input: AdminAccountDeleteInput,
 ): Promise<void> {
-  if (actorUserId === input.userId) {
-    throw forbidden();
-  }
-
   const target = await db.user.findUnique({
     where: { id: input.userId },
     select: { id: true, role: true },
   });
   if (!target || target.role !== "ADMIN") throw notFound();
+
+  const remainingAdmins = await db.user.count({ where: { role: "ADMIN" } });
+  if (remainingAdmins <= 1) {
+    throw conflict("마지막 관리자 계정은 삭제할 수 없습니다.");
+  }
+
+  if (actorUserId === input.userId) {
+    throw forbidden();
+  }
 
   await db.user.delete({ where: { id: input.userId } });
 
