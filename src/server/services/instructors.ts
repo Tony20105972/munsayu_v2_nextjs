@@ -1,4 +1,4 @@
-import "@/server/server-only";
+import "server-only";
 import type { Instructor, InstructorTeam } from "@prisma/client";
 import type {
   InstructorTeamMembershipInput,
@@ -48,9 +48,12 @@ export type TeamWithInstructors = {
   instructors: { instructorId: string; name: string; displayOrder: number }[];
 };
 
-/** 팀별 노출 순서는 팀마다 따로 둔다. (ASM-003) */
-export async function listTeams(): Promise<TeamWithInstructors[]> {
+/** 팀별 노출 순서는 팀마다 따로 둔다. `teamId`를 주면 그 팀만 돌려준다. (ASM-003) */
+export async function listTeams(
+  options: { teamId?: string } = {},
+): Promise<TeamWithInstructors[]> {
   const teams = await db.instructorTeam.findMany({
+    where: options.teamId ? { id: options.teamId } : {},
     orderBy: { name: "asc" },
     include: {
       memberships: {

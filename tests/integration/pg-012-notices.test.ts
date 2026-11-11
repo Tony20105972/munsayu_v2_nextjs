@@ -35,7 +35,7 @@ describe("PG-012 공지", () => {
       },
     });
 
-    const response = await noticesList();
+    const response = await noticesList(makeRequest("GET", "/api/notices"));
     expect(response.status).toBe(200);
 
     const titles = (await response.json()).items.map(
@@ -54,8 +54,37 @@ describe("PG-012 공지", () => {
       },
     });
 
-    const response = await noticesList();
+    const response = await noticesList(makeRequest("GET", "/api/notices"));
     expect((await response.json()).items).toHaveLength(0);
+  });
+
+  test("PG-012 공지 목록: page·pageSize로 나눠 돌려준다", async () => {
+    for (let index = 0; index < 3; index += 1) {
+      await db.notice.create({
+        data: {
+          title: `공지 ${index}`,
+          body: "본문",
+          publishedAt: new Date(`2026-0${index + 1}-01T00:00:00.000Z`),
+        },
+      });
+    }
+
+    const first = await noticesList(
+      makeRequest("GET", "/api/notices?page=1&pageSize=2"),
+    );
+    const firstBody = await first.json();
+    expect(firstBody.total).toBe(3);
+    expect(firstBody.page).toBe(1);
+    expect(firstBody.pageSize).toBe(2);
+    expect(firstBody.items).toHaveLength(2);
+    expect(firstBody.items[0].title).toBe("공지 2");
+
+    const second = await noticesList(
+      makeRequest("GET", "/api/notices?page=2&pageSize=2"),
+    );
+    const secondBody = await second.json();
+    expect(secondBody.items).toHaveLength(1);
+    expect(secondBody.items[0].title).toBe("공지 0");
   });
 
   test("PG-012 공지 상세: 공개된 글은 본문을 돌려주고 비공개 글은 404", async () => {

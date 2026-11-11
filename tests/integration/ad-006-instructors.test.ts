@@ -67,7 +67,7 @@ describe("AD-006 강사·팀 관리", () => {
       makeRequest("DELETE", `/api/admin/instructors/${id}`, { cookie }),
       routeContext({ id }),
     );
-    expect(deleted.status).toBe(204);
+    expect(deleted.status).toBe(200);
     expect(await db.instructor.count()).toBe(0);
   });
 
@@ -102,7 +102,7 @@ describe("AD-006 강사·팀 관리", () => {
           body: membership,
         }),
       );
-      expect(response.status).toBe(204);
+      expect(response.status).toBe(200);
     }
 
     const teams = await teamsGet(
@@ -168,7 +168,7 @@ describe("AD-006 강사·팀 관리", () => {
         body: { instructorId: instructor, teamId: team },
       }),
     );
-    expect(response.status).toBe(204);
+    expect(response.status).toBe(200);
     expect(await db.instructorTeamMembership.count()).toBe(0);
     expect(await db.instructor.count()).toBe(1);
   });
@@ -184,6 +184,29 @@ describe("AD-006 강사·팀 관리", () => {
     );
     expect(response.status).toBe(422);
     expect(Object.keys((await response.json()).fieldErrors)).toContain("instructorId");
+  });
+
+  test("AD-006 공개 강사진 목록은 teamId로 한 팀만 볼 수 있다", async () => {
+    const daechi = await createTeam("대치팀");
+    const bundang = await createTeam("분당팀");
+    const instructor = await createInstructor("가상강사A", "tch-a");
+    await membershipPost(
+      makeRequest("POST", "/api/admin/instructors/memberships", {
+        cookie,
+        body: { instructorId: instructor, teamId: daechi, displayOrder: 1 },
+      }),
+    );
+
+    const all = await publicInstructors(makeRequest("GET", "/api/instructors"));
+    expect((await all.json()).teams).toHaveLength(2);
+
+    const filtered = await publicInstructors(
+      makeRequest("GET", `/api/instructors?teamId=${bundang}`),
+    );
+    const body = await filtered.json();
+    expect(body.teams).toHaveLength(1);
+    expect(body.teams[0].id).toBe(bundang);
+    expect(body.teams[0].instructors).toHaveLength(0);
   });
 
   test("AD-006 공개 강사진 목록도 팀별 순서를 따른다", async () => {
@@ -203,7 +226,7 @@ describe("AD-006 강사·팀 관리", () => {
       }),
     );
 
-    const response = await publicInstructors();
+    const response = await publicInstructors(makeRequest("GET", "/api/instructors"));
     const body = await response.json();
     expect(body.teams[0].instructors.map((row: { name: string }) => row.name)).toEqual([
       "가상강사B",
