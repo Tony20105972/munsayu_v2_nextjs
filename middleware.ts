@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 /**
- * RT-001 / RT-002 레거시 URL 호환.
+ * RT-001 / RT-002 / RT-004 레거시 URL 호환.
  *
  * 규칙의 원본은 `docs/contracts/route-compatibility-map.json` 하나다. 이 파일은 그 규칙만 그대로 옮긴다.
  * - `/bbs/board.php?bo_table=notice` → 308 `/notice`
@@ -9,7 +9,7 @@ import { NextResponse, type NextRequest } from "next/server";
  * - `/bbs/login.php` → 308 `/login`
  * - `/bbs/register.php` → 308 `/register`
  * - `/bbs/password_lost.php` → 308 `/account/recovery`
- * - `/uAdmin/**`, `/adm/**` → 410 Gone. 응답에 `/admin` 이 있다는 사실을 드러내지 않는다. (EV-0002)
+ * - `/uAdmin/**`, `/adm/**` → 410 Gone. 응답에 `/admin` 이 있다는 사실을 드러내지 않는다. (RT-004, EV-0002)
  *
  * 같은 규칙을 Route Handler 로 중복 구현하지 않는다. 처리는 여기 한 곳에서만 한다.
  * (Next.js 16 은 `middleware.ts` 와 `proxy.ts` 를 모두 인식한다 —

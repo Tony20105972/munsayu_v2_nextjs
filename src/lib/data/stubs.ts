@@ -726,11 +726,7 @@ export async function resetPasswordStub(): Promise<void> {}
 /** STUB: `PATCH /api/account/profile` 로 교체. (FM-003) */
 export async function updateProfileStub(): Promise<void> {}
 
-/**
- * STUB: 비밀번호 변경 엔드포인트로 교체. (FM-003)
- * `changePasswordSchema` 는 계약에 있지만 openapi.yaml 에 대응하는 경로가 없다.
- * 조정자가 경로를 정해야 한다 — 작업 노트의 "조정자에게 요청" 참고.
- */
+/** STUB: `POST /api/account/password` 로 교체. (FM-003) */
 export async function changePasswordStub(): Promise<void> {}
 
 /** STUB: `POST /api/account/withdraw` 로 교체. (FM-003) */

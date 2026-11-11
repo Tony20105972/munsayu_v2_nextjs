@@ -30,7 +30,7 @@
 | RT-001 | 공지 게시판 URL 308 | `/bbs/board.php?...` | `middleware.ts` |
 | RT-002 | 인증 URL 308 | `/bbs/login.php`, `/bbs/register.php`, `/bbs/password_lost.php` | `middleware.ts` |
 | RT-003 | 문해력 진단 외부 링크 유지 | 푸터·진단 안내 | `src/lib/site-config.ts`, `src/components/layout/site-footer.tsx` |
-| — | `/uAdmin/**`, `/adm/**` 410 | — | `middleware.ts` |
+| RT-004 | `/uAdmin/**`, `/adm/**` 410 | — | `middleware.ts` |
 
 공통 레이아웃: `app/layout.tsx`, `src/components/layout/site-header.tsx`, `site-footer.tsx`
 공통 UI: `src/components/ui/` (`page-banner`, `section`, `tabs`, `campus-link-tabs`, `modal-dialog`, `disclosure`, `form-controls`)
@@ -129,7 +129,7 @@ Next DevTools MCP·Context7 이 없어 설치된 패키지의 타입 정의를 �
 | `requestPasswordResetStub` | `POST /api/auth/password-reset/request` |
 | `resetPasswordStub` | `POST /api/auth/password-reset/confirm` |
 | `updateProfileStub` | `PATCH /api/account/profile` |
-| `changePasswordStub` | **경로 미정** — openapi.yaml 에 대응 경로 없음 |
+| `changePasswordStub` | `POST /api/account/password` |
 | `withdrawStub` | `POST /api/account/withdraw` |
 
 콘텐츠 스텁(값 자체도 교체 대상): `COURSE_STUBS`, `EVENT_STUBS`, `NOTICE_STUBS`, `INSTRUCTOR_STUBS`.
@@ -167,7 +167,7 @@ Next DevTools MCP·Context7 이 없어 설치된 패키지의 타입 정의를 �
 ## 7. 조정자에게 요청
 
 1. **`src/lib/contracts/common.ts` 문구 보강 제안.** `personNameSchema`, `schoolName`(`courseApplicationSchema`), `loginIdSchema` 등 일부 스키마에 한국어 오류 문구가 없어 Zod 기본 영어 문구가 나온다. 지금은 FE에서 한국어로 바꿔 표시하지만(ASM-058), 계약에 문구를 넣는 쪽이 FE·BE 응답이 같아진다. 계약 변경이라 FE가 손대지 않았다.
-2. **비밀번호 변경 엔드포인트 누락.** `changePasswordSchema` 는 계약에 있는데 `docs/contracts/openapi.yaml` 에 대응 경로가 없다. 경로를 정해 주시면 `changePasswordStub` 주석과 교체 지점을 맞춘다.
+2. **브랜치가 `feat/phase-3-4` 보다 3커밋 뒤에 있다.** 작업 중 조정자가 `5c7beaa`(openapi 44경로 기록, 관리자 계약 보강), `568dec2`(410 규칙에 RT-004 부여), `a80ecbf`(migration-status 뼈대)를 올렸다. 확인 결과 공개 화면이 쓰는 계약(`common`·`applications`·`reservations`·`auth`)은 바뀌지 않았고, 새로 생긴 `POST /api/account/password` 와 RT-004 는 이 작업에 반영했다. 병합 시 충돌은 없을 것으로 보인다.
 3. **`src/lib/event-consent.ts` 이동 여부.** 설명회 동의 문구 상수를 FE 쪽에 두었다(ASM-052). BE도 저장 시 같은 문구·`policyVersion` 이 필요하면 `src/lib/contracts/applications.ts` 로 옮겨 주시기 바란다.
 4. **`middleware.ts` → `proxy.ts` 이름 변경.** Next.js 16.4.5 빌드가 `middleware` 파일 규칙을 deprecated 로 경고한다(`npx @next/codemod@canary middleware-to-proxy .`). 지시가 `middleware.ts` 였고 소유권 표에도 `middleware.ts` 로 적혀 있어 그대로 두었다. 이름을 바꾸려면 소유권 표도 함께 고쳐야 한다.
 5. **`src/lib/site.ts` 와 `tests/unit/site.test.ts` 정리.** Phase 0 하네스 상수를 확인하는 테스트라 기능과 무관하다. `tests/` 가 조정자 소유여서 지우지 않고 `src/lib/site.ts` 를 남겨 두었다. 테스트를 정리할 때 함께 지우면 된다.
