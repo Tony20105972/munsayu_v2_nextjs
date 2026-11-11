@@ -1,5 +1,27 @@
-import "server-only";
-export interface MailAdapter { send(message: { to: string; subject: string; text: string }): Promise<void> }
-class ConsoleMailAdapter implements MailAdapter { async send(message: { to: string; subject: string; text: string }) { console.info("mail queued", { subject: message.subject }); } }
-class ResendMailAdapter implements MailAdapter { async send(message: { to: string; subject: string; text: string }) { const key = process.env.RESEND_API_KEY; const from = process.env.MAIL_FROM; if (!key || !from) throw new Error("MAIL_NOT_CONFIGURED"); await fetch("https://api.resend.com/emails", { method: "POST", headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" }, body: JSON.stringify({ from, ...message }) }); } }
-export const mail: MailAdapter = process.env.MAIL_ADAPTER === "resend" ? new ResendMailAdapter() : new ConsoleMailAdapter();
+import "@/server/server-only";
+import { ConsoleMailAdapter } from "@/server/adapters/mail/console-adapter";
+import { MemoryMailAdapter } from "@/server/adapters/mail/memory-adapter";
+import { ResendMailAdapter } from "@/server/adapters/mail/resend-adapter";
+import type { MailAdapter } from "@/server/adapters/mail/types";
+
+export type { MailAdapter, MailMessage } from "@/server/adapters/mail/types";
+export { MemoryMailAdapter } from "@/server/adapters/mail/memory-adapter";
+
+const adapters = {
+  console: new ConsoleMailAdapter(),
+  memory: new MemoryMailAdapter(),
+  resend: new ResendMailAdapter(),
+} as const;
+
+/** 환경 변수로 어댑터를 고른다. 기본은 실제 발송이 없는 console이다. (ASM-010) */
+export function getMailAdapter(): MailAdapter {
+  const selected = process.env.MAIL_ADAPTER;
+  if (selected === "resend") return adapters.resend;
+  if (selected === "memory") return adapters.memory;
+  return adapters.console;
+}
+
+/** 테스트에서 보낸 메일을 확인하려면 이 인스턴스를 쓴다. */
+export function getMemoryMailAdapter(): MemoryMailAdapter {
+  return adapters.memory;
+}
