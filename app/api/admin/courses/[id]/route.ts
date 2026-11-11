@@ -1,7 +1,7 @@
 import { courseUpsertSchema } from "@/lib/contracts";
 import { requireAdmin } from "@/server/auth";
 import { deleteCourse, updateCourse } from "@/server/services/courses";
-import { emptyNoStore, errorResponse, jsonNoStore, parseJsonBody } from "@/server/http";
+import { errorResponse, jsonNoStore, parseJsonBody } from "@/server/http";
 
 /** AD-007 강좌 수정. */
 export async function PUT(
@@ -28,7 +28,7 @@ export async function DELETE(
     await requireAdmin(request);
     const { id } = await context.params;
     await deleteCourse(id);
-    return emptyNoStore(204);
+    return jsonNoStore({ id, deleted: true }, 200);
   } catch (error) {
     return errorResponse(error);
   }

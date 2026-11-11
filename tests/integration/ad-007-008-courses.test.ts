@@ -73,7 +73,7 @@ describe("AD-007/008 시간표·강좌 신청 관리", () => {
       makeRequest("DELETE", `/api/admin/courses/${id}`, { cookie }),
       routeContext({ id }),
     );
-    expect(deleted.status).toBe(204);
+    expect(deleted.status).toBe(200);
   });
 
   test("AD-007 강좌 추가: 없는 지점이면 422", async () => {

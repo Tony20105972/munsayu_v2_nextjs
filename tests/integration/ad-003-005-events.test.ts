@@ -73,7 +73,7 @@ describe("AD-003~005 설명회 관리", () => {
       makeRequest("DELETE", `/api/admin/events/${id}`, { cookie }),
       routeContext({ id }),
     );
-    expect(deleted.status).toBe(204);
+    expect(deleted.status).toBe(200);
     expect(await db.event.findUnique({ where: { id } })).toBeNull();
   });
 

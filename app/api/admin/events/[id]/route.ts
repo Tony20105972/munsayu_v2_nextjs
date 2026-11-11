@@ -1,7 +1,7 @@
 import { eventUpsertSchema } from "@/lib/contracts";
 import { requireAdmin } from "@/server/auth";
 import { deleteEvent, updateEvent } from "@/server/services/events";
-import { emptyNoStore, errorResponse, jsonNoStore, parseJsonBody } from "@/server/http";
+import { errorResponse, jsonNoStore, parseJsonBody } from "@/server/http";
 
 /** AD-003 설명회 수정. 관리코드도 여기서 고친다. (ASM-005) */
 export async function PUT(
@@ -28,7 +28,7 @@ export async function DELETE(
     await requireAdmin(request);
     const { id } = await context.params;
     await deleteEvent(id);
-    return emptyNoStore(204);
+    return jsonNoStore({ id, deleted: true }, 200);
   } catch (error) {
     return errorResponse(error);
   }

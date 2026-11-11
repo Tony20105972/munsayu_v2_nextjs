@@ -1,7 +1,7 @@
 import { instructorUpsertSchema } from "@/lib/contracts";
 import { requireAdmin } from "@/server/auth";
 import { deleteInstructor, updateInstructor } from "@/server/services/instructors";
-import { emptyNoStore, errorResponse, jsonNoStore, parseJsonBody } from "@/server/http";
+import { errorResponse, jsonNoStore, parseJsonBody } from "@/server/http";
 
 /** AD-006 강사 수정. */
 export async function PUT(
@@ -28,7 +28,7 @@ export async function DELETE(
     await requireAdmin(request);
     const { id } = await context.params;
     await deleteInstructor(id);
-    return emptyNoStore(204);
+    return jsonNoStore({ id, deleted: true }, 200);
   } catch (error) {
     return errorResponse(error);
   }
