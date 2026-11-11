@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useId, useState, type FormEvent } from "react";
 import { StatusMessage, SubmitButton, TextField } from "@/components/ui/form-controls";
 import { PASSWORD_RESET_TOKEN_TTL_MINUTES, resetPasswordSchema } from "@/lib/contracts";
-import { resetPasswordStub } from "@/lib/data/stubs";
+import { resetPasswordAction } from "@/lib/actions/account";
 import { errorElementId, toFieldErrors, type FieldErrors } from "@/lib/form-errors";
 
 /**
@@ -48,7 +48,13 @@ export function PasswordResetForm() {
     setSubmitting(true);
 
     try {
-      await resetPasswordStub();
+      const result = await resetPasswordAction(parsed.data);
+      if (!result.ok) {
+        setFieldErrors(result.fieldErrors ?? {});
+        setFormError(result.message);
+        return;
+      }
+
       setDone(true);
     } catch {
       setFormError("비밀번호를 바꾸지 못했습니다. 재설정을 다시 요청해 주세요.");

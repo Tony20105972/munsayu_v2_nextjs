@@ -9,7 +9,7 @@ import {
   TextField,
 } from "@/components/ui/form-controls";
 import { registerSchema } from "@/lib/contracts";
-import { registerMemberStub } from "@/lib/data/stubs";
+import { registerAction } from "@/lib/actions/account";
 import { errorElementId, toFieldErrors, type FieldErrors } from "@/lib/form-errors";
 
 /**
@@ -82,7 +82,13 @@ export function RegisterFlow() {
     setSubmitting(true);
 
     try {
-      await registerMemberStub();
+      const result = await registerAction(parsed.data);
+      if (!result.ok) {
+        setFieldErrors(result.fieldErrors ?? {});
+        setFormError(result.message);
+        return;
+      }
+
       setDone(true);
     } catch {
       setFormError("가입을 완료하지 못했습니다. 잠시 후 다시 시도해 주세요.");

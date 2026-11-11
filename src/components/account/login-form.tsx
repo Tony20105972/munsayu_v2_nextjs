@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useId, useState, type FormEvent } from "react";
 import {
   CheckboxField,
@@ -9,7 +10,7 @@ import {
   TextField,
 } from "@/components/ui/form-controls";
 import { loginSchema } from "@/lib/contracts";
-import { loginStub } from "@/lib/data/stubs";
+import { loginAction } from "@/lib/actions/account";
 import { errorElementId, toFieldErrors, type FieldErrors } from "@/lib/form-errors";
 
 /**
@@ -19,6 +20,7 @@ import { errorElementId, toFieldErrors, type FieldErrors } from "@/lib/form-erro
  */
 export function LoginForm() {
   const formId = useId();
+  const router = useRouter();
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -44,8 +46,17 @@ export function LoginForm() {
     setSubmitting(true);
 
     try {
-      await loginStub();
+      const result = await loginAction(parsed.data);
+      if (!result.ok) {
+        setFieldErrors(result.fieldErrors ?? {});
+        setFormError(result.message);
+        return;
+      }
+
       setDone(true);
+      // 관리자 계정은 관리자 화면으로, 회원은 홈으로 보낸다.
+      router.replace(result.data.role === "ADMIN" ? "/admin" : "/");
+      router.refresh();
     } catch {
       setFormError("아이디 또는 비밀번호를 확인해 주세요.");
     } finally {

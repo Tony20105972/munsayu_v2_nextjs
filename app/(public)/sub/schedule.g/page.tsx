@@ -1,7 +1,9 @@
+import { Suspense } from "react";
 import { Timetable } from "@/components/public/timetable";
 import { CampusLinkTabs } from "@/components/ui/campus-link-tabs";
+import { LoadingBlock } from "@/components/ui/loading-block";
 import { PageBanner } from "@/components/ui/page-banner";
-import { groupCoursesByGrade, listCoursesByCampusStub } from "@/lib/data/stubs";
+import { loadTimetable } from "@/lib/data/public-content";
 import { buildPageMetadata, pageTitle } from "@/lib/metadata";
 
 /**
@@ -14,9 +16,11 @@ export const metadata = buildPageMetadata({
   path: "/sub/schedule.g",
 });
 
-export default function BundangTimetablePage() {
-  const groups = groupCoursesByGrade(listCoursesByCampusStub("bundang"));
+async function BundangTimetable() {
+  return <Timetable groups={await loadTimetable("분당점")} />;
+}
 
+export default function BundangTimetablePage() {
   return (
     <>
       <PageBanner
@@ -24,7 +28,9 @@ export default function BundangTimetablePage() {
         description="스스로 질문하고 독해하는 힘! 문사유 분당점 초등 커리큘럼을 확인하세요."
       />
       <CampusLinkTabs activeCampusId="bundang" label="시간표 지점 선택" />
-      <Timetable groups={groups} />
+      <Suspense fallback={<LoadingBlock label="시간표를 불러오고 있습니다." />}>
+        <BundangTimetable />
+      </Suspense>
     </>
   );
 }

@@ -9,7 +9,10 @@ import {
   type ReservationLookupInput,
   type ReservationSummary,
 } from "@/lib/contracts";
-import { cancelReservationStub, lookupReservationsStub } from "@/lib/data/stubs";
+import {
+  cancelReservationAction,
+  lookupReservationsAction,
+} from "@/lib/actions/public-forms";
 import { errorElementId, toFieldErrors, type FieldErrors } from "@/lib/form-errors";
 
 const KOREAN_DATE_TIME = new Intl.DateTimeFormat("ko-KR", {
@@ -84,9 +87,16 @@ export function ReservationLookup() {
     setLookup({ phase: "loading" });
 
     try {
-      const result = await lookupReservationsStub(parsed.data);
+      const result = await lookupReservationsAction(parsed.data);
+      if (!result.ok) {
+        setLookup({ phase: "idle" });
+        setFieldErrors(result.fieldErrors ?? {});
+        setFormError(result.message);
+        return;
+      }
+
       setCredentials(parsed.data);
-      setLookup({ phase: "done", items: result.items });
+      setLookup({ phase: "done", items: result.data.items });
     } catch {
       setLookup({ phase: "idle" });
       setFormError("예약 내역을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.");
@@ -114,7 +124,12 @@ export function ReservationLookup() {
     setCancelling(true);
 
     try {
-      await cancelReservationStub(parsed.data);
+      const result = await cancelReservationAction(parsed.data);
+      if (!result.ok) {
+        setFormError(result.message);
+        return;
+      }
+
       setLookup((current) =>
         current.phase === "done"
           ? {

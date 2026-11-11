@@ -3,7 +3,7 @@
 import { useId, useState, type FormEvent } from "react";
 import { StatusMessage, SubmitButton, TextField } from "@/components/ui/form-controls";
 import { changePasswordSchema, updateProfileSchema } from "@/lib/contracts";
-import { changePasswordStub, updateProfileStub } from "@/lib/data/stubs";
+import { changePasswordAction, updateProfileAction } from "@/lib/actions/account";
 import { errorElementId, toFieldErrors, type FieldErrors } from "@/lib/form-errors";
 
 /**
@@ -11,7 +11,21 @@ import { errorElementId, toFieldErrors, type FieldErrors } from "@/lib/form-erro
  * 레거시에서 관찰하지 못한 화면이라 계약(`updateProfileSchema`, `changePasswordSchema`)만 따른다. // ASM-055
  */
 
-export function UpdateProfileForm({ defaultName }: { defaultName: string }) {
+type UpdateProfileFormProps = {
+  defaultName: string;
+  /**
+   * 현재 이메일·휴대전화번호를 읽는 공개 경로가 없어 지금은 비워 둔다.
+   * BE 가 `GET /api/account/profile` 을 만들면 값만 넘기면 된다. // ASM-074
+   */
+  defaultEmail?: string;
+  defaultPhone?: string;
+};
+
+export function UpdateProfileForm({
+  defaultName,
+  defaultEmail,
+  defaultPhone,
+}: UpdateProfileFormProps) {
   const formId = useId();
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
@@ -39,7 +53,13 @@ export function UpdateProfileForm({ defaultName }: { defaultName: string }) {
     setSubmitting(true);
 
     try {
-      await updateProfileStub();
+      const result = await updateProfileAction(parsed.data);
+      if (!result.ok) {
+        setFieldErrors(result.fieldErrors ?? {});
+        setFormError(result.message);
+        return;
+      }
+
       setSaved(true);
     } catch {
       setFormError("정보를 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.");
@@ -72,7 +92,9 @@ export function UpdateProfileForm({ defaultName }: { defaultName: string }) {
         name="email"
         label="이메일"
         type="email"
+        hint="저장할 때 세 항목을 모두 함께 반영하므로 현재 이메일도 다시 입력해 주세요."
         autoComplete="email"
+        defaultValue={defaultEmail}
         required
         errors={fieldErrors.email}
       />
@@ -85,6 +107,7 @@ export function UpdateProfileForm({ defaultName }: { defaultName: string }) {
         inputMode="tel"
         placeholder="010-0000-0000"
         autoComplete="tel"
+        defaultValue={defaultPhone}
         required
         errors={fieldErrors.phone}
       />
@@ -125,7 +148,13 @@ export function ChangePasswordForm() {
     setSubmitting(true);
 
     try {
-      await changePasswordStub();
+      const result = await changePasswordAction(parsed.data);
+      if (!result.ok) {
+        setFieldErrors(result.fieldErrors ?? {});
+        setFormError(result.message);
+        return;
+      }
+
       setSaved(true);
     } catch {
       setFormError("비밀번호를 바꾸지 못했습니다. 현재 비밀번호를 확인해 주세요.");
@@ -176,7 +205,10 @@ export function ChangePasswordForm() {
 
       {formError ? <StatusMessage tone="error">{formError}</StatusMessage> : null}
       {saved ? (
-        <StatusMessage tone="success">비밀번호를 바꿨습니다.</StatusMessage>
+        <StatusMessage tone="success">
+          비밀번호를 바꿨습니다. 안전을 위해 기존 로그인이 모두 끊겼으니 새 비밀번호로
+          다시 로그인해 주세요.
+        </StatusMessage>
       ) : null}
 
       <SubmitButton pending={submitting}>비밀번호 바꾸기</SubmitButton>

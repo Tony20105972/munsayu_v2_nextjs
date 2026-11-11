@@ -2,20 +2,25 @@
 
 import { useId, useState } from "react";
 import { CourseReservationDialog } from "@/components/public/course-reservation-dialog";
-import type { CourseSummary } from "@/lib/data/stubs";
-
-export type CourseGroup = {
-  gradeTitle: string;
-  courses: CourseSummary[];
-};
+import type { CourseCardView, CourseGroupView } from "@/lib/view-models";
 
 /**
  * PG-008·PG-009 시간표 목록과 FM-001 예약 모달 연결.
  * 카드 구성(머리글·강좌명·강의시간·개강일·상세보기·수강예약)은
  * docs/evidence/dom/phase1-course.yml, phase1-schedule-g.yml 관찰값이다.
  */
-export function Timetable({ groups }: { groups: readonly CourseGroup[] }) {
-  const [selectedCourse, setSelectedCourse] = useState<CourseSummary | null>(null);
+export function Timetable({ groups }: { groups: readonly CourseGroupView[] }) {
+  const [selectedCourse, setSelectedCourse] = useState<CourseCardView | null>(null);
+
+  if (groups.length === 0) {
+    return (
+      <div className="mx-auto max-w-6xl px-4 py-12">
+        <p className="rounded-xl border border-line bg-surface px-5 py-6 text-sm text-muted">
+          등록된 강좌가 없습니다. 상담센터로 문의해 주세요.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12">
@@ -53,7 +58,7 @@ function CourseCard({
   course,
   onReserve,
 }: {
-  course: CourseSummary;
+  course: CourseCardView;
   onReserve: () => void;
 }) {
   const detailId = useId();

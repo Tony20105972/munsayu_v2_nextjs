@@ -2,12 +2,7 @@
 
 import { useId, useState } from "react";
 import { EventReservationDialog } from "@/components/public/event-reservation-dialog";
-import type { EventSummary } from "@/lib/data/stubs";
-
-export type EventGroup = {
-  campusName: string;
-  events: EventSummary[];
-};
+import type { EventCardView, EventGroupView } from "@/lib/view-models";
 
 /**
  * PG-010 설명회 목록.
@@ -15,8 +10,8 @@ export type EventGroup = {
  * docs/evidence/dom/phase1-presentation.yml 관찰값이다. (EV-0005, BZ-001)
  * 상태 이름은 관리자가 직접 바꾸며 자동 전환은 없다. (ASM-001)
  */
-export function EventList({ groups }: { groups: readonly EventGroup[] }) {
-  const [selectedEvent, setSelectedEvent] = useState<EventSummary | null>(null);
+export function EventList({ groups }: { groups: readonly EventGroupView[] }) {
+  const [selectedEvent, setSelectedEvent] = useState<EventCardView | null>(null);
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-12">
@@ -60,7 +55,7 @@ function EventCard({
   event,
   onReserve,
 }: {
-  event: EventSummary;
+  event: EventCardView;
   onReserve: () => void;
 }) {
   const detailId = useId();

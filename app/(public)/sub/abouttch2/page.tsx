@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { InstructorList } from "@/components/public/instructor-list";
+import { LoadingBlock } from "@/components/ui/loading-block";
 import { PageBanner } from "@/components/ui/page-banner";
 import { Section } from "@/components/ui/section";
-import { listBundangInstructorsStub } from "@/lib/data/stubs";
+import { loadBundangInstructors } from "@/lib/data/public-content";
 import { buildPageMetadata, pageTitle } from "@/lib/metadata";
 
 /**
@@ -16,9 +18,11 @@ export const metadata = buildPageMetadata({
   path: "/sub/abouttch2",
 });
 
-export default function BundangInstructorsPage() {
-  const instructors = listBundangInstructorsStub();
+async function BundangInstructors() {
+  return <InstructorList instructors={await loadBundangInstructors()} />;
+}
 
+export default function BundangInstructorsPage() {
   return (
     <>
       <PageBanner
@@ -30,7 +34,9 @@ export default function BundangInstructorsPage() {
         title="분당점 강사진"
         description="전체 강사 명단은 강사진 안내 화면에서 확인할 수 있습니다."
       >
-        <InstructorList instructors={instructors} />
+        <Suspense fallback={<LoadingBlock label="강사 정보를 불러오고 있습니다." />}>
+          <BundangInstructors />
+        </Suspense>
         <p className="mt-8 text-center">
           <Link
             href="/sub/abouttch1"

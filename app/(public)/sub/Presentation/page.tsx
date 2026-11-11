@@ -1,13 +1,16 @@
-import { EventList, type EventGroup } from "@/components/public/event-list";
+import { Suspense } from "react";
+import { EventList } from "@/components/public/event-list";
+import { LoadingBlock } from "@/components/ui/loading-block";
 import { PageBanner } from "@/components/ui/page-banner";
-import { listEventsByCampusStub } from "@/lib/data/stubs";
+import { loadEventGroups } from "@/lib/data/public-content";
 import { buildPageMetadata } from "@/lib/metadata";
-import { CAMPUSES, SITE_TITLE_SUFFIX } from "@/lib/site-config";
+import { SITE_TITLE_SUFFIX } from "@/lib/site-config";
 
 /**
  * PG-010 현장설명회 예약 + FM-002 설명회 신청.
  * 근거: docs/evidence/dom/phase1-presentation.yml (EV-0005)
  * 레거시 관찰 시점에는 title 이 홈과 같았다(legacy-seo-map.md).
+ * 상태 문구와 마감 여부는 관리자가 고른 상태 옵션 값을 그대로 쓴다. (ASM-001)
  */
 export const metadata = buildPageMetadata({
   title: SITE_TITLE_SUFFIX,
@@ -15,12 +18,11 @@ export const metadata = buildPageMetadata({
   path: "/sub/Presentation",
 });
 
-export default function PresentationPage() {
-  const groups: EventGroup[] = CAMPUSES.map((campus) => ({
-    campusName: campus.name,
-    events: listEventsByCampusStub(campus.id),
-  }));
+async function EventGroups() {
+  return <EventList groups={await loadEventGroups()} />;
+}
 
+export default function PresentationPage() {
   return (
     <>
       <PageBanner
@@ -37,7 +39,9 @@ export default function PresentationPage() {
             주시기 바랍니다.
           </p>
         </div>
-        <EventList groups={groups} />
+        <Suspense fallback={<LoadingBlock label="설명회 일정을 불러오고 있습니다." />}>
+          <EventGroups />
+        </Suspense>
       </section>
     </>
   );

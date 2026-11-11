@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { InstructorProfile } from "@/lib/data/stubs";
+import type { InstructorCardView } from "@/lib/view-models";
 
 /**
  * 강사 소개 목록.
@@ -10,7 +10,7 @@ import type { InstructorProfile } from "@/lib/data/stubs";
 export function InstructorList({
   instructors,
 }: {
-  instructors: readonly InstructorProfile[];
+  instructors: readonly InstructorCardView[];
 }) {
   if (instructors.length === 0) {
     return (

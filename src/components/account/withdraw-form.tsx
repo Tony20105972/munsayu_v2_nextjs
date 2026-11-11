@@ -8,7 +8,7 @@ import {
   TextField,
 } from "@/components/ui/form-controls";
 import { withdrawSchema } from "@/lib/contracts";
-import { withdrawStub } from "@/lib/data/stubs";
+import { withdrawAction } from "@/lib/actions/account";
 import { errorElementId, toFieldErrors, type FieldErrors } from "@/lib/form-errors";
 
 /**
@@ -41,7 +41,13 @@ export function WithdrawForm() {
     setSubmitting(true);
 
     try {
-      await withdrawStub();
+      const result = await withdrawAction(parsed.data);
+      if (!result.ok) {
+        setFieldErrors(result.fieldErrors ?? {});
+        setFormError(result.message);
+        return;
+      }
+
       setDone(true);
     } catch {
       setFormError("탈퇴를 처리하지 못했습니다. 비밀번호를 확인해 주세요.");

@@ -15,12 +15,13 @@ import {
   ELEMENTARY_GRADES,
   courseApplicationSchema,
 } from "@/lib/contracts";
-import { submitCourseApplicationStub, type CourseSummary } from "@/lib/data/stubs";
+import { submitCourseApplicationAction } from "@/lib/actions/public-forms";
 import { errorElementId, toFieldErrors, type FieldErrors } from "@/lib/form-errors";
 import { createIdempotencyKey } from "@/lib/idempotency";
+import type { CourseCardView } from "@/lib/view-models";
 
 type CourseReservationDialogProps = {
-  course: CourseSummary;
+  course: CourseCardView;
   onClose: () => void;
 };
 
@@ -82,8 +83,14 @@ export function CourseReservationDialog({
     setSubmitting(true);
 
     try {
-      await submitCourseApplicationStub(parsed.data);
-      setSubmitted(true);
+      // 서버에서 같은 계약 스키마로 다시 검증한다. 클라이언트 결과는 신뢰하지 않는다.
+      const result = await submitCourseApplicationAction(parsed.data);
+      if (result.ok) {
+        setSubmitted(true);
+      } else {
+        setFieldErrors(result.fieldErrors ?? {});
+        setFormError(result.message);
+      }
     } catch {
       setFormError("신청을 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.");
     } finally {

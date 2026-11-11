@@ -3,7 +3,7 @@
 import { useId, useState, type FormEvent } from "react";
 import { StatusMessage, SubmitButton, TextField } from "@/components/ui/form-controls";
 import { findLoginIdSchema, requestPasswordResetSchema } from "@/lib/contracts";
-import { findLoginIdStub, requestPasswordResetStub } from "@/lib/data/stubs";
+import { findLoginIdAction, requestPasswordResetAction } from "@/lib/actions/account";
 import { errorElementId, toFieldErrors, type FieldErrors } from "@/lib/form-errors";
 
 /**
@@ -18,6 +18,7 @@ const NEUTRAL_RESULT_MESSAGE =
 export function FindLoginIdForm() {
   const formId = useId();
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
 
@@ -37,8 +38,17 @@ export function FindLoginIdForm() {
 
     setFieldErrors({});
     setSubmitting(true);
-    await findLoginIdStub();
+    setFormError(null);
+
+    const result = await findLoginIdAction(parsed.data);
     setSubmitting(false);
+
+    if (!result.ok) {
+      setFieldErrors(result.fieldErrors ?? {});
+      setFormError(result.message);
+      return;
+    }
+
     setDone(true);
   }
 
@@ -74,6 +84,8 @@ export function FindLoginIdForm() {
             required
             errors={fieldErrors.email}
           />
+          {formError ? <StatusMessage tone="error">{formError}</StatusMessage> : null}
+
           <SubmitButton pending={submitting}>아이디 찾기</SubmitButton>
         </form>
       )}
@@ -84,6 +96,7 @@ export function FindLoginIdForm() {
 export function RequestPasswordResetForm() {
   const formId = useId();
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
 
@@ -103,8 +116,17 @@ export function RequestPasswordResetForm() {
 
     setFieldErrors({});
     setSubmitting(true);
-    await requestPasswordResetStub();
+    setFormError(null);
+
+    const result = await requestPasswordResetAction(parsed.data);
     setSubmitting(false);
+
+    if (!result.ok) {
+      setFieldErrors(result.fieldErrors ?? {});
+      setFormError(result.message);
+      return;
+    }
+
     setDone(true);
   }
 
@@ -140,6 +162,8 @@ export function RequestPasswordResetForm() {
             required
             errors={fieldErrors.email}
           />
+          {formError ? <StatusMessage tone="error">{formError}</StatusMessage> : null}
+
           <SubmitButton pending={submitting}>재설정 링크 받기</SubmitButton>
         </form>
       )}
