@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { SiteFooter } from "@/components/layout/site-footer";
-import { SiteHeader } from "@/components/layout/site-header";
 import { SITE_ORIGIN, SITE_TITLE_SUFFIX } from "@/lib/site-config";
 import "./globals.css";
 
 /**
- * 공통 레이아웃. 헤더·푸터는 레거시 관찰값(EV-0003, EV-0007)을 재현한다.
- * 페이지별 title·description·canonical·OG는 각 페이지의 metadata 가 덮어쓴다. (BLUEPRINT 8장)
+ * 최상위 레이아웃. `<html>`·`<body>` 와 기본 메타데이터만 둔다.
+ *
+ * 공개 화면의 헤더·푸터는 `app/(public)/layout.tsx` 에, 관리자 화면의 머리글·메뉴는
+ * `app/admin/(authed)/layout.tsx` 에 있다. 두 영역이 서로 다른 화면 틀을 쓰기 때문이다.
+ * 페이지별 title·description·canonical·OG 는 각 페이지의 metadata 가 덮어쓴다. (BLUEPRINT 8장)
  */
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_ORIGIN),
@@ -19,19 +20,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="ko">
-      <body className="flex min-h-screen flex-col">
-        <a
-          href="#main-content"
-          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-brand focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:text-white"
-        >
-          본문으로 건너뛰기
-        </a>
-        <SiteHeader />
-        <main id="main-content" className="flex-1">
-          {children}
-        </main>
-        <SiteFooter />
-      </body>
+      <body className="flex min-h-screen flex-col">{children}</body>
     </html>
   );
 }

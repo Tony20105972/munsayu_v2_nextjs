@@ -14,25 +14,11 @@ import {
   lookupReservationsAction,
 } from "@/lib/actions/public-forms";
 import { errorElementId, toFieldErrors, type FieldErrors } from "@/lib/form-errors";
-
-const KOREAN_DATE_TIME = new Intl.DateTimeFormat("ko-KR", {
-  dateStyle: "long",
-  timeStyle: "short",
-  timeZone: "Asia/Seoul",
-});
-
-function formatDateTime(value: string | null): string | null {
-  if (!value) {
-    return null;
-  }
-
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) {
-    return null;
-  }
-
-  return KOREAN_DATE_TIME.format(parsed);
-}
+import {
+  formatCourseStartDate,
+  formatDateTime,
+  formatEventStartsAt,
+} from "@/lib/view-models";
 
 const STATUS_LABEL: Record<ReservationSummary["status"], string> = {
   PENDING: "접수",
@@ -231,11 +217,16 @@ export function ReservationLookup() {
                             <dd className="inline">{item.scheduleText}</dd>
                           </div>
                         ) : null}
-                        {formatDateTime(item.scheduledAt) ? (
+                        {item.scheduledAt ? (
                           <div>
-                            <dt className="inline font-bold text-ink">일시 : </dt>
+                            <dt className="inline font-bold text-ink">
+                              {item.kind === "course" ? "개강일 : " : "일시 : "}
+                            </dt>
+                            {/* 강좌는 날짜만 의미가 있고 설명회는 시각까지 의미가 있다. */}
                             <dd className="inline">
-                              {formatDateTime(item.scheduledAt)}
+                              {item.kind === "course"
+                                ? formatCourseStartDate(item.scheduledAt)
+                                : formatEventStartsAt(item.scheduledAt)}
                             </dd>
                           </div>
                         ) : null}
