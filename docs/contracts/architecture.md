@@ -27,7 +27,7 @@ Header/footer and public route evidence: EV-0003, EV-0007. Forms are client UI p
 |---|---|---|---|
 | `auth` | 회원·관리자 세션, 로그인 유지, 계정 복구 | FM-003, AD-001/002 | EV-0007, EV-ADM-01/02, ASM-002 |
 | `courses` | 지점·강좌·시간표·신청 현황 | PG-008/009, AD-007/008 | EV-0006, EV-ADM-05 |
-| `course-applications` | 강좌 신청, 동의, 중복·마감 트랜잭션 | FM-001, BZ-002, AD-013 | EV-0006, EV-0010 |
+| `course-applications` | 강좌 신청, 동의, 마감 트랜잭션 | FM-001, BZ-002, AD-013 | EV-0006, EV-0010 |
 | `events` | 설명회·상태 목록·관리코드 | PG-010, AD-003/004 | EV-0005, EV-ADM-03, ASM-001/005 |
 | `event-reservations` | 설명회 예약, 조회·취소, 참석 합계 | FM-002, PG-011, AD-005 | EV-0008, EV-ADM-03, ASM-001 |
 | `instructors` | 강사·팀 소속·노출 순서 | AD-006 | EV-ADM-04, ASM-003 |
@@ -44,7 +44,7 @@ Header/footer and public route evidence: EV-0003, EV-0007. Forms are client UI p
 신청: PENDING → CONFIRMED → CANCELLED
 ```
 
-예약/신청 생성은 PostgreSQL `SERIALIZABLE` 트랜잭션에서 대상 `Course` 또는 `Event` 행을 `FOR UPDATE`로 잠그고 (1) 공개 접수 상태, (2) 동일 연락처+대상 활성 기록, (3) idempotency key를 확인하고 저장한다. 충돌/직렬화 실패는 재시도 뒤 하나만 201, 나머지는 409가 된다. 정원 숫자는 차단 조건이 아니다. 취소된 기록은 중복 차단 대상에서 제외한다. `접수마감`은 새 신청을 409으로 막는다.
+예약/신청 생성은 하나의 DB 트랜잭션에서 공개 접수 상태를 확인하고 저장한다. 정원 숫자는 차단 조건이 아니며, 같은 연락처의 의도적인 재신청도 허용한다. 같은 idempotency key 재전송만 기존 결과를 돌려주고 새로 저장하지 않는다. `접수마감`은 새 신청을 409으로 막는다.
 
 ## 입력 계약
 

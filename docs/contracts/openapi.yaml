@@ -5,12 +5,12 @@ paths:
     post:
       summary: FM-001 강좌 신청
       requestBody: {required: true, content: {application/json: {schema: {$ref: '#/components/schemas/CourseApplicationInput'}}}}
-      responses: {'201': {description: created}, '409': {description: closed or duplicate}, '422': {description: invalid}}
+      responses: {'201': {description: created}, '409': {description: closed}, '422': {description: invalid}}
   /api/event-reservations:
     post:
       summary: FM-002 설명회 예약 (ASM-001)
       requestBody: {required: true, content: {application/json: {schema: {$ref: '#/components/schemas/EventReservationInput'}}}}
-      responses: {'201': {description: created}, '409': {description: closed or duplicate}, '422': {description: invalid}}
+      responses: {'201': {description: created}, '409': {description: closed}, '422': {description: invalid}}
   /api/reservations/lookup:
     post:
       summary: PG-011 예약 조회
