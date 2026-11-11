@@ -12,9 +12,9 @@
 | 항목 | 값 |
 |---|---|
 | 현재 Phase | **2 — Migration Contract** |
-| 상태 | `IN_PROGRESS` |
+| 상태 | `GATE_CHECK` |
 | 마지막 갱신 | 2026-11-11 |
-| 다음 행동 | 확정 답변과 ASM 기본안을 반영한 Phase 2 마이그레이션 계약 작성 |
+| 다음 행동 | 사람의 Phase 2 검토 및 Phase 3·4 병렬 착수 승인 대기 |
 | 막힌 것 | 없음 — 남은 의문은 ASM으로 기록하고 Phase 안에서 진행 |
 
 상태 값: `NOT_STARTED` → `IN_PROGRESS` → `GATE_CHECK` → `IN_REVIEW` → `APPROVED`
@@ -28,7 +28,7 @@
 |---|---|---|---|---|---|---|
 | 0 | Harness Bootstrap | APPROVED | PASS (7/7) | 차단 0 / 권장 2 | ☑ | `reports/phase-0-report.md` |
 | 1 | PHP Black-Box Reconnaissance | APPROVED | PASS (6/6) | 차단 0 / 권장 0 | ☑ | `reports/phase-1-report.md` |
-| 2 | Migration Contract | NOT_STARTED | — | — | ☐ | `reports/phase-2-report.md` |
+| 2 | Migration Contract | GATE_CHECK | PASS (7/7) | 차단 3 수정 / 권장 반영 | ☐ | `reports/phase-2-report.md` |
 | 3 | Frontend Reconstruction | NOT_STARTED | — | — | ☐ | `reports/phase-3-report.md` |
 | 4 | Backend Replacement | NOT_STARTED | — | — | ☐ | `reports/phase-4-report.md` |
 | 5 | Legacy Parity Testing | NOT_STARTED | — | — | ☐ | `reports/phase-5-report.md` |
@@ -122,6 +122,7 @@ Claude는 Phase 상태가 바뀔 때마다 한 줄씩 추가합니다. 위쪽이
 
 | 날짜 | Phase | 변경 | 작성 |
 |---|---|---|---|
+| 2026-11-11 | 2 | Gate PASS(7/7), 독립 리뷰 차단 3건 수정 후 GATE_CHECK로 전환 | Codex |
 | 2026-11-11 | 2 | Phase 2 시작: 확정 답변 및 ASM 기본안 반영, 상태를 IN_PROGRESS로 변경 | Codex |
 | 2026-11-09 | 1 | Phase 1 승인, PR #2 병합 (사용자 지시) | Codex |
 | 2026-11-09 | 1 | Phase 1 리뷰 반영: .gitignore·AD 연결·공개 사업자 정보 예외 처리 | Codex |
