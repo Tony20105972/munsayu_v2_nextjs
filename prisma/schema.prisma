@@ -96,6 +96,9 @@ model CourseApplication {
   department String
   grade String
   privacyConsentAt DateTime
+  /// PII 파기 대상 시각; 등록 안내 완료 시 설정한다. // ASM-009
+  purgeEligibleAt DateTime?
+  retentionPolicyVersion String @default("legacy-ev-0006-v1")
   status ApplicationStatus @default(PENDING)
   idempotencyKey String @unique
   cancelledAt DateTime?
@@ -138,6 +141,9 @@ model EventReservation {
   grade String
   attendeeCount Int
   privacyConsentAt DateTime
+  /// PII 파기 대상 시각; 설명회 종료 및 안내 완료 시 설정한다. // ASM-009
+  purgeEligibleAt DateTime?
+  retentionPolicyVersion String @default("legacy-ev-0006-v1")
   status ReservationStatus @default(PENDING)
   idempotencyKey String @unique
   cancelledAt DateTime?
@@ -175,7 +181,7 @@ model InstructorTeamMembership {
 model PrivacyRetentionSetting {
   id Int @id @default(1)
   courseRetentionPolicy String @default("종강 및 정규 등록 안내 완료 시점 즉시 파기")
-  eventRetentionDays Int?
+  eventRetentionPolicy String @default("종강 및 정규 등록 안내 완료 시점 즉시 파기")
   automaticPurgeEnabled Boolean @default(false)
   updatedByUserId String?
   createdAt DateTime @default(now())
@@ -183,10 +189,12 @@ model PrivacyRetentionSetting {
 }
 model AuditLog {
   id String @id @default(cuid())
+  /// PII 가능 식별자
   actorUserId String?
   action AuditAction
   resourceType String
   resourceId String?
+  /// PII 금지: 건수·필터 이름만 저장하는 비식별 요약
   filterSummary String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
