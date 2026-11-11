@@ -23,7 +23,8 @@
     "postinstall": "prisma generate",
     "test:unit": "vitest run --project unit",
     "test:integration": "vitest run --project integration",
-    "e2e:visual": "playwright test --project=visual-1440 --project=visual-390"
+    "e2e:visual": "playwright test --project=visual-1440 --project=visual-390",
+    "check:assets": "node scripts/check-public-assets.mjs"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.1",
