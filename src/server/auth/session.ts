@@ -1,4 +1,4 @@
-import "@/server/server-only";
+import "server-only";
 import type { Prisma, SessionScope, User } from "@prisma/client";
 import type { SessionUser } from "@/lib/contracts";
 import { db } from "@/server/db";
@@ -53,14 +53,13 @@ export async function issueSession(
 }
 
 /**
- * 요청마다 쿠키 → 세션 행 → 계정 상태를 다시 확인한다.
+ * 토큰 하나를 세션 행·계정 상태까지 다시 확인한다.
  * 범위가 맞지 않거나 계정이 ACTIVE가 아니면 세션으로 보지 않는다.
  */
-export async function resolveSession(
-  request: Request,
+export async function resolveSessionByToken(
+  token: string | null,
   scope: SessionScope,
 ): Promise<User | null> {
-  const token = readCookie(request, SESSION_COOKIE_NAMES[scope]);
   if (!token) return null;
 
   const session = await db.authSession.findUnique({
@@ -73,6 +72,14 @@ export async function resolveSession(
   if (scope === "ADMIN" && session.user.role !== "ADMIN") return null;
 
   return session.user;
+}
+
+/** 요청마다 쿠키 → 세션 행 → 계정 상태를 다시 확인한다. (Route Handler 경로) */
+export async function resolveSession(
+  request: Request,
+  scope: SessionScope,
+): Promise<User | null> {
+  return resolveSessionByToken(readCookie(request, SESSION_COOKIE_NAMES[scope]), scope);
 }
 
 export async function destroySession(
