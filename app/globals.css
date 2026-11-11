@@ -1,25 +1,52 @@
 @import "tailwindcss";
 
-:root {
-  --background: #fffdf8;
-  --foreground: #29231e;
+/*
+ * 레거시 공개 화면(EV-0003, EV-0006, EV-0009)의 색 구성을 재현한다.
+ * - 상단 바·푸터: 짙은 초록
+ * - 강조(개강일·전화번호): 주황
+ * - 페이지 배너: 남색 계열 (레거시는 사진 배경, 신규는 사진 미확보로 단색 그라데이션)
+ * 글꼴은 라이선스를 확인할 수 있는 시스템 글꼴만 쓴다. // ASM-041
+ */
+@theme {
+  --color-ink: #12281b;
+  --color-ink-soft: #1d4430;
+  --color-brand: #15492c;
+  --color-brand-dark: #0d3119;
+  --color-accent: #e07b2c;
+  --color-accent-soft: #f3a862;
+  --color-banner-start: #1f3350;
+  --color-banner-end: #334f72;
+  --color-canvas: #f6f7f8;
+  --color-surface: #ffffff;
+  --color-line: #e2e6e3;
+  --color-muted: #6b7280;
+
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR",
+    "Malgun Gothic", "맑은 고딕", system-ui, sans-serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: Arial, Helvetica, sans-serif;
+* {
+  box-sizing: border-box;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
 }
 
-* { box-sizing: border-box; }
+:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 2px;
+}
 
-.field { width: 100%; border: 1px solid #d6d3d1; border-radius: .5rem; padding: .75rem; font-size: .875rem; background: white; }
-.field:focus { outline: 2px solid #a65532; outline-offset: 1px; }
-.button { border-radius: .5rem; background: #a65532; padding: .8rem 1rem; color: white; font-size: .875rem; font-weight: 700; }
-.button:hover { background: #884224; }
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
