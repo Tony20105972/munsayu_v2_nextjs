@@ -1,3 +1,34 @@
-import { PageHero, Section, pageMetadata } from "@/components/public/page";
-export const metadata = pageMetadata("오시는 길", "문해와 사유 대치·분당 학원 안내", "/sub/Location");
-export default function Location() { return <><PageHero eyebrow="LOCATION" title="문해와 사유를 찾아오세요"/><Section title="캠퍼스"><div className="grid gap-5 md:grid-cols-2">{["대치본원","분당"].map(x=><article key={x} className="rounded-2xl border border-stone-200 p-7"><h2 className="text-xl font-bold">{x}</h2><p className="mt-3 text-sm text-stone-600">상세 주소와 교통 안내는 학원에 문의해 주세요.</p></article>)}</div></Section></> }
+import { LocationPanel } from "@/components/public/location-panel";
+import { PageBanner } from "@/components/ui/page-banner";
+import { Tabs } from "@/components/ui/tabs";
+import { buildPageMetadata, pageTitle } from "@/lib/metadata";
+import { CAMPUSES } from "@/lib/site-config";
+
+/**
+ * PG-003 오시는 길.
+ * 근거: docs/evidence/dom/phase1-location.yml — 배너 문구, 지점 탭, 대치본원 교통 안내.
+ */
+export const metadata = buildPageMetadata({
+  title: pageTitle("오시는 길"),
+  description: "문사유 논술구술학원의 위치를 안내해 드립니다.",
+  path: "/sub/Location",
+});
+
+export default function LocationPage() {
+  return (
+    <>
+      <PageBanner
+        title="오시는 길"
+        description="문사유 논술구술학원의 위치를 안내해 드립니다."
+      />
+      <Tabs
+        label="지점 선택"
+        items={CAMPUSES.map((campus) => ({
+          id: campus.id,
+          label: campus.name,
+          panel: <LocationPanel campusId={campus.id} />,
+        }))}
+      />
+    </>
+  );
+}
