@@ -15,6 +15,7 @@
 /test-results
 /playwright-report
 /legacy-assets-raw/
+/legacy-assets-clean/
 /.playwright-mcp/
 
 # next.js
