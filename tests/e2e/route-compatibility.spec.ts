@@ -46,4 +46,11 @@ test.describe("RT 레거시 URL 호환", () => {
       external?.target ?? "",
     );
   });
+
+  test("AD-012 분석 ID가 없으면 분석 스크립트를 넣지 않는다", async ({ page }) => {
+    // 개발·테스트 환경은 ANALYTICS_PROVIDER_ID 가 비어 있다. (ASM-004)
+    await page.goto("/");
+    await expect(page.locator("script[data-analytics]")).toHaveCount(0);
+    await expect(page.locator('script[src*="googletagmanager"]')).toHaveCount(0);
+  });
 });
