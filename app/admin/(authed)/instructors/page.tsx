@@ -153,6 +153,7 @@ export default async function AdminInstructorsPage() {
                             name={instructor.name}
                             profileCode={instructor.profileCode}
                             bio={instructor.bio}
+                            photoStorageKey={instructor.photoStorageKey}
                           />
                           <InstructorDeleteButton
                             instructorId={instructor.id}

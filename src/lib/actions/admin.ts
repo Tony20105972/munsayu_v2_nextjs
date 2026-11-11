@@ -252,7 +252,12 @@ export async function createEventStatusOptionAction(
 
 function instructorUpsertInput(formData: FormData): Record<string, unknown> {
   const raw = formEntries(formData);
-  return { ...raw, bio: raw.bio ?? null, photoStorageKey: null };
+  return {
+    ...raw,
+    bio: raw.bio ?? null,
+    // 사진은 `public/images/instructors/` 에 커밋된 파일의 키로 고른다. (EV-0012)
+    photoStorageKey: raw.photoStorageKey ?? null,
+  };
 }
 
 export async function createInstructorAction(

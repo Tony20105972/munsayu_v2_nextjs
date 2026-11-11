@@ -1,7 +1,9 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { LOGO_IMAGE } from "@/lib/images";
 import { CONSULT_CENTER_LINE, MAIN_NAV, SITE_NAME } from "@/lib/site-config";
 
 /**
@@ -69,13 +71,18 @@ export function SiteHeader() {
         className="border-b border-line bg-surface"
       >
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4">
-          <Link href="/" className="flex flex-col leading-tight" onClick={closeAll}>
-            <span className="text-xl font-bold tracking-tight text-ink">
-              {SITE_NAME}
-            </span>
-            <span className="text-[10px] tracking-[0.3em] text-muted">
-              읽고, 생각하고, 표현하다
-            </span>
+          <Link href="/" className="flex items-center" onClick={closeAll}>
+            {/* 레거시 헤더 로고 그대로. alt 도 레거시 원문이다. (EV-0012) */}
+            <Image
+              src={LOGO_IMAGE.src}
+              alt={LOGO_IMAGE.alt}
+              width={LOGO_IMAGE.width}
+              height={LOGO_IMAGE.height}
+              priority
+              sizes="200px"
+              className="h-10 w-auto sm:h-11"
+            />
+            <span className="sr-only">{SITE_NAME}</span>
           </Link>
 
           <button

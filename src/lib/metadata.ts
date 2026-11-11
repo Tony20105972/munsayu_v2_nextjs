@@ -10,6 +10,17 @@ type PageMetadataInput = {
 };
 
 /**
+ * 링크 공유용 대표 이미지. `app/opengraph-image.png` 파일 규칙으로 서비스되지만,
+ * 페이지가 `openGraph` 를 직접 정의하면 파일 규칙이 자동으로 붙지 않으므로 여기서 명시한다.
+ */
+const OPEN_GRAPH_IMAGE = {
+  url: "/opengraph-image.png",
+  width: 3001,
+  height: 3001,
+  alt: `${SITE_NAME} 로고`,
+} as const;
+
+/**
  * 모든 유지 경로의 title·description·canonical·OG를 같은 규칙으로 만든다. (BLUEPRINT 8장)
  * 관찰된 title은 docs/legacy/legacy-seo-map.md 값을 그대로 넣고,
  * 미관찰 페이지는 `<페이지 이름> | 문해와 사유(초등독서논술학원)` 형식을 쓴다.
@@ -32,6 +43,7 @@ export function buildPageMetadata({
       title,
       description,
       url,
+      images: [OPEN_GRAPH_IMAGE],
     },
   };
 }

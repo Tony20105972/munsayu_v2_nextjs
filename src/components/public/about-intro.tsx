@@ -1,3 +1,5 @@
+import Image from "next/image";
+import { ABOUT_INTRO_PHOTO } from "@/lib/images";
 import { EXTERNAL_LINKS } from "@/lib/site-config";
 
 /** 모든 문구는 docs/evidence/dom/phase1-about.yml 관찰값이다. (EV-0003) */
@@ -74,6 +76,20 @@ export function AboutIntro() {
         <p className="font-bold text-ink">
           어휘로 중심을 다지고, 독서로 세계를 넓힙니다.
         </p>
+
+        {/*
+          레거시는 이 자리에 Unsplash 직링크 사진(alt="문사유 수업현장")을 썼다.
+          외부 호스트라 파일을 받지 못해 학원 시설 사진으로 대체했다. // ASM-079
+        */}
+        <div className="relative mt-2 aspect-16/9 w-full overflow-hidden rounded-xl bg-canvas">
+          <Image
+            src={ABOUT_INTRO_PHOTO.src}
+            alt={ABOUT_INTRO_PHOTO.alt}
+            fill
+            sizes="(min-width: 768px) 56rem, 100vw"
+            className="object-cover"
+          />
+        </div>
       </Block>
 
       <Block eyebrow="어휘와 독서" heading="단단한 중심에서, 넓은 세계로.">

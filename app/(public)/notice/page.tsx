@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { connection } from "next/server";
 import { Suspense } from "react";
 import { LoadingBlock } from "@/components/ui/loading-block";
 import { PageBanner } from "@/components/ui/page-banner";
@@ -32,6 +33,10 @@ function toPageNumber(raw: string | undefined): number {
 }
 
 async function NoticeTable({ searchParams }: NoticeListPageProps) {
+  // 공지 목록은 `publishedAt <= 지금` 으로 걸러지므로 현재 시각에 의존한다.
+  // 그 값이 빌드 시점에 굳지 않도록 요청 시점 렌더임을 알린다. (Suspense 경계 안)
+  await connection();
+
   const { page: rawPage } = await searchParams;
   const page = toPageNumber(rawPage);
   const list = await listNotices({ page, pageSize: PAGE_SIZE });

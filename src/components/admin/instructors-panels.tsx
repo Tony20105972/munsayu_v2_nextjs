@@ -13,6 +13,7 @@ import {
   AdminConfirmButton,
   AdminInlineForm,
 } from "@/components/admin/forms";
+import { INSTRUCTOR_PHOTO_KEYS } from "@/lib/images";
 import {
   createInstructorAction,
   createTeamAction,
@@ -25,6 +26,15 @@ import {
 /** AD-006 강사 관리 화면의 입력 부분. */
 
 const BIO_HINT = "한 줄에 한 항목씩 적으면 공개 화면에서 목록으로 보입니다.";
+
+/** 커밋돼 있는 강사 사진 파일 목록. 고르지 않으면 학원 로고 자리표시가 들어간다. */
+const PHOTO_OPTIONS: AdminOption[] = INSTRUCTOR_PHOTO_KEYS.map((key) => ({
+  value: key,
+  label: key,
+}));
+
+const PHOTO_HINT =
+  "public/images/instructors/ 에 올려 둔 사진 파일 키입니다. 고르지 않으면 학원 로고 자리표시가 들어갑니다.";
 
 export function InstructorCreateForm() {
   return (
@@ -51,6 +61,14 @@ export function InstructorCreateForm() {
             required
             errors={fieldErrors.profileCode}
           />
+          <AdminSelectField
+            name="photoStorageKey"
+            label="강사 사진"
+            hint={PHOTO_HINT}
+            options={PHOTO_OPTIONS}
+            placeholder="사진 없음(로고 자리표시)"
+            errors={fieldErrors.photoStorageKey}
+          />
           <div className="sm:col-span-2 lg:col-span-3">
             <AdminTextArea
               name="bio"
@@ -70,11 +88,13 @@ export function InstructorEditForm({
   name,
   profileCode,
   bio,
+  photoStorageKey,
 }: {
   instructorId: string;
   name: string;
   profileCode: string;
   bio: string | null;
+  photoStorageKey: string | null;
 }) {
   return (
     <AdminActionForm
@@ -101,6 +121,15 @@ export function InstructorEditForm({
               autoComplete="off"
               required
               errors={fieldErrors.profileCode}
+            />
+            <AdminSelectField
+              name="photoStorageKey"
+              label="강사 사진"
+              hint={PHOTO_HINT}
+              options={PHOTO_OPTIONS}
+              defaultValue={photoStorageKey ?? ""}
+              placeholder="사진 없음(로고 자리표시)"
+              errors={fieldErrors.photoStorageKey}
             />
             <div className="sm:col-span-2 lg:col-span-3">
               <AdminTextArea

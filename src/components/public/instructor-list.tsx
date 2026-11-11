@@ -1,9 +1,11 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { InstructorCardView } from "@/lib/view-models";
 
 /**
  * 강사 소개 목록.
  * 이름·소속·약력은 docs/evidence/dom/phase1-teachers.yml 관찰값이다. (EV-0009)
+ * 사진과 `alt` 는 레거시 원문 그대로다. (EV-0012)
  * 레거시는 사진 위에 마우스를 올리면 `수강 예약하기` 버튼이 나타났는데,
  * 키보드로도 쓸 수 있도록 항상 보이는 링크로 바꾸고 시간표 화면으로 보낸다. // ASM-051
  */
@@ -25,21 +27,32 @@ export function InstructorList({
       {instructors.map((instructor) => (
         <li
           key={instructor.id}
-          className="flex flex-col rounded-xl border border-line bg-surface p-6"
+          className="flex flex-col overflow-hidden rounded-xl border border-line bg-surface"
         >
-          <p className="text-xs font-bold text-accent">{instructor.affiliation}</p>
-          <h3 className="mt-2 text-lg font-bold text-ink">{instructor.name}</h3>
-          <ul className="mt-4 grow space-y-1.5 text-sm leading-relaxed text-muted">
-            {instructor.careers.map((career) => (
-              <li key={career}>• {career}</li>
-            ))}
-          </ul>
-          <Link
-            href="/sub/schedule.n"
-            className="mt-5 inline-block rounded-md border border-line px-4 py-2 text-center text-sm font-bold text-brand hover:bg-canvas"
-          >
-            수강 예약하기
-          </Link>
+          <div className="relative aspect-3/4 w-full bg-canvas">
+            <Image
+              src={instructor.photo.src}
+              alt={instructor.photo.alt}
+              fill
+              sizes="(min-width: 1024px) 22rem, (min-width: 768px) 45vw, 100vw"
+              className="object-cover"
+            />
+          </div>
+          <div className="flex flex-1 flex-col p-6">
+            <p className="text-xs font-bold text-accent">{instructor.affiliation}</p>
+            <h3 className="mt-2 text-lg font-bold text-ink">{instructor.name}</h3>
+            <ul className="mt-4 grow space-y-1.5 text-sm leading-relaxed text-muted">
+              {instructor.careers.map((career) => (
+                <li key={career}>• {career}</li>
+              ))}
+            </ul>
+            <Link
+              href="/sub/schedule.n"
+              className="mt-5 inline-block rounded-md border border-line px-4 py-2 text-center text-sm font-bold text-brand hover:bg-canvas"
+            >
+              수강 예약하기
+            </Link>
+          </div>
         </li>
       ))}
     </ul>

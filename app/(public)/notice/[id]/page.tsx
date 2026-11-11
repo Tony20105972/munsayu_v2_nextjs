@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { connection } from "next/server";
 import { PageBanner } from "@/components/ui/page-banner";
 import { buildPageMetadata, pageTitle } from "@/lib/metadata";
 import {
@@ -29,6 +30,10 @@ type NoticeDetailPageProps = {
  * 게시되지 않은 글과 없는 글은 모두 404 다. (ASM-015)
  */
 async function findNotice(id: string): Promise<NoticeDetail | null> {
+  // 공지 조회는 `publishedAt <= 지금` 을 보므로 현재 시각에 의존한다.
+  // `cacheComponents` 환경에서 그 값을 미리 굳히지 않도록 요청 시점 렌더임을 알린다.
+  await connection();
+
   try {
     return await getNotice(id);
   } catch (error) {

@@ -1,12 +1,26 @@
 import Link from "next/link";
+import { HOME_HERO_BACKGROUNDS } from "@/lib/images";
 
 /**
  * 홈 히어로. 문구·버튼 주소는 docs/evidence/dom/phase1-home.yml 관찰값이다.
+ * 배경 사진 3장은 레거시와 같이 CSS background 로 넣고 천천히 바꿔 보여 준다. (EV-0012)
  * 레거시는 제목을 h2로 썼지만 홈에 h1이 없어 접근성 기준에 맞춰 h1으로 올렸다. // ASM-046
  */
 export function HomeHero() {
   return (
-    <section className="bg-linear-to-br from-banner-start to-banner-end text-white">
+    <section className="relative isolate overflow-hidden bg-banner-start text-white">
+      {HOME_HERO_BACKGROUNDS.map((background) => (
+        <div
+          key={background}
+          aria-hidden="true"
+          className="home-hero-slide absolute inset-0 -z-20 bg-cover bg-center"
+          style={{ backgroundImage: `url(${background})` }}
+        />
+      ))}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 -z-10 bg-linear-to-br from-banner-start/90 to-banner-end/75"
+      />
       <div className="mx-auto max-w-6xl px-4 py-20 sm:py-28">
         <p className="text-xs font-bold tracking-[0.35em] text-accent-soft">
           ELEMENTARY LITERACY PROGRAM

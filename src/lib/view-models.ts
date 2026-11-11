@@ -7,6 +7,8 @@
  *   같은 문구가 나와야 시각 회귀 테스트가 흔들리지 않는다.
  */
 
+import { resolveInstructorPhoto, type ImageAsset } from "@/lib/images";
+
 const SEOUL = "Asia/Seoul";
 
 type DateParts = {
@@ -365,6 +367,7 @@ type InstructorLike = {
   id: string;
   name: string;
   bio: string | null;
+  photoStorageKey: string | null;
   teams: { teamId: string; teamName: string; displayOrder: number }[];
 };
 
@@ -374,6 +377,8 @@ export type InstructorCardView = {
   /** 카드 머리글. 소속 팀 이름을 이어 붙인다. */
   affiliation: string;
   careers: string[];
+  /** 레거시 강사 사진. 지정된 사진이 없으면 로고 자리표시를 쓴다. (EV-0012) */
+  photo: ImageAsset;
 };
 
 /** 소속 팀이 없는 강사의 머리글. */
@@ -396,6 +401,7 @@ export function toInstructorCardView(instructor: InstructorLike): InstructorCard
       .split("\n")
       .map((line) => line.trim())
       .filter((line) => line.length > 0),
+    photo: resolveInstructorPhoto(instructor),
   };
 }
 

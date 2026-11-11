@@ -42,6 +42,43 @@ body {
   outline-offset: 2px;
 }
 
+/*
+ * 홈 상단 배경 슬라이드. 레거시도 CSS background 로 사진 3장을 돌렸다. (EV-0012)
+ * 세 장을 겹쳐 두고 투명도만 바꾼다. 움직임을 줄이도록 설정한 환경에서는
+ * 아래 `prefers-reduced-motion` 규칙이 애니메이션을 사실상 멈춰 첫 장만 보인다.
+ */
+.home-hero-slide {
+  animation: home-hero-fade 18s linear infinite;
+  opacity: 0;
+}
+
+.home-hero-slide:nth-child(1) {
+  animation-delay: 0s;
+  opacity: 1;
+}
+
+.home-hero-slide:nth-child(2) {
+  animation-delay: 6s;
+}
+
+.home-hero-slide:nth-child(3) {
+  animation-delay: 12s;
+}
+
+@keyframes home-hero-fade {
+  0%,
+  28% {
+    opacity: 1;
+  }
+  33%,
+  95% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
