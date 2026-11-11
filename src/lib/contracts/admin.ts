@@ -72,6 +72,12 @@ export const instructorUpsertSchema = z.object({
 export type InstructorUpsertInput = z.infer<typeof instructorUpsertSchema>;
 
 /** 한 강사가 여러 팀에 소속될 수 있고 팀별 노출 순서를 둔다. (ASM-003) */
+/** 팀 자체의 생성 입력. 팀은 이름만 갖는다. */
+export const instructorTeamCreateSchema = z.object({
+  name: z.string().trim().min(2).max(40),
+});
+export type InstructorTeamCreateInput = z.infer<typeof instructorTeamCreateSchema>;
+
 export const instructorTeamMembershipSchema = z.object({
   instructorId: cuidLikeIdSchema,
   teamId: cuidLikeIdSchema,
@@ -80,6 +86,25 @@ export const instructorTeamMembershipSchema = z.object({
 export type InstructorTeamMembershipInput = z.infer<
   typeof instructorTeamMembershipSchema
 >;
+
+/** 팀 소속 해제는 복합 키로 지정한다. */
+export const instructorTeamMembershipDeleteSchema = z.object({
+  instructorId: cuidLikeIdSchema,
+  teamId: cuidLikeIdSchema,
+});
+export type InstructorTeamMembershipDeleteInput = z.infer<
+  typeof instructorTeamMembershipDeleteSchema
+>;
+
+/** 관리자 강좌 목록 필터. `intakeOpen`은 쿼리 문자열이라 문자열에서 변환한다. */
+export const adminCourseListSchema = paginationSchema.extend({
+  campusId: cuidLikeIdSchema.optional(),
+  intakeOpen: z
+    .enum(["true", "false"])
+    .transform((value) => value === "true")
+    .optional(),
+});
+export type AdminCourseListInput = z.infer<typeof adminCourseListSchema>;
 
 export const memberSearchSchema = paginationSchema.extend({
   /** 아이디 또는 이름 일부. 로그에는 남기지 않는다. */
@@ -128,6 +153,13 @@ export const applicationExportSchema = applicationFilterSchema.omit({
   pageSize: true,
 });
 export type ApplicationExportInput = z.infer<typeof applicationExportSchema>;
+
+/** 마스킹 상태의 단건 상세 조회. 원문 조회(reveal)와 달리 감사기록을 남기지 않는다. */
+export const applicationDetailSchema = z.object({
+  kind: z.enum(["course", "event"]),
+  applicationId: cuidLikeIdSchema,
+});
+export type ApplicationDetailInput = z.infer<typeof applicationDetailSchema>;
 
 /** 원문(마스킹 해제) 조회도 감사기록 대상이다. (AD-013) */
 export const applicationRevealSchema = z.object({

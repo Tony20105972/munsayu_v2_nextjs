@@ -9,6 +9,15 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
+      // `server-only`은 Next 번들러 전용 조건부 모듈이라 Vitest(node)에서 그대로 import하면
+      // 즉시 예외를 던진다. 서버 코드가 CLAUDE.md 7장대로 `import "server-only"`를 유지할 수 있게
+      // 테스트에서는 Next가 번들러에 쓰는 빈 모듈로 바꿔 준다.
+      "server-only": fileURLToPath(
+        new URL(
+          "./node_modules/next/dist/compiled/server-only/empty.js",
+          import.meta.url,
+        ),
+      ),
     },
   },
   test: {
