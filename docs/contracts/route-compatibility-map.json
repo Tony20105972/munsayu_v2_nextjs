@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "source": "docs/legacy/legacy-route-map.json; EV-0003~0011",
+  "rules": [
+    {"legacy":"/","target":"/","action":"maintain","reason":"home canonical path","evidence":["EV-0003"]},
+    {"legacy":"/sub/about","target":"/sub/about","action":"maintain","reason":"public indexed route","evidence":["EV-0003"]},
+    {"legacy":"/sub/Location","target":"/sub/Location","action":"maintain","reason":"public indexed route","evidence":["EV-0003"]},
+    {"legacy":"/sub/Facility","target":"/sub/Facility","action":"maintain","reason":"public indexed route","evidence":["EV-0003"]},
+    {"legacy":"/sub/abouttch1","target":"/sub/abouttch1","action":"maintain","reason":"public instructor route","evidence":["EV-0009"]},
+    {"legacy":"/sub/abouttch2","target":"/sub/abouttch2","action":"maintain","reason":"observed public route","evidence":["EV-0003"]},
+    {"legacy":"/sub/abouttch3","target":"/sub/abouttch3","action":"maintain","reason":"observed public route","evidence":["EV-0003"]},
+    {"legacy":"/sub/schedule.n","target":"/sub/schedule.n","action":"maintain","reason":"course reservation links may be shared","evidence":["EV-0006","EV-0010"]},
+    {"legacy":"/sub/schedule.g","target":"/sub/schedule.g","action":"maintain","reason":"public timetable","evidence":["EV-0009"]},
+    {"legacy":"/sub/Presentation","target":"/sub/Presentation","action":"maintain","reason":"event entry page","evidence":["EV-0005"]},
+    {"legacy":"/sub/Check","target":"/sub/Check","action":"maintain","reason":"reservation lookup/cancel entry","evidence":["EV-0008"]},
+    {"legacy":"/bbs/board.php?bo_table=notice","target":"/notice","action":"308","reason":"replace query-string board route with canonical notice list","evidence":["EV-0007"]},
+    {"legacy":"/bbs/board.php?bo_table=notice&wr_id={id}","target":"/notice/{id}","action":"308","reason":"preserve observed detail URL pattern","evidence":["EV-0007","EV-0011"]},
+    {"legacy":"/bbs/login.php","target":"/login","action":"308","reason":"public member login retained under application route","evidence":["EV-0007"]},
+    {"legacy":"/bbs/register.php","target":"/register","action":"308","reason":"public registration retained","evidence":["EV-0007"]},
+    {"legacy":"/bbs/password_lost.php","target":"/account/recovery","action":"308","reason":"observed recovery link","evidence":["EV-0007"]},
+    {"legacy":"https://forms.gle/XUjFY9jVStQDKskg8","target":"https://forms.gle/XUjFY9jVStQDKskg8","action":"external-maintain","reason":"AD-009 remains an external Google Forms link","evidence":["EV-0006","EV-0007"]},
+    {"legacy":"/uAdmin/**","target":null,"action":"410","reason":"robots-disallowed legacy administration must not be exposed as /admin","evidence":["EV-0002"]},
+    {"legacy":"/adm/**","target":null,"action":"410","reason":"legacy administrator route is not mapped to new /admin","evidence":["policy"]}
+  ],
+  "implementation": "Same paths are App Router pages. 308 rules preserve query parameters only where target needs id. 410 rules intentionally do not disclose /admin."
+}

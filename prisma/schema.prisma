@@ -1,0 +1,207 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+}
+enum UserRole {
+  MEMBER
+  ADMIN
+}
+enum AccountStatus {
+  ACTIVE
+  BLOCKED
+  WITHDRAWN
+}
+enum IntakeStatus {
+  OPEN
+  CLOSED
+}
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+enum ApplicationStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+enum AuditAction {
+  PII_VIEW
+  CSV_EXPORT
+  PII_PURGE
+  ADMIN_ACCOUNT_CREATE
+  ADMIN_ACCOUNT_DELETE
+}
+model User {
+  id String @id @default(cuid())
+  loginId String @unique
+  passwordHash String
+  /// PII
+  name String
+  /// PII
+  email String @unique
+  /// PII
+  phone String
+  role UserRole @default(MEMBER)
+  status AccountStatus @default(ACTIVE)
+  sessions AuthSession[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+model AuthSession {
+  id String @id @default(cuid())
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+model Campus {
+  id String @id @default(cuid())
+  name String @unique
+  courses Course[]
+  events Event[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+model Course {
+  id String @id @default(cuid())
+  campusId String
+  campus Campus @relation(fields: [campusId], references: [id])
+  title String
+  sectionTitle String?
+  gradeTitle String?
+  scheduleText String?
+  startDate DateTime?
+  displayOrder Int @default(0)
+  intakeStatus IntakeStatus @default(OPEN)
+  applications CourseApplication[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+model CourseApplication {
+  id String @id @default(cuid())
+  courseId String
+  course Course @relation(fields: [courseId], references: [id])
+  /// PII
+  studentName String
+  /// PII
+  guardianPhone String
+  /// PII
+  schoolName String
+  department String
+  grade String
+  privacyConsentAt DateTime
+  /// PII 파기 대상 시각; 등록 안내 완료 시 설정한다. // ASM-009
+  purgeEligibleAt DateTime?
+  retentionPolicyVersion String @default("legacy-ev-0006-v1")
+  status ApplicationStatus @default(PENDING)
+  idempotencyKey String @unique
+  cancelledAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([courseId, guardianPhone, status])
+}
+model EventStatusOption {
+  id String @id @default(cuid())
+  label String @unique
+  sortOrder Int @default(0)
+  isClosed Boolean @default(false)
+  events Event[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+model Event {
+  id String @id @default(cuid())
+  campusId String?
+  campus Campus? @relation(fields: [campusId], references: [id])
+  managementCode String @unique
+  title String
+  startsAt DateTime
+  venue String?
+  speaker String?
+  statusOptionId String
+  statusOption EventStatusOption @relation(fields: [statusOptionId], references: [id])
+  reservations EventReservation[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+model EventReservation {
+  id String @id @default(cuid())
+  eventId String
+  event Event @relation(fields: [eventId], references: [id])
+  /// PII
+  name String
+  /// PII
+  phone String
+  grade String
+  attendeeCount Int
+  privacyConsentAt DateTime
+  /// PII 파기 대상 시각; 설명회 종료 및 안내 완료 시 설정한다. // ASM-009
+  purgeEligibleAt DateTime?
+  retentionPolicyVersion String @default("legacy-ev-0006-v1")
+  status ReservationStatus @default(PENDING)
+  idempotencyKey String @unique
+  cancelledAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([eventId, phone, status])
+}
+model Instructor {
+  id String @id @default(cuid())
+  name String
+  profileCode String @unique
+  photoStorageKey String?
+  bio String?
+  memberships InstructorTeamMembership[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+model InstructorTeam {
+  id String @id @default(cuid())
+  name String @unique
+  memberships InstructorTeamMembership[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+model InstructorTeamMembership {
+  instructorId String
+  teamId String
+  instructor Instructor @relation(fields: [instructorId], references: [id], onDelete: Cascade)
+  team InstructorTeam @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  displayOrder Int @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@id([instructorId, teamId])
+}
+model PrivacyRetentionSetting {
+  id Int @id @default(1)
+  courseRetentionPolicy String @default("종강 및 정규 등록 안내 완료 시점 즉시 파기")
+  eventRetentionPolicy String @default("종강 및 정규 등록 안내 완료 시점 즉시 파기")
+  automaticPurgeEnabled Boolean @default(false)
+  updatedByUserId String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+model AuditLog {
+  id String @id @default(cuid())
+  /// PII 가능 식별자
+  actorUserId String?
+  action AuditAction
+  resourceType String
+  resourceId String?
+  /// PII 금지: 건수·필터 이름만 저장하는 비식별 요약
+  filterSummary String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+model AppSetting {
+  key String @id
+  value String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
