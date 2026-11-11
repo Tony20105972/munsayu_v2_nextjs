@@ -1,4 +1,4 @@
-import "@/server/server-only";
+import "server-only";
 import { createHash } from "node:crypto";
 import type { PrivacyRetentionSetting, Prisma } from "@prisma/client";
 import {
@@ -6,7 +6,7 @@ import {
   type PrivacyRetentionSettingInput,
   type PurgeEligibilityInput,
 } from "@/lib/contracts";
-import { db } from "@/server/db";
+import { db, isUniqueViolation } from "@/server/db";
 import { summarizeFilter, writeAuditLog } from "@/server/services/audit";
 
 /** 파기한 개인정보 칸에 넣는 비식별 값. 행 자체는 남긴다. (BLUEPRINT 6장) */
@@ -26,14 +26,21 @@ export async function getRetentionSetting(
   });
   if (existing) return existing;
 
-  return client.privacyRetentionSetting.create({
-    data: {
-      id: 1,
-      courseRetentionPolicy: COURSE_PRIVACY_CONSENT.retention,
-      eventRetentionPolicy: COURSE_PRIVACY_CONSENT.retention,
-      automaticPurgeEnabled: false,
-    },
-  });
+  try {
+    return await client.privacyRetentionSetting.create({
+      data: {
+        id: 1,
+        courseRetentionPolicy: COURSE_PRIVACY_CONSENT.retention,
+        eventRetentionPolicy: COURSE_PRIVACY_CONSENT.retention,
+        automaticPurgeEnabled: false,
+      },
+    });
+  } catch (error) {
+    // 두 신청이 동시에 들어와 기본 행을 함께 만들려 하면 한쪽이 유일 제약에 걸린다.
+    // 이때는 먼저 만들어진 행을 읽어 쓴다.
+    if (!isUniqueViolation(error)) throw error;
+    return client.privacyRetentionSetting.findUniqueOrThrow({ where: { id: 1 } });
+  }
 }
 
 /**

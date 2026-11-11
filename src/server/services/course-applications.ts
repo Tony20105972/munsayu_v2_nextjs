@@ -1,12 +1,14 @@
-import "@/server/server-only";
+import "server-only";
 import type { ApplicationCreatedResult, CourseApplicationInput } from "@/lib/contracts";
-import { db } from "@/server/db";
+import { db, isUniqueViolation } from "@/server/db";
 import { intakeClosed, validationFailed } from "@/server/errors";
 import { notifyQuietly } from "@/server/adapters/notify";
 import {
   getRetentionSetting,
   resolveRetentionPolicyVersion,
 } from "@/server/services/privacy";
+
+type InsertOutcome = { id: string; createdAt: Date; replayed: boolean };
 
 /**
  * FM-001 강좌 수강 신청.
@@ -21,43 +23,61 @@ export async function createCourseApplication(
   const setting = await getRetentionSetting();
   const retentionPolicyVersion = resolveRetentionPolicyVersion("course", setting);
 
-  const result = await db.$transaction(async (tx) => {
-    const existing = await tx.courseApplication.findUnique({
+  const insertOnce = (): Promise<InsertOutcome> =>
+    db.$transaction(async (tx) => {
+      const existing = await tx.courseApplication.findUnique({
+        where: { idempotencyKey: input.idempotencyKey },
+        select: { id: true, createdAt: true },
+      });
+      if (existing) {
+        return { id: existing.id, createdAt: existing.createdAt, replayed: true };
+      }
+
+      const course = await tx.course.findUnique({
+        where: { id: input.courseId },
+        select: { id: true, intakeStatus: true },
+      });
+      if (!course) {
+        throw validationFailed({ courseId: ["강좌를 찾을 수 없습니다."] });
+      }
+      if (course.intakeStatus !== "OPEN") {
+        throw intakeClosed();
+      }
+
+      const created = await tx.courseApplication.create({
+        data: {
+          courseId: input.courseId,
+          studentName: input.studentName,
+          guardianPhone: input.guardianPhone,
+          schoolName: input.schoolName,
+          department: input.department,
+          grade: input.grade,
+          privacyConsentAt: new Date(),
+          retentionPolicyVersion,
+          idempotencyKey: input.idempotencyKey,
+        },
+        select: { id: true, createdAt: true },
+      });
+
+      return { id: created.id, createdAt: created.createdAt, replayed: false };
+    });
+
+  let result: InsertOutcome;
+  try {
+    result = await insertOnce();
+  } catch (error) {
+    // 같은 key가 동시에 들어오면 한쪽이 유일 제약에 걸린다.
+    // 이때는 오류를 내보내지 않고 먼저 저장된 건을 재전송 결과로 돌려준다.
+    if (!isUniqueViolation(error)) throw error;
+
+    const saved = await db.courseApplication.findUnique({
       where: { idempotencyKey: input.idempotencyKey },
       select: { id: true, createdAt: true },
     });
-    if (existing) {
-      return { id: existing.id, createdAt: existing.createdAt, replayed: true };
-    }
+    if (!saved) throw error;
 
-    const course = await tx.course.findUnique({
-      where: { id: input.courseId },
-      select: { id: true, intakeStatus: true },
-    });
-    if (!course) {
-      throw validationFailed({ courseId: ["강좌를 찾을 수 없습니다."] });
-    }
-    if (course.intakeStatus !== "OPEN") {
-      throw intakeClosed();
-    }
-
-    const created = await tx.courseApplication.create({
-      data: {
-        courseId: input.courseId,
-        studentName: input.studentName,
-        guardianPhone: input.guardianPhone,
-        schoolName: input.schoolName,
-        department: input.department,
-        grade: input.grade,
-        privacyConsentAt: new Date(),
-        retentionPolicyVersion,
-        idempotencyKey: input.idempotencyKey,
-      },
-      select: { id: true, createdAt: true },
-    });
-
-    return { id: created.id, createdAt: created.createdAt, replayed: false };
-  });
+    result = { id: saved.id, createdAt: saved.createdAt, replayed: true };
+  }
 
   if (!result.replayed) {
     // 알림 실패는 저장을 되돌리지 않는다. 개인정보는 넣지 않는다. (BLUEPRINT 5장)

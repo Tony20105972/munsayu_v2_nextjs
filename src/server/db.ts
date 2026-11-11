@@ -1,5 +1,5 @@
-import "@/server/server-only";
-import { PrismaClient } from "@prisma/client";
+import "server-only";
+import { Prisma, PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 
 /**
@@ -15,4 +15,14 @@ export const db = globalForPrisma.prisma ?? new PrismaClient({ adapter });
 
 if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = db;
+}
+
+/**
+ * 유일 제약 위반(P2002) 여부. 같은 idempotency key가 동시에 들어와 경합할 때
+ * 두 번째 요청을 500이 아니라 재전송으로 처리하기 위해 쓴다.
+ */
+export function isUniqueViolation(error: unknown): boolean {
+  return (
+    error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002"
+  );
 }
