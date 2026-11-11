@@ -13,10 +13,7 @@ import { errorElementId, toFieldErrors, type FieldErrors } from "@/lib/form-erro
 
 type UpdateProfileFormProps = {
   defaultName: string;
-  /**
-   * 현재 이메일·휴대전화번호를 읽는 공개 경로가 없어 지금은 비워 둔다.
-   * BE 가 `GET /api/account/profile` 을 만들면 값만 넘기면 된다. // ASM-074
-   */
+  /** 서버 컴포넌트가 `getMemberProfile()` 로 읽어 넘긴 현재 값. (ASM-074 해소) */
   defaultEmail?: string;
   defaultPhone?: string;
 };
@@ -92,7 +89,6 @@ export function UpdateProfileForm({
         name="email"
         label="이메일"
         type="email"
-        hint="저장할 때 세 항목을 모두 함께 반영하므로 현재 이메일도 다시 입력해 주세요."
         autoComplete="email"
         defaultValue={defaultEmail}
         required

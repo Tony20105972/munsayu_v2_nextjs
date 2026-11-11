@@ -8,6 +8,7 @@ import {
 import { PageBanner } from "@/components/ui/page-banner";
 import { buildPageMetadata, pageTitle } from "@/lib/metadata";
 import { getMemberUserFromCookies } from "@/server/auth/server-component-session";
+import { getMemberProfile } from "@/server/services/accounts";
 
 /**
  * 로그인 상태를 요청마다 서버에서 확인해 비로그인은 바로 로그인 화면으로 보내야 하므로
@@ -32,6 +33,9 @@ export default async function AccountProfilePage() {
     redirect("/login");
   }
 
+  // 수정 폼은 세 항목을 함께 저장하므로 현재 값을 미리 채워 준다. (ASM-074 해소)
+  const profile = await getMemberProfile(member.id);
+
   return (
     <>
       <PageBanner
@@ -49,7 +53,11 @@ export default async function AccountProfilePage() {
           </div>
 
           <div className="mt-6 grid gap-6 md:grid-cols-2">
-            <UpdateProfileForm defaultName={member.name} />
+            <UpdateProfileForm
+              defaultName={profile?.name ?? member.name}
+              defaultEmail={profile?.email}
+              defaultPhone={profile?.phone}
+            />
             <ChangePasswordForm />
           </div>
 

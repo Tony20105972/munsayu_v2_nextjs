@@ -114,7 +114,8 @@ export async function requestPasswordReset(
     },
   });
 
-  const link = `${appBaseUrl()}/account/recovery/reset?token=${token}`;
+  // 실제 재설정 화면 경로다. 화면 경로와 다르면 메일 링크가 404 가 된다. (C-3 통합에서 확인)
+  const link = `${appBaseUrl()}/account/password-reset?token=${token}`;
   await getMailAdapter().send({
     to: user.email,
     subject: "[문사유] 비밀번호 재설정 안내",
@@ -147,6 +148,19 @@ export async function confirmPasswordReset(input: ResetPasswordInput): Promise<v
     });
     await tx.user.update({ where: { id: record.userId }, data: { passwordHash } });
     await invalidateUserSessions(record.userId, tx);
+  });
+}
+
+/**
+ * FM-003 회원 정보 수정 화면이 현재 값을 미리 채우기 위해 쓴다.
+ * 비밀번호 해시 같은 값은 돌려주지 않는다.
+ */
+export async function getMemberProfile(
+  userId: string,
+): Promise<{ name: string; email: string; phone: string } | null> {
+  return db.user.findUnique({
+    where: { id: userId },
+    select: { name: true, email: true, phone: true },
   });
 }
 

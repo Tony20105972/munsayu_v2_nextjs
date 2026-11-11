@@ -100,12 +100,14 @@ export function RegisterFlow() {
   if (done) {
     return (
       <div className="space-y-5 rounded-xl border border-line bg-surface p-6">
-        <StatusMessage tone="success">회원가입이 완료되었습니다.</StatusMessage>
+        <StatusMessage tone="success">
+          회원가입이 완료되었습니다. 바로 로그인된 상태입니다.
+        </StatusMessage>
         <Link
-          href="/login"
+          href="/account/profile"
           className="inline-block rounded-md bg-brand px-5 py-3 text-sm font-bold text-white hover:bg-brand-dark"
         >
-          로그인하러 가기
+          내 정보 보기
         </Link>
       </div>
     );

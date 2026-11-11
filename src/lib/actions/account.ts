@@ -45,14 +45,23 @@ import {
 const NEUTRAL_ACCOUNT_MESSAGE =
   "입력하신 정보로 확인할 수 있는 계정이 있으면 안내 메일을 보냈습니다. 메일함을 확인해 주세요.";
 
-export async function registerAction(input: unknown): Promise<ActionResult> {
+/**
+ * PG-014 회원가입. 가입과 동시에 회원 세션을 발급한다.
+ * `POST /api/auth/register` 와 같은 동작이어야 한다(openapi: 201 가입 및 세션 생성).
+ */
+export async function registerAction(
+  input: unknown,
+): Promise<ActionResult<SessionUser>> {
   try {
     await enforcePublicRateLimit("action-register");
     const parsed = parseInput(registerSchema, input);
     if (!parsed.ok) return parsed.failure;
 
-    await registerMember(parsed.value);
-    return success();
+    const user = await registerMember(parsed.value);
+    const session = await issueSession(user.id, "MEMBER", false);
+    await writeSessionCookie("MEMBER", session.token, session.cookieMaxAgeSeconds);
+
+    return success(toSessionUser(user));
   } catch (error) {
     return toFailure(error);
   }
