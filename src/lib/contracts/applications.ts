@@ -45,6 +45,21 @@ export const COURSE_PRIVACY_CONSENT = {
   policyVersion: "legacy-ev-0006-v1",
 } as const;
 
+/**
+ * 설명회 동의 안내 문구. 레거시 설명회 폼은 관찰하지 못했고(접수 가능한 일정 없음, EV-0005)
+ * ASM-009에 따라 강좌 문구를 바탕으로 설명회에 맞게 목적·수집항목·보유기간만 바꿨다. // ASM-052
+ * 보유기간 표시는 `PrivacyRetentionSetting`의 설정값과 같은 값을 쓴다. (BZ-002)
+ */
+export const EVENT_PRIVACY_CONSENT = {
+  heading: COURSE_PRIVACY_CONSENT.heading,
+  purpose: "설명회 좌석 배정 관리 및 예약 확정 안내",
+  collectedItems: "이름, 휴대폰 번호, 학생 학년, 참석 인원",
+  retention: "해당 설명회 종료 및 안내 완료 시점 즉시 파기",
+  checkboxLabel: COURSE_PRIVACY_CONSENT.checkboxLabel,
+  submitLabel: "설명회 예약 신청서 제출하기",
+  policyVersion: COURSE_PRIVACY_CONSENT.policyVersion,
+} as const;
+
 export const courseApplicationSchema = z.object({
   courseId: cuidLikeIdSchema,
   /** 레거시 `rl_name` */
@@ -67,7 +82,13 @@ export const eventReservationSchema = z.object({
   name: personNameSchema,
   phone: phoneSchema,
   grade: elementaryGradeSchema,
-  attendeeCount: z.coerce.number().int().min(1).max(EVENT_ATTENDEE_MAX),
+  attendeeCount: z.coerce
+    .number()
+    .int()
+    .min(1, { message: "참석 인원은 1명 이상이어야 합니다." })
+    .max(EVENT_ATTENDEE_MAX, {
+      message: `참석 인원은 최대 ${EVENT_ATTENDEE_MAX}명까지 신청할 수 있습니다.`,
+    }),
   privacyConsent: requiredConsentSchema,
   idempotencyKey: idempotencyKeySchema,
 });

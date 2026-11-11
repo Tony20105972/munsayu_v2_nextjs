@@ -71,13 +71,13 @@ export const instructorUpsertSchema = z.object({
 });
 export type InstructorUpsertInput = z.infer<typeof instructorUpsertSchema>;
 
-/** 한 강사가 여러 팀에 소속될 수 있고 팀별 노출 순서를 둔다. (ASM-003) */
 /** 팀 자체의 생성 입력. 팀은 이름만 갖는다. */
 export const instructorTeamCreateSchema = z.object({
   name: z.string().trim().min(2).max(40),
 });
 export type InstructorTeamCreateInput = z.infer<typeof instructorTeamCreateSchema>;
 
+/** 한 강사가 여러 팀에 소속될 수 있고 팀별 노출 순서를 둔다. (ASM-003) */
 export const instructorTeamMembershipSchema = z.object({
   instructorId: cuidLikeIdSchema,
   teamId: cuidLikeIdSchema,
