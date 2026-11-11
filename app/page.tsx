@@ -1,15 +1,4 @@
-import { siteName } from "@/lib/site";
-
-export default function Home() {
-  return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-50 p-8 font-sans">
-      <section className="max-w-xl space-y-3 text-center">
-        <p className="text-sm font-medium tracking-[0.2em] text-slate-500">
-          HARNESS READY
-        </p>
-        <h1 className="text-4xl font-semibold text-slate-900">{siteName}</h1>
-        <p className="text-slate-600">Phase 0 개발·검증 하네스</p>
-      </section>
-    </main>
-  );
-}
+import Link from "next/link";
+import { ActionLink, Section, pageMetadata } from "@/components/public/page";
+export const metadata = pageMetadata("문해와 사유(초등독서논술학원)", "읽고, 생각하고, 표현하는 힘을 기르는 초등 독서논술학원", "/");
+export default function Home() { return <><section className="bg-[#29231e] px-5 py-24 text-[#fffdf8] md:py-36"><div className="mx-auto max-w-6xl"><p className="text-sm tracking-[.25em] text-[#e4bca5]">LITERACY & THOUGHT</p><h1 className="mt-6 max-w-4xl text-5xl font-bold tracking-[-.1em] md:text-7xl">읽고, 생각하고,<br/>자기 언어로 말합니다.</h1><p className="mt-7 max-w-xl text-stone-300">문해와 사유는 아이가 텍스트를 깊게 이해하고 스스로 사유하는 힘을 기르는 초등 독서논술학원입니다.</p><div className="mt-9 flex gap-3"><ActionLink href="/sub/schedule.n">시간표 보기</ActionLink><Link href="/sub/Presentation" className="rounded-full border border-stone-500 px-5 py-3 text-sm font-bold">설명회 안내</Link></div></div></section><Section title="문해와 사유의 수업"><div className="grid gap-5 md:grid-cols-3">{[["읽기", "텍스트 속 정보와 맥락을 정확히 이해합니다."],["사유", "질문하고 근거를 찾아 자신의 생각을 만듭니다."],["표현", "생각을 말과 글로 또렷하게 전합니다."]].map(([t,d])=><article key={t} className="rounded-2xl bg-[#ede4d5] p-7"><h2 className="text-xl font-bold">{t}</h2><p className="mt-3 text-sm text-stone-600">{d}</p></article>)}</div></Section></> }

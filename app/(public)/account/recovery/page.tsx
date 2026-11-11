@@ -1,0 +1,1 @@
+import { AuthForm } from "@/components/forms/auth-forms"; import { pageMetadata } from "@/components/public/page"; export const metadata=pageMetadata("계정 찾기", "문해와 사유 아이디와 비밀번호 찾기", "/account/recovery"); export default function Page(){return <div className="px-5 py-16"><AuthForm kind="recovery"/></div>}

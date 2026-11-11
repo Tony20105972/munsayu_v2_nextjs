@@ -1,30 +1,21 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { Geist, Geist_Mono } from "next/font/google";
+import { SiteShell } from "@/components/layout/site-shell";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = {
-  title: "Munsayu V2",
-  description: "Munsayu V2 migration harness",
+  metadataBase: new URL("https://munsayu.com"),
+  title: { default: "문해와 사유(초등독서논술학원)", template: "%s | 문해와 사유" },
+  description: "문해와 사유 초등 독서논술학원",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
       lang="ko"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className="h-full antialiased"
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full"><SiteShell>{children}</SiteShell></body>
     </html>
   );
 }

@@ -1,0 +1,1 @@
+import { AuthForm } from "@/components/forms/auth-forms"; import { pageMetadata } from "@/components/public/page"; export const metadata=pageMetadata("회원가입약관", "문해와 사유 회원가입", "/register"); export default function Page(){return <div className="px-5 py-16"><AuthForm kind="register"/></div>}

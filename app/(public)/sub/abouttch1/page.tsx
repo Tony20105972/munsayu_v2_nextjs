@@ -1,0 +1,4 @@
+import { PageHero, Section, pageMetadata } from "@/components/public/page";
+const instructors = [{ name: "김윤환", role: "원장", bio: "문해와 사유 대치/분당학원 원장" }, { name: "김민주", role: "강사", bio: "문해와 사유 강사" }, { name: "김보민", role: "강사", bio: "문해와 사유 강사" }];
+export const metadata = pageMetadata("강사진", "문해와 사유 강사진을 소개합니다.", "/sub/abouttch1");
+export default function Teachers() { return <><PageHero eyebrow="TEACHERS" title="함께 읽고 생각하는 선생님들"/><Section title="강사진"><div className="grid gap-5 md:grid-cols-3">{instructors.map(t=><article key={t.name} className="rounded-2xl border border-stone-200 p-6"><div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-[#ede4d5] text-xl font-bold">{t.name.slice(0,1)}</div><h2 className="font-bold">{t.name} <span className="text-sm font-normal text-stone-500">{t.role}</span></h2><p className="mt-2 text-sm text-stone-600">{t.bio}</p></article>)}</div></Section></> }
