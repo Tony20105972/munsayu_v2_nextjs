@@ -1,4 +1,4 @@
-import "@/server/server-only";
+import "server-only";
 import { ConsoleNotifyAdapter } from "@/server/adapters/notify/console-adapter";
 import { MemoryNotifyAdapter } from "@/server/adapters/notify/memory-adapter";
 import type { NotifyAdapter, NotifyMessage } from "@/server/adapters/notify/types";

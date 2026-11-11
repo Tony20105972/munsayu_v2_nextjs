@@ -1,4 +1,4 @@
-import "@/server/server-only";
+import "server-only";
 
 export type StoredObject = {
   key: string;

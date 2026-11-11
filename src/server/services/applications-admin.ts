@@ -1,4 +1,4 @@
-import "@/server/server-only";
+import "server-only";
 import type { Prisma } from "@prisma/client";
 import {
   maskName,

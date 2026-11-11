@@ -1,4 +1,4 @@
-import "@/server/server-only";
+import "server-only";
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 
 /** 세션·재설정 토큰은 32바이트 난수다. 원문은 저장하지 않는다. */

@@ -1,4 +1,4 @@
-import "@/server/server-only";
+import "server-only";
 import type { SessionScope } from "@prisma/client";
 import { LOGIN_ATTEMPT_LIMIT } from "@/lib/contracts";
 import { db } from "@/server/db";

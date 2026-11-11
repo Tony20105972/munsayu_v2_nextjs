@@ -1,4 +1,4 @@
-import { courseUpsertSchema } from "@/lib/contracts";
+import { adminCourseListSchema, courseUpsertSchema } from "@/lib/contracts";
 import { requireAdmin } from "@/server/auth";
 import { createCourse, listAdminCourses } from "@/server/services/courses";
 import {
@@ -7,7 +7,6 @@ import {
   parseJsonBody,
   parseSearchParams,
 } from "@/server/http";
-import { adminCourseListSchema } from "@/server/validation";
 
 /** AD-007 시간표(강좌) 목록. 지점·접수상태로 거른다. */
 export async function GET(request: Request): Promise<Response> {

@@ -1,4 +1,4 @@
-import "@/server/server-only";
+import "server-only";
 import { ConsoleMailAdapter } from "@/server/adapters/mail/console-adapter";
 import { MemoryMailAdapter } from "@/server/adapters/mail/memory-adapter";
 import { ResendMailAdapter } from "@/server/adapters/mail/resend-adapter";

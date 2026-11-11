@@ -1,4 +1,4 @@
-import "@/server/server-only";
+import "server-only";
 import type { User } from "@prisma/client";
 import {
   PASSWORD_RESET_TOKEN_TTL_MINUTES,

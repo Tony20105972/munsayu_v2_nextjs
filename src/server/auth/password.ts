@@ -1,4 +1,4 @@
-import "@/server/server-only";
+import "server-only";
 import argon2 from "argon2";
 
 /**

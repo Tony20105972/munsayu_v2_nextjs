@@ -1,4 +1,4 @@
-import "@/server/server-only";
+import "server-only";
 import { createHash } from "node:crypto";
 import { rateLimited } from "@/server/errors";
 

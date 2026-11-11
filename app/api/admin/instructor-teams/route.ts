@@ -1,7 +1,7 @@
+import { instructorTeamCreateSchema } from "@/lib/contracts";
 import { requireAdmin } from "@/server/auth";
 import { createTeam, listTeams } from "@/server/services/instructors";
 import { errorResponse, jsonNoStore, parseJsonBody } from "@/server/http";
-import { instructorTeamCreateSchema } from "@/server/validation";
 
 /** AD-006 강사 팀 목록(팀별 노출 순서 포함). */
 export async function GET(request: Request): Promise<Response> {

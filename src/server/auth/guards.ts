@@ -1,4 +1,4 @@
-import "@/server/server-only";
+import "server-only";
 import type { User } from "@prisma/client";
 import { forbidden, unauthenticated } from "@/server/errors";
 import { resolveSession } from "@/server/auth/session";

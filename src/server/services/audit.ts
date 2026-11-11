@@ -1,4 +1,4 @@
-import "@/server/server-only";
+import "server-only";
 import type { AuditAction, Prisma } from "@prisma/client";
 import { db } from "@/server/db";
 
