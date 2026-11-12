@@ -12,9 +12,9 @@
 | 항목 | 값 |
 |---|---|
 | 현재 Phase | **3·4 — Frontend Reconstruction · Backend Replacement (병렬)** |
-| 상태 | `IN_PROGRESS` |
-| 마지막 갱신 | 2026-11-11 |
-| 다음 행동 | 공유 계약 확정 완료 → FE·BE 워크트리 병렬 구현 |
+| 상태 | `GATE_CHECK` |
+| 마지막 갱신 | 2026-11-12 |
+| 다음 행동 | **사람 승인 대기.** PR 검토 후 Phase 5 시작 여부 결정 |
 | 막힌 것 | 없음 — 남은 의문은 ASM으로 기록하고 Phase 안에서 진행 |
 
 상태 값: `NOT_STARTED` → `IN_PROGRESS` → `GATE_CHECK` → `IN_REVIEW` → `APPROVED`
@@ -29,8 +29,8 @@
 | 0 | Harness Bootstrap | APPROVED | PASS (7/7) | 차단 0 / 권장 2 | ☑ | `reports/phase-0-report.md` |
 | 1 | PHP Black-Box Reconnaissance | APPROVED | PASS (6/6) | 차단 0 / 권장 0 | ☑ | `reports/phase-1-report.md` |
 | 2 | Migration Contract | APPROVED | PASS (7/7) | 차단 3 수정 / 권장 반영 | ☑ | `reports/phase-2-report.md` |
-| 3 | Frontend Reconstruction | IN_PROGRESS | — | — | ☐ | `reports/phase-3-report.md` |
-| 4 | Backend Replacement | IN_PROGRESS | — | — | ☐ | `reports/phase-4-report.md` |
+| 3 | Frontend Reconstruction | GATE_CHECK | PASS (5/5) | 차단 1 수정 / 권장 12 기록 | ☐ | `reports/phase-3-report.md` |
+| 4 | Backend Replacement | GATE_CHECK | PASS (9/9 적용) | 차단 1 수정 / 권장 12 기록 | ☐ | `reports/phase-4-report.md` |
 | 5 | Legacy Parity Testing | NOT_STARTED | — | — | ☐ | `reports/phase-5-report.md` |
 | 6 | Performance & Security | NOT_STARTED | — | — | ☐ | `reports/phase-6-report.md` |
 | 7 | Cutover 준비 | NOT_STARTED | — | — | ☐ | `reports/phase-7-report.md` |
@@ -108,11 +108,11 @@ Phase 0에서 Claude가 채웁니다. 필수 도구가 `정상`이 아니면 Pha
 
 | 구분 | 전체 | 구현 | 테스트 통과 | 동등성 확인 |
 |---|---|---|---|---|
-| PG 페이지 | | | | |
-| FM 폼 | | | | |
-| BZ 비즈니스 규칙 | | | | |
-| AD 관리자 | | | | |
-| RT 레거시 URL | | | | |
+| PG 페이지 | 14 | 14 | 14 | Phase 5 |
+| FM 폼 | 3 | 3 | 3 | Phase 5 |
+| BZ 비즈니스 규칙 | 2 | 2 | 2 | Phase 5 |
+| AD 관리자 | 13 | 11 (010·011 범위 제외) | 11 | Phase 5 |
+| RT 레거시 URL | 4 | 4 | 4 | Phase 5 |
 
 ---
 
@@ -122,6 +122,9 @@ Claude는 Phase 상태가 바뀔 때마다 한 줄씩 추가합니다. 위쪽이
 
 | 날짜 | Phase | 변경 | 작성 |
 |---|---|---|---|
+| 2026-11-12 | 3·4 | 독립 리뷰 차단 2건(BZ-002 보유기간 문구 연결, ASM 등록부 누락) 수정, Gate PASS로 GATE_CHECK 전환 | Claude Code |
+| 2026-11-12 | 3·4 | C-3 통합: FE·BE 병합, 전체 E2E 39건, 통합에서 찾은 결함 5건 수정 | Claude Code |
+| 2026-11-11 | 3·4 | 레거시 이미지 57개 수집·연결, 1MB 초과 축소, Unsplash 6종 로컬화 (사용자 지시) | Claude Code |
 | 2026-11-11 | 3·4 | C-1 공유 계약 확정(Zod 전체·예약 조회 목록 계약), Prisma 7 설정·로컬/CI DB·테스트 하네스 정비, ASM-012~015 기록 | Claude Code |
 | 2026-11-11 | 2→3·4 | Phase 2 승인, PR #3 병합 (사용자 지시) | Codex |
 | 2026-11-11 | 2 | Gate PASS(7/7), 독립 리뷰 차단 3건 수정 후 GATE_CHECK로 전환 | Codex |
