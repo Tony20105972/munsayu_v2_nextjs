@@ -11,7 +11,7 @@ app/layout.tsx
    │  ├─ InstructorDirectory → InstructorCard
    │  ├─ TimetablePage → CourseCard → CourseReservationForm
    │  ├─ EventListPage → EventCard → EventReservationForm
-   │  ├─ ReservationLookup → ReservationCancelDialog
+   │  ├─ ReservationLookup → ReservationList → ReservationCancelDialog
    │  ├─ NoticeList / NoticeDetail
    │  └─ Login / Register / AccountRecovery / AccountProfile
    └─ Footer (강좌·설명회·외부 진단 링크)
@@ -21,13 +21,15 @@ app/admin/layout.tsx
 
 Header/footer and public route evidence: EV-0003, EV-0007. Forms are client UI plus Server Action; public programmatic endpoints are Route Handlers.
 
+입력 스키마의 실행 가능한 원본은 `src/lib/contracts/`이고 HTTP 계약은 `openapi.yaml`이다. 두 곳은 공유 소유이며, 바꿀 때는 이 문서를 먼저 고치고 ADR을 남긴다.
+
 ## 서버 모듈
 
 | 모듈 | 책임 | 기능 | 근거 |
 |---|---|---|---|
 | `auth` | 회원·관리자 세션, 로그인 유지, 계정 복구 | FM-003, AD-001/002 | EV-0007, EV-ADM-01/02, ASM-002 |
 | `courses` | 지점·강좌·시간표·신청 현황 | PG-008/009, AD-007/008 | EV-0006, EV-ADM-05 |
-| `course-applications` | 강좌 신청, 동의, 중복·마감 트랜잭션 | FM-001, BZ-002, AD-013 | EV-0006, EV-0010 |
+| `course-applications` | 강좌 신청, 동의, 마감 트랜잭션 | FM-001, BZ-002, AD-013 | EV-0006, EV-0010 |
 | `events` | 설명회·상태 목록·관리코드 | PG-010, AD-003/004 | EV-0005, EV-ADM-03, ASM-001/005 |
 | `event-reservations` | 설명회 예약, 조회·취소, 참석 합계 | FM-002, PG-011, AD-005 | EV-0008, EV-ADM-03, ASM-001 |
 | `instructors` | 강사·팀 소속·노출 순서 | AD-006 | EV-ADM-04, ASM-003 |
@@ -44,16 +46,16 @@ Header/footer and public route evidence: EV-0003, EV-0007. Forms are client UI p
 신청: PENDING → CONFIRMED → CANCELLED
 ```
 
-예약/신청 생성은 PostgreSQL `SERIALIZABLE` 트랜잭션에서 대상 `Course` 또는 `Event` 행을 `FOR UPDATE`로 잠그고 (1) 공개 접수 상태, (2) 동일 연락처+대상 활성 기록, (3) idempotency key를 확인하고 저장한다. 충돌/직렬화 실패는 재시도 뒤 하나만 201, 나머지는 409가 된다. 정원 숫자는 차단 조건이 아니다. 취소된 기록은 중복 차단 대상에서 제외한다. `접수마감`은 새 신청을 409으로 막는다.
+예약/신청 생성은 하나의 DB 트랜잭션에서 공개 접수 상태를 확인하고 저장한다. 정원 숫자는 차단 조건이 아니며, 같은 연락처의 의도적인 재신청도 허용한다. 같은 idempotency key 재전송만 기존 결과를 돌려주고 새로 저장하지 않는다. `접수마감`은 새 신청을 409으로 막는다.
 
 ## 입력 계약
 
 | 흐름 | 필수 입력 | 결과 |
 |---|---|---|
-| FM-001 강좌 신청 | `courseId`, 학생 이름, 보호자 연락처, 학교, 과정, 학년, 동의, idempotency key | 201 신청 생성; 마감 409; 중복 409; 유효성 422 |
-| FM-002 설명회 예약 | `eventId`, 이름, 연락처, 학년, 참석 인원(1~2), 동의, idempotency key | 201 예약 생성; 마감/중복 409; 유효성 422 |
-| PG-011 예약 조회·취소 | 조회: 이름·보호자 연락처·예약 식별자. 취소: 같은 본인 확인 정보 | 본인 예약만 요약 반환; 취소는 상태 변경 |
-| FM-003 회원 | 아이디, 비밀번호, 이름, 이메일, 휴대폰(가입); 자격증명(로그인) | 가입·세션 생성, 중복/검증 오류 반환 |
+| FM-001 강좌 신청 | `courseId`, 학생 이름, 보호자 연락처, 학교, 과정, 학년, 동의, idempotency key | 201 신청 생성; 접수마감 409; 유효성 422. 같은 idempotency key 재전송은 201 + `replayed: true`로 기존 건 반환 |
+| FM-002 설명회 예약 | `eventId`, 이름, 연락처, 학년, 참석 인원(1~2), 동의, idempotency key | 201 예약 생성; 마감 409; 유효성 422. 같은 idempotency key 재전송은 기존 건 반환 |
+| PG-011 예약 조회·취소 | 조회: 이름·연락처. 취소: 같은 본인 확인 정보 + `kind`·예약 식별자 | 같은 연락처의 강좌 신청·설명회 예약을 목록으로 반환(ASM-013); 취소는 건별 상태 변경, 불일치는 404 |
+| FM-003 회원 | 아이디, 비밀번호, 이름, 이메일, 휴대폰(가입); 자격증명(로그인) | 가입·세션 생성, 아이디/이메일 중복 409, 검증 422. 찾기·수정·탈퇴도 같은 계약 묶음 |
 
 PII는 응답·로그에 원문을 쓰지 않고 관리자 목록은 마스킹한다. CSV와 원문 조회는 단일 관리자 역할에서도 매 요청 인증·감사기록을 남긴다.
 

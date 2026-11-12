@@ -1,26 +1,89 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+ * 레거시 공개 화면(EV-0003, EV-0006, EV-0009)의 색 구성을 재현한다.
+ * - 상단 바·푸터: 짙은 초록
+ * - 강조(개강일·전화번호): 주황
+ * - 페이지 배너: 남색 계열 (레거시는 사진 배경, 신규는 사진 미확보로 단색 그라데이션)
+ * 글꼴은 라이선스를 확인할 수 있는 시스템 글꼴만 쓴다. // ASM-041
+ */
+@theme {
+  --color-ink: #12281b;
+  --color-ink-soft: #1d4430;
+  --color-brand: #15492c;
+  --color-brand-dark: #0d3119;
+  --color-accent: #e07b2c;
+  --color-accent-soft: #f3a862;
+  --color-banner-start: #1f3350;
+  --color-banner-end: #334f72;
+  --color-canvas: #f6f7f8;
+  --color-surface: #ffffff;
+  --color-line: #e2e6e3;
+  --color-muted: #6b7280;
+
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR",
+    "Malgun Gothic", "맑은 고딕", system-ui, sans-serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/*
+ * 홈 상단 배경 슬라이드. 레거시도 CSS background 로 사진 3장을 돌렸다. (EV-0012)
+ * 세 장을 겹쳐 두고 투명도만 바꾼다. 움직임을 줄이도록 설정한 환경에서는
+ * 아래 `prefers-reduced-motion` 규칙이 애니메이션을 사실상 멈춰 첫 장만 보인다.
+ */
+.home-hero-slide {
+  animation: home-hero-fade 18s linear infinite;
+  opacity: 0;
+}
+
+.home-hero-slide:nth-child(1) {
+  animation-delay: 0s;
+  opacity: 1;
+}
+
+.home-hero-slide:nth-child(2) {
+  animation-delay: 6s;
+}
+
+.home-hero-slide:nth-child(3) {
+  animation-delay: 12s;
+}
+
+@keyframes home-hero-fade {
+  0%,
+  28% {
+    opacity: 1;
+  }
+  33%,
+  95% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

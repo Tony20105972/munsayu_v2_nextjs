@@ -15,6 +15,8 @@
 /test-results
 /playwright-report
 /legacy-assets-raw/
+/legacy-assets-clean/
+/.playwright-mcp/
 
 # next.js
 /.next/
@@ -27,6 +29,9 @@
 .DS_Store
 *.pem
 
+# local postgres cluster (ASM-012)
+/.tmp/
+
 # debug
 npm-debug.log*
 yarn-debug.log*
@@ -35,6 +40,8 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# 키 이름만 담은 예시 파일은 커밋한다 (CLAUDE.md 7장)
+!.env.example
 
 # vercel
 .vercel

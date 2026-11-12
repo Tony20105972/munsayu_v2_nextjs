@@ -1,42 +1,997 @@
 openapi: 3.1.0
-info: {title: Munsayu public/admin API, version: 0.1.0}
+info:
+  title: Munsayu public/admin API
+  version: 0.2.0
+  description: >-
+    Phase 3·4 공유 계약. 입력 스키마의 실행 가능한 원본은 src/lib/contracts/ 이고 이 문서는 HTTP 계약을 정한다.
+    중복 신청은 허용하므로 중복을 이유로 한 409는 없다. 같은 idempotency key 재전송만 기존 결과를 돌려준다. (ASM-001)
+    모든 개인정보 응답은 Cache-Control: no-store 이고 관리자 목록은 마스킹 값만 담는다.
 paths:
   /api/course-applications:
     post:
       summary: FM-001 강좌 신청
-      requestBody: {required: true, content: {application/json: {schema: {$ref: '#/components/schemas/CourseApplicationInput'}}}}
-      responses: {'201': {description: created}, '409': {description: closed or duplicate}, '422': {description: invalid}}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CourseApplicationInput" }
+      responses:
+        "201":
+          description: 신청 저장. 같은 idempotency key 재전송이면 replayed=true 로 기존 건을 돌려준다
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApplicationCreated" }
+        "409":
+          description: 강좌가 접수마감 상태 (INTAKE_CLOSED)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiError" }
+        "422":
+          description: 검증 실패 (VALIDATION_FAILED)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiError" }
+        "429": { description: 요청 횟수 제한 (RATE_LIMITED) }
   /api/event-reservations:
     post:
       summary: FM-002 설명회 예약 (ASM-001)
-      requestBody: {required: true, content: {application/json: {schema: {$ref: '#/components/schemas/EventReservationInput'}}}}
-      responses: {'201': {description: created}, '409': {description: closed or duplicate}, '422': {description: invalid}}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/EventReservationInput" }
+      responses:
+        "201":
+          description: 예약 저장. 참석 인원은 1~2명
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApplicationCreated" }
+        "409":
+          description: 설명회 상태가 마감(isClosed) (INTAKE_CLOSED)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiError" }
+        "422":
+          description: 검증 실패 (VALIDATION_FAILED)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiError" }
+        "429": { description: 요청 횟수 제한 (RATE_LIMITED) }
   /api/reservations/lookup:
     post:
-      summary: PG-011 예약 조회
-      requestBody: {required: true, content: {application/json: {schema: {$ref: '#/components/schemas/ReservationLookupInput'}}}}
-      responses: {'200': {description: masked reservation summary, headers: {Cache-Control: {schema: {type: string, example: no-store}}}}, '404': {description: not found}, '422': {description: invalid}}
+      summary: PG-011 예약 조회 — 이름·연락처로 강좌 신청과 설명회 예약을 함께 목록으로 돌려준다 (ASM-013)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ReservationLookupInput" }
+      responses:
+        "200":
+          description: 본인 신청·예약 목록. 0건이면 빈 배열
+          headers:
+            Cache-Control: { schema: { type: string, example: no-store } }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ReservationLookupResult" }
+        "422":
+          description: 검증 실패 (VALIDATION_FAILED)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiError" }
+        "429": { description: 요청 횟수 제한 (RATE_LIMITED) }
   /api/reservations/{id}/cancel:
     post:
-      summary: PG-011 예약 취소
-      parameters: [{name: id, in: path, required: true, schema: {type: string}}]
-      requestBody: {required: true, content: {application/json: {schema: {$ref: '#/components/schemas/ReservationLookupInput'}}}}
-      responses: {'200': {description: cancelled}, '404': {description: not found}, '422': {description: invalid}}
+      summary: PG-011 예약 건별 취소
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ReservationCancelInput" }
+      responses:
+        "200":
+          description: 취소됨. 기록은 물리 삭제하지 않고 상태만 CANCELLED 로 바꾼다
+          headers:
+            Cache-Control: { schema: { type: string, example: no-store } }
+        "404":
+          description: 본인 확인 정보와 일치하는 건이 없음 (NOT_FOUND). 타인 건도 같은 응답
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiError" }
+        "422":
+          description: 검증 실패 (VALIDATION_FAILED)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiError" }
+  /api/auth/register:
+    post:
+      summary: FM-003 회원가입
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RegisterInput" }
+      responses:
+        "201": { description: 가입 및 세션 생성 }
+        "409": { description: 아이디 또는 이메일 중복 (CONFLICT) }
+        "422": { description: 검증 실패 (VALIDATION_FAILED) }
+  /api/auth/login:
+    post:
+      summary: FM-003 / AD-001 로그인 — 회원과 관리자 세션 쿠키를 분리한다
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LoginInput" }
+      responses:
+        "200": { description: 세션 쿠키 발급 (HttpOnly, SameSite=Lax, 운영에서 Secure) }
+        "401": { description: 자격 증명 불일치 또는 차단된 계정 (UNAUTHENTICATED) }
+        "429": { description: 로그인 시도 제한 (RATE_LIMITED) }
+  /api/auth/logout:
+    post:
+      summary: FM-003 / AD-001 로그아웃
+      responses:
+        "204": { description: 세션 삭제 }
+  /api/auth/find-login-id:
+    post:
+      summary: FM-003 아이디 찾기 — 결과는 메일로만 보낸다 (ASM-010)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/FindLoginIdInput" }
+      responses:
+        "202": { description: 계정 존재 여부와 무관하게 같은 응답을 준다 }
+        "422": { description: 검증 실패 (VALIDATION_FAILED) }
+  /api/auth/password-reset/request:
+    post:
+      summary: FM-003 비밀번호 재설정 요청 — 1회용·만료 토큰을 메일로 보낸다
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RequestPasswordResetInput" }
+      responses:
+        "202": { description: 계정 존재 여부와 무관하게 같은 응답을 준다 }
+        "422": { description: 검증 실패 (VALIDATION_FAILED) }
+        "429": { description: 요청 횟수 제한 (RATE_LIMITED) }
+  /api/auth/password-reset/confirm:
+    post:
+      summary: FM-003 비밀번호 재설정 확정
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ResetPasswordInput" }
+      responses:
+        "200": { description: 비밀번호 변경 및 기존 세션 폐기 }
+        "400": { description: 토큰이 만료·사용됨·위조 (TOKEN_INVALID) }
+        "422": { description: 검증 실패 (VALIDATION_FAILED) }
+  /api/account/profile:
+    patch:
+      summary: FM-003 회원 정보 수정
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateProfileInput" }
+      responses:
+        "200": { description: 수정됨 }
+        "401": { description: 비로그인 (UNAUTHENTICATED) }
+        "422": { description: 검증 실패 (VALIDATION_FAILED) }
+  /api/account/withdraw:
+    post:
+      summary: FM-003 회원 탈퇴 — 상태를 WITHDRAWN 으로 바꾸고 세션을 폐기한다
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/WithdrawInput" }
+      responses:
+        "200": { description: 탈퇴 처리 }
+        "401": { description: 비로그인 또는 비밀번호 불일치 (UNAUTHENTICATED) }
+  /api/admin/applications:
+    get:
+      summary: AD-008 / AD-005 신청·예약 목록 (마스킹)
+      parameters:
+        - { name: kind, in: query, schema: { type: string, enum: [course, event] } }
+        - { name: campusId, in: query, schema: { type: string } }
+        - { name: courseId, in: query, schema: { type: string } }
+        - { name: eventId, in: query, schema: { type: string } }
+        - {
+            name: status,
+            in: query,
+            schema: { type: string, enum: [PENDING, CONFIRMED, CANCELLED] },
+          }
+        - { name: grade, in: query, schema: { type: string } }
+        - { name: from, in: query, schema: { type: string, format: date-time } }
+        - { name: to, in: query, schema: { type: string, format: date-time } }
+        - { name: page, in: query, schema: { type: integer, minimum: 1 } }
+        - {
+            name: pageSize,
+            in: query,
+            schema: { type: integer, minimum: 1, maximum: 100 },
+          }
+      responses:
+        "200":
+          description: 마스킹된 목록
+          headers:
+            Cache-Control: { schema: { type: string, example: no-store } }
+        "401": { description: 비로그인 (UNAUTHENTICATED) }
+        "403": { description: 관리자 아님 (FORBIDDEN) }
+        "422": { description: 검증 실패 (VALIDATION_FAILED) }
+  /api/admin/applications/reveal:
+    post:
+      summary: AD-013 개인정보 원문 조회 — 감사기록을 남긴다
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ApplicationRevealInput" }
+      responses:
+        "200":
+          description: 원문 1건과 감사기록 ID
+          headers:
+            Cache-Control: { schema: { type: string, example: no-store } }
+        "401": { description: 비로그인 (UNAUTHENTICATED) }
+        "403": { description: 관리자 아님 (FORBIDDEN) }
+        "404": { description: 대상 없음 (NOT_FOUND) }
+        "422": { description: 검증 실패 (VALIDATION_FAILED) }
   /api/admin/applications/export:
-    get: {summary: AD-013 filtered CSV export with audit record, responses: {'200': {description: csv, headers: {Cache-Control: {schema: {type: string, example: no-store}}}}, '401': {description: unauthenticated}, '403': {description: non-admin forbidden}}}
+    get:
+      summary: AD-013 현재 필터 결과 전체 CSV 내보내기 — 감사기록을 남긴다 (ASM-006)
+      parameters:
+        - { name: kind, in: query, schema: { type: string, enum: [course, event] } }
+        - { name: campusId, in: query, schema: { type: string } }
+        - { name: status, in: query, schema: { type: string } }
+        - { name: from, in: query, schema: { type: string, format: date-time } }
+        - { name: to, in: query, schema: { type: string, format: date-time } }
+      responses:
+        "200":
+          description: text/csv 본문
+          headers:
+            Cache-Control: { schema: { type: string, example: no-store } }
+        "401": { description: 비로그인 (UNAUTHENTICATED) }
+        "403": { description: 관리자 아님 (FORBIDDEN) }
+        "422": { description: 검증 실패 (VALIDATION_FAILED) }
+  /api/admin/privacy/retention:
+    get:
+      summary: AD-013 보존 설정 조회
+      responses:
+        "200": { description: 현재 보존 설정 }
+        "401": { description: 비로그인 (UNAUTHENTICATED) }
+        "403": { description: 관리자 아님 (FORBIDDEN) }
+    put:
+      summary: AD-013 보존 설정 변경 — 동의 문구 표시와 같은 값을 쓴다 (ASM-009)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PrivacyRetentionSettingInput" }
+      responses:
+        "200": { description: 변경됨 }
+        "401": { description: 비로그인 (UNAUTHENTICATED) }
+        "403": { description: 관리자 아님 (FORBIDDEN) }
+        "422": { description: 검증 실패 (VALIDATION_FAILED) }
+  /api/admin/privacy/purge-schedule:
+    post:
+      summary: AD-013 파기 대상 시각 설정 (purgeEligibleAt)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PurgeEligibilityInput" }
+      responses:
+        "200": { description: 설정됨 }
+        "401": { description: 비로그인 (UNAUTHENTICATED) }
+        "403": { description: 관리자 아님 (FORBIDDEN) }
+        "422": { description: 검증 실패 (VALIDATION_FAILED) }
   /api/admin/privacy/purge:
-    post: {summary: AD-013 manual purge, responses: {'200': {description: purge summary and audit id}, '401': {description: unauthenticated}, '403': {description: non-admin forbidden}}}
+    post:
+      summary: >-
+        AD-013 파기 실행. 관리자 세션 또는 x-purge-secret 헤더(예약 실행)로만 호출한다.
+        자동 실행 설정의 기본값은 꺼짐이다.
+      parameters:
+        - {
+            name: x-purge-secret,
+            in: header,
+            required: false,
+            schema: { type: string },
+          }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PurgeRunInput" }
+      responses:
+        "200": { description: 파기 건수 요약과 감사기록 ID }
+        "401": { description: 비로그인이고 비밀값도 없음 (UNAUTHENTICATED) }
+        "403": { description: 관리자 아님 (FORBIDDEN) }
+        "422": { description: 검증 실패 (VALIDATION_FAILED) }
+  /api/auth/session:
+    get:
+      summary: 현재 세션 사용자 확인 — 화면이 로그인 상태를 읽는 단일 경로
+      responses:
+        "200":
+          description: 세션 사용자 (id, loginId, name, role) 또는 null
+          headers:
+            Cache-Control: { schema: { type: string, example: no-store } }
+  /api/account/password:
+    post:
+      summary: FM-003 비밀번호 변경 (로그인 상태)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ChangePasswordInput" }
+      responses:
+        "200": { description: 변경됨 }
+        "401": { description: 비로그인 또는 현재 비밀번호 불일치 (UNAUTHENTICATED) }
+        "422": { description: 검증 실패 (VALIDATION_FAILED) }
+  /api/campuses:
+    get:
+      summary: PG-008/009 지점 목록 (공개)
+      responses:
+        "200": { description: 지점 목록 }
+  /api/courses:
+    get:
+      summary: PG-008/009 공개 시간표 — 지점별 강좌와 접수 상태
+      parameters:
+        - { name: campusId, in: query, schema: { type: string } }
+      responses:
+        "200": { description: 강좌 목록 (개인정보 없음) }
+  /api/events:
+    get:
+      summary: PG-010 공개 설명회 목록 — 수동 상태 라벨 포함
+      parameters:
+        - { name: campusId, in: query, schema: { type: string } }
+      responses:
+        "200": { description: 설명회 목록 (개인정보 없음) }
+  /api/instructors:
+    get:
+      summary: PG-005~007 공개 강사 목록 — 팀별 노출 순서 (ASM-003)
+      parameters:
+        - { name: teamId, in: query, schema: { type: string } }
+      responses:
+        "200": { description: 강사·팀 목록 }
+  /api/notices:
+    get:
+      summary: PG-012 공지 목록 (ASM-015 — 관리자 편집은 범위 밖)
+      parameters:
+        - { name: page, in: query, schema: { type: integer, minimum: 1 } }
+        - {
+            name: pageSize,
+            in: query,
+            schema: { type: integer, minimum: 1, maximum: 100 },
+          }
+      responses:
+        "200": { description: 공지 목록 }
+  /api/notices/{id}:
+    get:
+      summary: PG-012 공지 상세
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: 공지 1건 }
+        "404": { description: 없음 (NOT_FOUND) }
+  /api/privacy-notice:
+    get:
+      summary: BZ-002 동의 문구와 보존 기간 표시값 — 설정과 같은 단일 값 (ASM-009)
+      responses:
+        "200": { description: 목적·수집항목·보유기간 문구 }
+  /api/admin/members:
+    get:
+      summary: AD-002 회원 검색 (마스킹)
+      parameters:
+        - { name: keyword, in: query, schema: { type: string } }
+        - {
+            name: status,
+            in: query,
+            schema: { type: string, enum: [ACTIVE, BLOCKED, WITHDRAWN] },
+          }
+        - { name: page, in: query, schema: { type: integer } }
+        - { name: pageSize, in: query, schema: { type: integer } }
+      responses:
+        "200":
+          description: 마스킹된 회원 목록
+          headers:
+            Cache-Control: { schema: { type: string, example: no-store } }
+        "401": { description: UNAUTHENTICATED }
+        "403": { description: FORBIDDEN }
+        "422": { description: 검증 실패 (VALIDATION_FAILED) }
+  /api/admin/members/status:
+    post:
+      summary: AD-002 회원 상태 변경 (ACTIVE / BLOCKED / WITHDRAWN) — 감사기록
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/MemberStatusChangeInput" }
+      responses:
+        "200": { description: 변경됨 }
+        "401": { description: UNAUTHENTICATED }
+        "403": { description: FORBIDDEN }
+        "404": { description: 대상 없음 (NOT_FOUND) }
+        "422": { description: 검증 실패 (VALIDATION_FAILED) }
+  /api/admin/admins:
+    post:
+      summary: AD-002 관리자 계정 추가 (단일 ADMIN 역할, D5) — 감사기록
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminAccountCreateInput" }
+      responses:
+        "201": { description: 생성됨 }
+        "401": { description: UNAUTHENTICATED }
+        "403": { description: FORBIDDEN }
+        "409": { description: 아이디·이메일 중복 (CONFLICT) }
+        "422": { description: 검증 실패 (VALIDATION_FAILED) }
+  /api/admin/admins/{id}:
+    delete:
+      summary: AD-002 관리자 계정 삭제 — 감사기록. 마지막 관리자는 삭제할 수 없다
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: 삭제됨 }
+        "401": { description: UNAUTHENTICATED }
+        "403": { description: FORBIDDEN }
+        "409": { description: 마지막 관리자 삭제 거부 (CONFLICT) }
+        "404": { description: 대상 없음 (NOT_FOUND) }
+  /api/admin/courses:
+    get:
+      summary: AD-007 강좌 목록 (지점·접수 상태 필터)
+      parameters:
+        - { name: campusId, in: query, schema: { type: string } }
+        - {
+            name: intakeOpen,
+            in: query,
+            schema: { type: string, enum: ["true", "false"] },
+          }
+        - { name: page, in: query, schema: { type: integer } }
+        - { name: pageSize, in: query, schema: { type: integer } }
+      responses:
+        "200": { description: 강좌 목록 }
+        "401": { description: UNAUTHENTICATED }
+        "403": { description: FORBIDDEN }
+        "422": { description: 검증 실패 (VALIDATION_FAILED) }
+    post:
+      summary: AD-007 강좌 생성
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CourseUpsertInput" }
+      responses:
+        "201": { description: 생성됨 }
+        "401": { description: UNAUTHENTICATED }
+        "403": { description: FORBIDDEN }
+        "422": { description: VALIDATION_FAILED }
+  /api/admin/courses/{id}:
+    put:
+      summary: AD-007 강좌 수정
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CourseUpsertInput" }
+      responses:
+        "200": { description: 수정됨 }
+        "401": { description: UNAUTHENTICATED }
+        "403": { description: FORBIDDEN }
+        "404": { description: NOT_FOUND }
+        "422": { description: 검증 실패 (VALIDATION_FAILED) }
+    delete:
+      summary: AD-007 강좌 삭제. 신청이 있으면 삭제하지 않는다
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: 삭제됨 }
+        "401": { description: UNAUTHENTICATED }
+        "403": { description: FORBIDDEN }
+        "409": { description: 신청이 있어 삭제 불가 (CONFLICT) }
+        "404": { description: 대상 없음 (NOT_FOUND) }
+  /api/admin/courses/intake:
+    post:
+      summary: AD-007 강좌 접수중/접수마감 수동 전환 (자동 전환 없음, Q-ADM-05)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CourseIntakeChangeInput" }
+      responses:
+        "200": { description: 변경됨 }
+        "401": { description: UNAUTHENTICATED }
+        "403": { description: FORBIDDEN }
+        "404": { description: 대상 없음 (NOT_FOUND) }
+        "422": { description: 검증 실패 (VALIDATION_FAILED) }
+  /api/admin/events:
+    get:
+      summary: AD-003 설명회 목록
+      parameters:
+        - { name: campusId, in: query, schema: { type: string } }
+      responses:
+        "200": { description: 설명회 목록 }
+        "401": { description: UNAUTHENTICATED }
+        "403": { description: FORBIDDEN }
+        "422": { description: 검증 실패 (VALIDATION_FAILED) }
+    post:
+      summary: AD-003 설명회 생성 (관리코드 자동 생성·수정 가능, ASM-005)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/EventUpsertInput" }
+      responses:
+        "201": { description: 생성됨 }
+        "401": { description: UNAUTHENTICATED }
+        "403": { description: FORBIDDEN }
+        "409": { description: 관리코드 중복 (CONFLICT) }
+        "422": { description: 검증 실패 (VALIDATION_FAILED) }
+  /api/admin/events/{id}:
+    put:
+      summary: AD-003 설명회 수정
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/EventUpsertInput" }
+      responses:
+        "200": { description: 수정됨 }
+        "401": { description: UNAUTHENTICATED }
+        "403": { description: FORBIDDEN }
+        "404": { description: NOT_FOUND }
+        "422": { description: 검증 실패 (VALIDATION_FAILED) }
+        "409": { description: 관리코드 중복 (CONFLICT) }
+    delete:
+      summary: AD-003 설명회 삭제. 예약이 있으면 삭제하지 않는다
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: 삭제됨 }
+        "401": { description: UNAUTHENTICATED }
+        "403": { description: FORBIDDEN }
+        "409": { description: 예약이 있어 삭제 불가 (CONFLICT) }
+        "404": { description: 대상 없음 (NOT_FOUND) }
+  /api/admin/events/status:
+    post:
+      summary: AD-004 설명회 상태 수동 전환 (접수중 / 마감임박 / 접수마감, ASM-001)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/EventStatusChangeInput" }
+      responses:
+        "200": { description: 변경됨 }
+        "401": { description: UNAUTHENTICATED }
+        "403": { description: FORBIDDEN }
+        "404": { description: 대상 없음 (NOT_FOUND) }
+        "422": { description: 검증 실패 (VALIDATION_FAILED) }
+  /api/admin/events/{id}/totals:
+    get:
+      summary: >-
+        AD-005 예약 건수와 참석 인원 합계를 따로 집계 (EV-ADM-03).
+        없는 설명회 id는 404가 아니라 `{reservationCount: 0, attendeeTotal: 0}`을 돌려준다
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: reservationCount, attendeeTotal }
+        "401": { description: UNAUTHENTICATED }
+        "403": { description: FORBIDDEN }
+  /api/admin/event-status-options:
+    get:
+      summary: AD-004 설명회 상태 목록 (데이터로 관리)
+      responses:
+        "200": { description: 상태 목록 }
+        "401": { description: UNAUTHENTICATED }
+        "403": { description: FORBIDDEN }
+    post:
+      summary: AD-004 설명회 상태 추가
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/EventStatusOptionInput" }
+      responses:
+        "201": { description: 생성됨 }
+        "401": { description: UNAUTHENTICATED }
+        "403": { description: FORBIDDEN }
+        "422": { description: 검증 실패 (VALIDATION_FAILED) }
+        "409": { description: 상태 이름 중복 (CONFLICT) }
+  /api/admin/instructors:
+    get:
+      summary: AD-006 강사 목록 (팀 소속 포함)
+      responses:
+        "200": { description: 강사 목록 }
+        "401": { description: UNAUTHENTICATED }
+        "403": { description: FORBIDDEN }
+    post:
+      summary: AD-006 강사 생성
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/InstructorUpsertInput" }
+      responses:
+        "201": { description: 생성됨 }
+        "401": { description: UNAUTHENTICATED }
+        "403": { description: FORBIDDEN }
+        "422": { description: 검증 실패 (VALIDATION_FAILED) }
+        "409": { description: 프로필 코드 중복 (CONFLICT) }
+  /api/admin/instructors/{id}:
+    put:
+      summary: AD-006 강사 수정
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/InstructorUpsertInput" }
+      responses:
+        "200": { description: 수정됨 }
+        "401": { description: UNAUTHENTICATED }
+        "403": { description: FORBIDDEN }
+        "404": { description: NOT_FOUND }
+        "422": { description: 검증 실패 (VALIDATION_FAILED) }
+        "409": { description: 프로필 코드 중복 (CONFLICT) }
+    delete:
+      summary: AD-006 강사 삭제 (팀 소속도 함께 삭제)
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: 삭제됨 }
+        "401": { description: UNAUTHENTICATED }
+        "403": { description: FORBIDDEN }
+        "404": { description: 대상 없음 (NOT_FOUND) }
+  /api/admin/instructor-teams:
+    get:
+      summary: AD-006 강사 팀 목록
+      responses:
+        "200": { description: 팀 목록 }
+        "401": { description: UNAUTHENTICATED }
+        "403": { description: FORBIDDEN }
+    post:
+      summary: AD-006 강사 팀 생성
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/InstructorTeamCreateInput" }
+      responses:
+        "201": { description: 생성됨 }
+        "401": { description: UNAUTHENTICATED }
+        "403": { description: FORBIDDEN }
+        "422": { description: 검증 실패 (VALIDATION_FAILED) }
+        "409": { description: 팀 이름 중복 (CONFLICT) }
+  /api/admin/instructors/memberships:
+    post:
+      summary: AD-006 팀 소속 추가·순서 변경 (한 강사가 여러 팀, ASM-003)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/InstructorTeamMembershipInput" }
+      responses:
+        "200": { description: 반영됨 }
+        "401": { description: UNAUTHENTICATED }
+        "403": { description: FORBIDDEN }
+        "422": { description: 검증 실패 (VALIDATION_FAILED) }
+    delete:
+      summary: AD-006 팀 소속 해제
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/InstructorTeamMembershipDeleteInput" }
+      responses:
+        "200": { description: 해제됨 }
+        "401": { description: UNAUTHENTICATED }
+        "403": { description: FORBIDDEN }
+        "404": { description: 대상 없음 (NOT_FOUND) }
+        "422": { description: 검증 실패 (VALIDATION_FAILED) }
+  /api/admin/applications/detail:
+    get:
+      summary: AD-008 신청 1건 상세 (마스킹 상태, 감사기록 없음)
+      parameters:
+        - {
+            name: kind,
+            in: query,
+            required: true,
+            schema: { type: string, enum: [course, event] },
+          }
+        - { name: applicationId, in: query, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: 마스킹된 1건
+          headers:
+            Cache-Control: { schema: { type: string, example: no-store } }
+        "401": { description: UNAUTHENTICATED }
+        "403": { description: FORBIDDEN }
+        "404": { description: NOT_FOUND }
+        "422": { description: 검증 실패 (VALIDATION_FAILED) }
 components:
   schemas:
+    ChangePasswordInput:
+      type: object
+      required: [currentPassword, password, passwordConfirm]
+      properties:
+        currentPassword: { type: string }
+        password: { type: string, minLength: 10 }
+        passwordConfirm: { type: string }
+    MemberStatusChangeInput:
+      type: object
+      required: [userId, status]
+      properties:
+        userId: { type: string }
+        status: { type: string, enum: [ACTIVE, BLOCKED, WITHDRAWN] }
+    AdminAccountCreateInput:
+      type: object
+      required: [loginId, password, name, email, phone]
+      properties:
+        loginId: { type: string, pattern: "^[a-z0-9_]{3,20}$" }
+        password: { type: string, minLength: 10 }
+        name: { type: string }
+        email: { type: string, format: email }
+        phone: { type: string }
+    CourseUpsertInput:
+      type: object
+      required: [campusId, title]
+      properties:
+        campusId: { type: string }
+        title: { type: string }
+        sectionTitle: { type: [string, "null"] }
+        gradeTitle: { type: [string, "null"] }
+        scheduleText: { type: [string, "null"] }
+        startDate: { type: [string, "null"], format: date-time }
+        displayOrder: { type: integer, default: 0 }
+        intakeOpen: { type: boolean, default: true }
+    CourseIntakeChangeInput:
+      type: object
+      required: [courseId, intakeOpen]
+      properties:
+        courseId: { type: string }
+        intakeOpen: { type: boolean }
+    EventUpsertInput:
+      type: object
+      required: [managementCode, title, startsAt, statusOptionId]
+      properties:
+        campusId: { type: [string, "null"] }
+        managementCode: { type: string, maxLength: 30 }
+        title: { type: string }
+        startsAt: { type: string, format: date-time }
+        venue: { type: [string, "null"] }
+        speaker: { type: [string, "null"] }
+        statusOptionId: { type: string }
+    EventStatusChangeInput:
+      type: object
+      required: [eventId, statusOptionId]
+      properties:
+        eventId: { type: string }
+        statusOptionId: { type: string }
+    EventStatusOptionInput:
+      type: object
+      required: [label]
+      properties:
+        label: { type: string, maxLength: 20 }
+        sortOrder: { type: integer, default: 0 }
+        isClosed: { type: boolean, default: false }
+    InstructorUpsertInput:
+      type: object
+      required: [name, profileCode]
+      properties:
+        name: { type: string }
+        profileCode: { type: string }
+        bio: { type: [string, "null"] }
+        photoStorageKey: { type: [string, "null"] }
+    InstructorTeamCreateInput:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string, minLength: 2, maxLength: 40 }
+    InstructorTeamMembershipInput:
+      type: object
+      required: [instructorId, teamId]
+      properties:
+        instructorId: { type: string }
+        teamId: { type: string }
+        displayOrder: { type: integer, default: 0 }
+    InstructorTeamMembershipDeleteInput:
+      type: object
+      required: [instructorId, teamId]
+      properties:
+        instructorId: { type: string }
+        teamId: { type: string }
+    ApiError:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          enum:
+            [
+              VALIDATION_FAILED,
+              INTAKE_CLOSED,
+              NOT_FOUND,
+              UNAUTHENTICATED,
+              FORBIDDEN,
+              CONFLICT,
+              RATE_LIMITED,
+              TOKEN_INVALID,
+            ]
+        message: { type: string, description: 개인정보·내부 식별자를 담지 않는다 }
+        fieldErrors:
+          type: object
+          additionalProperties: { type: array, items: { type: string } }
+    ApplicationCreated:
+      type: object
+      required: [id, replayed, createdAt]
+      properties:
+        id: { type: string }
+        replayed:
+          {
+            type: boolean,
+            description: true면 같은 key 재전송이라 새로 저장하지 않았다,
+          }
+        createdAt: { type: string, format: date-time }
     CourseApplicationInput:
       type: object
-      required: [courseId, studentName, guardianPhone, schoolName, department, grade, privacyConsent, idempotencyKey]
-      properties: {courseId: {type: string}, studentName: {type: string}, guardianPhone: {type: string}, schoolName: {type: string}, department: {type: string}, grade: {type: string}, privacyConsent: {const: true}, idempotencyKey: {type: string}}
+      required:
+        [
+          courseId,
+          studentName,
+          guardianPhone,
+          schoolName,
+          department,
+          grade,
+          privacyConsent,
+          idempotencyKey,
+        ]
+      properties:
+        courseId: { type: string }
+        studentName: { type: string, minLength: 2, maxLength: 40 }
+        guardianPhone: { type: string, example: 010-0000-0000 }
+        schoolName: { type: string, minLength: 2, maxLength: 60 }
+        department: { type: string, enum: ["초등 문해력", "어휘·글쓰기", "진단평가"] }
+        grade:
+          { type: string, enum: ["예비초", "초1", "초2", "초3", "초4", "초5", "초6"] }
+        privacyConsent: { const: true }
+        idempotencyKey: { type: string, minLength: 16, maxLength: 128 }
     EventReservationInput:
       type: object
-      required: [eventId, name, phone, grade, attendeeCount, privacyConsent, idempotencyKey]
-      properties: {eventId: {type: string}, name: {type: string}, phone: {type: string}, grade: {type: string}, attendeeCount: {type: integer, minimum: 1, maximum: 2}, privacyConsent: {const: true}, idempotencyKey: {type: string}}
+      required:
+        [eventId, name, phone, grade, attendeeCount, privacyConsent, idempotencyKey]
+      properties:
+        eventId: { type: string }
+        name: { type: string, minLength: 2, maxLength: 40 }
+        phone: { type: string, example: 010-0000-0000 }
+        grade:
+          { type: string, enum: ["예비초", "초1", "초2", "초3", "초4", "초5", "초6"] }
+        attendeeCount: { type: integer, minimum: 1, maximum: 2 }
+        privacyConsent: { const: true }
+        idempotencyKey: { type: string, minLength: 16, maxLength: 128 }
     ReservationLookupInput:
       type: object
-      required: [reservationId, name, guardianPhone]
-      properties: {reservationId: {type: string}, name: {type: string}, guardianPhone: {type: string}}
+      required: [name, phone]
+      properties:
+        name: { type: string }
+        phone: { type: string, example: 010-0000-0000 }
+    ReservationCancelInput:
+      type: object
+      required: [name, phone, kind, reservationId]
+      properties:
+        name: { type: string }
+        phone: { type: string }
+        kind: { type: string, enum: [course, event] }
+        reservationId: { type: string }
+    ReservationLookupResult:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            required: [kind, reservationId, status, title, appliedAt, cancellable]
+            properties:
+              kind: { type: string, enum: [course, event] }
+              reservationId: { type: string }
+              status: { type: string, enum: [PENDING, CONFIRMED, CANCELLED] }
+              title: { type: string }
+              campusName: { type: [string, "null"] }
+              scheduledAt: { type: [string, "null"], format: date-time }
+              scheduleText: { type: [string, "null"] }
+              attendeeCount: { type: [integer, "null"] }
+              appliedAt: { type: string, format: date-time }
+              cancellable: { type: boolean }
+    RegisterInput:
+      type: object
+      required:
+        [
+          loginId,
+          password,
+          passwordConfirm,
+          name,
+          email,
+          phone,
+          termsConsent,
+          privacyConsent,
+        ]
+      properties:
+        loginId: { type: string, pattern: "^[a-z0-9_]{3,20}$" }
+        password: { type: string, minLength: 10, maxLength: 72 }
+        passwordConfirm: { type: string }
+        name: { type: string }
+        email: { type: string, format: email }
+        phone: { type: string }
+        termsConsent: { const: true }
+        privacyConsent: { const: true }
+    LoginInput:
+      type: object
+      required: [loginId, password]
+      properties:
+        loginId: { type: string }
+        password: { type: string }
+        rememberMe: { type: boolean, default: false }
+    FindLoginIdInput:
+      type: object
+      required: [name, email]
+      properties:
+        name: { type: string }
+        email: { type: string, format: email }
+    RequestPasswordResetInput:
+      type: object
+      required: [loginId, email]
+      properties:
+        loginId: { type: string }
+        email: { type: string, format: email }
+    ResetPasswordInput:
+      type: object
+      required: [token, password, passwordConfirm]
+      properties:
+        token: { type: string }
+        password: { type: string, minLength: 10 }
+        passwordConfirm: { type: string }
+    UpdateProfileInput:
+      type: object
+      required: [name, email, phone]
+      properties:
+        name: { type: string }
+        email: { type: string, format: email }
+        phone: { type: string }
+    WithdrawInput:
+      type: object
+      required: [password, confirm]
+      properties:
+        password: { type: string }
+        confirm: { const: true }
+    ApplicationRevealInput:
+      type: object
+      required: [kind, applicationId]
+      properties:
+        kind: { type: string, enum: [course, event] }
+        applicationId: { type: string }
+    PrivacyRetentionSettingInput:
+      type: object
+      required: [courseRetentionPolicy, eventRetentionPolicy]
+      properties:
+        courseRetentionPolicy: { type: string }
+        eventRetentionPolicy: { type: string }
+        automaticPurgeEnabled: { type: boolean, default: false }
+    PurgeEligibilityInput:
+      type: object
+      required: [kind, applicationIds, purgeEligibleAt]
+      properties:
+        kind: { type: string, enum: [course, event] }
+        applicationIds:
+          { type: array, items: { type: string }, minItems: 1, maxItems: 500 }
+        purgeEligibleAt: { type: string, format: date-time }
+    PurgeRunInput:
+      type: object
+      properties:
+        dryRun: { type: boolean, default: true }

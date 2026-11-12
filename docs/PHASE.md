@@ -11,10 +11,10 @@
 
 | 항목 | 값 |
 |---|---|
-| 현재 Phase | **2 — Migration Contract** |
+| 현재 Phase | **3·4 — Frontend Reconstruction · Backend Replacement (병렬)** |
 | 상태 | `GATE_CHECK` |
-| 마지막 갱신 | 2026-11-11 |
-| 다음 행동 | 사람의 Phase 2 검토 및 Phase 3·4 병렬 착수 승인 대기 |
+| 마지막 갱신 | 2026-11-12 |
+| 다음 행동 | **사람 승인 대기.** PR 검토 후 Phase 5 시작 여부 결정 |
 | 막힌 것 | 없음 — 남은 의문은 ASM으로 기록하고 Phase 안에서 진행 |
 
 상태 값: `NOT_STARTED` → `IN_PROGRESS` → `GATE_CHECK` → `IN_REVIEW` → `APPROVED`
@@ -28,9 +28,9 @@
 |---|---|---|---|---|---|---|
 | 0 | Harness Bootstrap | APPROVED | PASS (7/7) | 차단 0 / 권장 2 | ☑ | `reports/phase-0-report.md` |
 | 1 | PHP Black-Box Reconnaissance | APPROVED | PASS (6/6) | 차단 0 / 권장 0 | ☑ | `reports/phase-1-report.md` |
-| 2 | Migration Contract | GATE_CHECK | PASS (7/7) | 차단 3 수정 / 권장 반영 | ☐ | `reports/phase-2-report.md` |
-| 3 | Frontend Reconstruction | NOT_STARTED | — | — | ☐ | `reports/phase-3-report.md` |
-| 4 | Backend Replacement | NOT_STARTED | — | — | ☐ | `reports/phase-4-report.md` |
+| 2 | Migration Contract | APPROVED | PASS (7/7) | 차단 3 수정 / 권장 반영 | ☑ | `reports/phase-2-report.md` |
+| 3 | Frontend Reconstruction | GATE_CHECK | PASS (5/5) | 차단 1 수정 / 권장 12 기록 | ☐ | `reports/phase-3-report.md` |
+| 4 | Backend Replacement | GATE_CHECK | PASS (9/9 적용) | 차단 1 수정 / 권장 12 기록 | ☐ | `reports/phase-4-report.md` |
 | 5 | Legacy Parity Testing | NOT_STARTED | — | — | ☐ | `reports/phase-5-report.md` |
 | 6 | Performance & Security | NOT_STARTED | — | — | ☐ | `reports/phase-6-report.md` |
 | 7 | Cutover 준비 | NOT_STARTED | — | — | ☐ | `reports/phase-7-report.md` |
@@ -67,12 +67,12 @@ Phase 0에서 Claude가 채웁니다. 필수 도구가 `정상`이 아니면 Pha
 | D1 | 원본 사진·서버 백업 확보 가능 여부 | Phase 2 | 확정 | 확보 불가, 레거시 데이터 이관 없음 | ADR-003 |
 | D2 | DB (PostgreSQL 신규 / MySQL 연결) | Phase 2 | 확정 | PostgreSQL + Prisma 신규 구축 | ADR-003 |
 | D3 | 배포 환경 | Phase 2 | 기본안(ASM-008) | Vercel 전제, DB·이미지 저장소는 어댑터 분리 | ADR-003 |
-| D4 | 문자·메일 공급사 | Phase 2 | 확정 | 1차 문자 발송 없음; 알림 인터페이스 + 콘솔 어댑터 | ADR-003 |
+| D4 | 문자·메일 공급사 | Phase 2 | 확정 | 문자 발송 없음, 계정 기능용 메일만; MailAdapter + console/Resend | ADR-004 |
 | D5 | 관리자 계정·권한 | Phase 2 | 확정 | 단일 관리자 역할, 관리자가 계정 추가·삭제 | ADR-003 |
-| D6 | 이미지·폰트 사용 권리 | Phase 3 전 | 미정 | | |
+| D6 | 이미지·폰트 사용 권리 | Phase 3 전 | 부분 확정 | 레거시 이미지는 학원 귀속, 폰트는 라이선스 확인 전 대체 | ADR-004 |
 | D7 | 도메인·DNS 관리 권한 | Phase 7 전 | 미정 | | |
 | D8 | 전환 일정 | Phase 7 | 미정 | | |
-| D9 | 설명회 규칙(정원·참석 인원 상한·마감·중복·필수 항목) | Phase 2 | 기본안(ASM-001) | 수동 상태 전환, 정원 미강제, 1건 최대 2명, 동일 연락처 중복 차단 | ADR-003 |
+| D9 | 설명회 규칙(정원·참석 인원 상한·마감·중복·필수 항목) | Phase 2 | 확정 | 수동 상태 전환, 정원 미강제, 1건 최대 2명, 의도적 재신청 허용 | ADR-004 |
 
 미정 사항은 Phase 안에서 ASM 기본안으로 설계·기록합니다. 다음 Phase 시작은 사람 승인 전에는 할 수 없습니다.
 
@@ -108,11 +108,11 @@ Phase 0에서 Claude가 채웁니다. 필수 도구가 `정상`이 아니면 Pha
 
 | 구분 | 전체 | 구현 | 테스트 통과 | 동등성 확인 |
 |---|---|---|---|---|
-| PG 페이지 | | | | |
-| FM 폼 | | | | |
-| BZ 비즈니스 규칙 | | | | |
-| AD 관리자 | | | | |
-| RT 레거시 URL | | | | |
+| PG 페이지 | 14 | 14 | 14 | Phase 5 |
+| FM 폼 | 3 | 3 | 3 | Phase 5 |
+| BZ 비즈니스 규칙 | 2 | 2 | 2 | Phase 5 |
+| AD 관리자 | 13 | 11 (010·011 범위 제외) | 11 | Phase 5 |
+| RT 레거시 URL | 4 | 4 | 4 | Phase 5 |
 
 ---
 
@@ -122,6 +122,12 @@ Claude는 Phase 상태가 바뀔 때마다 한 줄씩 추가합니다. 위쪽이
 
 | 날짜 | Phase | 변경 | 작성 |
 |---|---|---|---|
+| 2026-11-12 | 3·4 | PR #4 생성, CI verify 통과. GitGuardian은 과거 커밋의 테스트 가짜 비밀번호로 빨간불 — 사람 판단 필요 | Claude Code |
+| 2026-11-12 | 3·4 | 독립 리뷰 차단 2건(BZ-002 보유기간 문구 연결, ASM 등록부 누락) 수정, Gate PASS로 GATE_CHECK 전환 | Claude Code |
+| 2026-11-12 | 3·4 | C-3 통합: FE·BE 병합, 전체 E2E 39건, 통합에서 찾은 결함 5건 수정 | Claude Code |
+| 2026-11-11 | 3·4 | 레거시 이미지 57개 수집·연결, 1MB 초과 축소, Unsplash 6종 로컬화 (사용자 지시) | Claude Code |
+| 2026-11-11 | 3·4 | C-1 공유 계약 확정(Zod 전체·예약 조회 목록 계약), Prisma 7 설정·로컬/CI DB·테스트 하네스 정비, ASM-012~015 기록 | Claude Code |
+| 2026-11-11 | 2→3·4 | Phase 2 승인, PR #3 병합 (사용자 지시) | Codex |
 | 2026-11-11 | 2 | Gate PASS(7/7), 독립 리뷰 차단 3건 수정 후 GATE_CHECK로 전환 | Codex |
 | 2026-11-11 | 2 | Phase 2 시작: 확정 답변 및 ASM 기본안 반영, 상태를 IN_PROGRESS로 변경 | Codex |
 | 2026-11-09 | 1 | Phase 1 승인, PR #2 병합 (사용자 지시) | Codex |

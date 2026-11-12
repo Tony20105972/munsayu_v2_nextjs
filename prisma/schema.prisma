@@ -1,207 +1,379 @@
+// MUNSAYU V2 데이터 모델 (Phase 4).
+// 연결 문자열은 Prisma 7 규칙에 따라 prisma.config.ts에만 둔다.
+// 개인정보 컬럼에는 `/// PII` 주석을 붙인다. (BLUEPRINT 6장)
+
 generator client {
   provider = "prisma-client-js"
 }
+
 datasource db {
   provider = "postgresql"
-  url = env("DATABASE_URL")
 }
+
 enum UserRole {
   MEMBER
   ADMIN
 }
+
 enum AccountStatus {
   ACTIVE
   BLOCKED
   WITHDRAWN
 }
+
+/// 회원 세션과 관리자 세션을 분리한다. 회원 세션으로는 관리자 요청을 통과시키지 않는다.
+enum SessionScope {
+  MEMBER
+  ADMIN
+}
+
 enum IntakeStatus {
   OPEN
   CLOSED
 }
+
 enum ReservationStatus {
   PENDING
   CONFIRMED
   CANCELLED
 }
+
 enum ApplicationStatus {
   PENDING
   CONFIRMED
   CANCELLED
 }
+
+/// src/lib/contracts/admin.ts 의 AUDIT_ACTIONS 와 같은 목록을 유지한다.
 enum AuditAction {
   PII_VIEW
   CSV_EXPORT
   PII_PURGE
+  PURGE_SCHEDULE_SET
   ADMIN_ACCOUNT_CREATE
   ADMIN_ACCOUNT_DELETE
+  MEMBER_STATUS_CHANGE
+  RETENTION_SETTING_CHANGE
 }
+
 model User {
-  id String @id @default(cuid())
-  loginId String @unique
+  id           String @id @default(cuid())
+  loginId      String @unique
   passwordHash String
+
   /// PII
   name String
+
   /// PII
   email String @unique
+
   /// PII
   phone String
-  role UserRole @default(MEMBER)
-  status AccountStatus @default(ACTIVE)
-  sessions AuthSession[]
+
+  role        UserRole      @default(MEMBER)
+  status      AccountStatus @default(ACTIVE)
+  withdrawnAt DateTime?
+
+  sessions    AuthSession[]
+  resetTokens PasswordResetToken[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([role, status])
 }
+
 model AuthSession {
-  id String @id @default(cuid())
+  id     String @id @default(cuid())
   userId String
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tokenHash String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// 토큰 원문은 저장하지 않고 SHA-256 해시만 저장한다.
+  tokenHash String       @unique
+  scope     SessionScope
   expiresAt DateTime
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([userId, scope])
+  @@index([expiresAt])
 }
+
+model PasswordResetToken {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// 토큰 원문은 저장하지 않고 SHA-256 해시만 저장한다. 1회용이다.
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+/// 로그인 시도 제한을 재시작 후에도 유지하기 위한 기록.
+/// 식별자 원문은 저장하지 않고 해시만 저장한다. (BLUEPRINT 10장)
+model LoginAttempt {
+  id             String       @id @default(cuid())
+  identifierHash String
+  scope          SessionScope
+  succeeded      Boolean
+  attemptedAt    DateTime     @default(now())
+
+  @@index([identifierHash, attemptedAt])
+}
+
 model Campus {
-  id String @id @default(cuid())
-  name String @unique
+  id      String   @id @default(cuid())
+  name    String   @unique
   courses Course[]
-  events Event[]
+  events  Event[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
 model Course {
-  id String @id @default(cuid())
+  id       String @id @default(cuid())
   campusId String
-  campus Campus @relation(fields: [campusId], references: [id])
-  title String
+  campus   Campus @relation(fields: [campusId], references: [id])
+
+  title        String
   sectionTitle String?
-  gradeTitle String?
+  gradeTitle   String?
   scheduleText String?
-  startDate DateTime?
-  displayOrder Int @default(0)
+  startDate    DateTime?
+  displayOrder Int       @default(0)
+
+  /// 관리자가 직접 바꾸는 접수 상태. 정원으로 자동 마감하지 않는다. (ASM-001, Q-ADM-05)
   intakeStatus IntakeStatus @default(OPEN)
+
   applications CourseApplication[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([campusId, displayOrder])
 }
+
 model CourseApplication {
-  id String @id @default(cuid())
+  id       String @id @default(cuid())
   courseId String
-  course Course @relation(fields: [courseId], references: [id])
+  course   Course @relation(fields: [courseId], references: [id])
+
   /// PII
   studentName String
+
   /// PII
   guardianPhone String
+
   /// PII
   schoolName String
+
   department String
-  grade String
-  privacyConsentAt DateTime
-  /// PII 파기 대상 시각; 등록 안내 완료 시 설정한다. // ASM-009
+  grade      String
+
+  privacyConsentAt       DateTime
+  retentionPolicyVersion String
+
+  /// PII 파기 대상 시각; 종강·등록 안내 완료 시 관리자가 설정한다. // ASM-009
   purgeEligibleAt DateTime?
-  retentionPolicyVersion String @default("legacy-ev-0006-v1")
-  status ApplicationStatus @default(PENDING)
-  idempotencyKey String @unique
+
+  /// 비식별화(파기)를 실행한 시각.
+  purgedAt DateTime?
+
+  status      ApplicationStatus @default(PENDING)
   cancelledAt DateTime?
+
+  /// 같은 신청서의 재전송만 막는 유일 키. 같은 연락처의 재신청은 허용한다. (ASM-001)
+  idempotencyKey String @unique
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  @@index([courseId, guardianPhone, status])
+
+  @@index([guardianPhone, createdAt])
+  @@index([courseId, status])
+  @@index([purgeEligibleAt, purgedAt])
+  @@index([createdAt])
 }
+
 model EventStatusOption {
-  id String @id @default(cuid())
-  label String @unique
-  sortOrder Int @default(0)
+  id        String @id @default(cuid())
+  label     String @unique
+  sortOrder Int    @default(0)
+
+  /// true면 새 예약을 받지 않는다.
   isClosed Boolean @default(false)
+
   events Event[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([sortOrder])
 }
+
 model Event {
-  id String @id @default(cuid())
+  id       String  @id @default(cuid())
   campusId String?
-  campus Campus? @relation(fields: [campusId], references: [id])
+  campus   Campus? @relation(fields: [campusId], references: [id])
+
+  /// 자동 생성하되 관리자가 고칠 수 있다. (ASM-005)
   managementCode String @unique
-  title String
+
+  title    String
   startsAt DateTime
-  venue String?
-  speaker String?
+  venue    String?
+  speaker  String?
+
   statusOptionId String
-  statusOption EventStatusOption @relation(fields: [statusOptionId], references: [id])
+  statusOption   EventStatusOption @relation(fields: [statusOptionId], references: [id])
+
   reservations EventReservation[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([campusId, startsAt])
+  @@index([statusOptionId])
 }
+
 model EventReservation {
-  id String @id @default(cuid())
+  id      String @id @default(cuid())
   eventId String
-  event Event @relation(fields: [eventId], references: [id])
+  event   Event  @relation(fields: [eventId], references: [id])
+
   /// PII
   name String
+
   /// PII
   phone String
+
   grade String
+
+  /// 1건 최대 2명. 상한 검증은 공유 계약(Zod)에서 한다. (ASM-001, D9)
   attendeeCount Int
-  privacyConsentAt DateTime
-  /// PII 파기 대상 시각; 설명회 종료 및 안내 완료 시 설정한다. // ASM-009
+
+  privacyConsentAt       DateTime
+  retentionPolicyVersion String
+
+  /// PII 파기 대상 시각; 설명회 종료·안내 완료 시 관리자가 설정한다. // ASM-009
   purgeEligibleAt DateTime?
-  retentionPolicyVersion String @default("legacy-ev-0006-v1")
-  status ReservationStatus @default(PENDING)
-  idempotencyKey String @unique
+
+  /// 비식별화(파기)를 실행한 시각.
+  purgedAt DateTime?
+
+  status      ReservationStatus @default(PENDING)
   cancelledAt DateTime?
+
+  idempotencyKey String @unique
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  @@index([eventId, phone, status])
+
+  @@index([phone, createdAt])
+  @@index([eventId, status])
+  @@index([purgeEligibleAt, purgedAt])
+  @@index([createdAt])
 }
+
 model Instructor {
-  id String @id @default(cuid())
-  name String
-  profileCode String @unique
+  id              String  @id @default(cuid())
+  name            String
+  profileCode     String  @unique
   photoStorageKey String?
-  bio String?
+  bio             String?
+
   memberships InstructorTeamMembership[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
 model InstructorTeam {
-  id String @id @default(cuid())
+  id   String @id @default(cuid())
   name String @unique
+
   memberships InstructorTeamMembership[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+/// 한 강사가 여러 팀에 속할 수 있고 팀마다 노출 순서를 따로 둔다. (ASM-003)
 model InstructorTeamMembership {
   instructorId String
-  teamId String
-  instructor Instructor @relation(fields: [instructorId], references: [id], onDelete: Cascade)
-  team InstructorTeam @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  teamId       String
+  instructor   Instructor     @relation(fields: [instructorId], references: [id], onDelete: Cascade)
+  team         InstructorTeam @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
   displayOrder Int @default(0)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
   @@id([instructorId, teamId])
+  @@index([teamId, displayOrder])
 }
+
+/// 공지(PG-012) 공개 읽기 전용. 관리자 작성 화면은 이번 범위 밖이다. (ASM-015)
+model Notice {
+  id          String    @id @default(cuid())
+  title       String
+  body        String
+  isPinned    Boolean   @default(false)
+  publishedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isPinned, publishedAt])
+}
+
+/// 보존 설정은 한 행만 쓴다. 표시 문구와 파기 기준이 같은 값을 쓴다. (ASM-009, BZ-002)
 model PrivacyRetentionSetting {
-  id Int @id @default(1)
-  courseRetentionPolicy String @default("종강 및 정규 등록 안내 완료 시점 즉시 파기")
-  eventRetentionPolicy String @default("종강 및 정규 등록 안내 완료 시점 즉시 파기")
+  id                    Int    @id @default(1)
+  courseRetentionPolicy String
+  eventRetentionPolicy  String
+
+  /// 자동 파기 기본값은 꺼짐이다.
   automaticPurgeEnabled Boolean @default(false)
+
   updatedByUserId String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
 model AuditLog {
   id String @id @default(cuid())
-  /// PII 가능 식별자
+
+  /// 행위자 식별자. 신청자 개인정보는 넣지 않는다.
   actorUserId String?
-  action AuditAction
+
+  action       AuditAction
   resourceType String
-  resourceId String?
-  /// PII 금지: 건수·필터 이름만 저장하는 비식별 요약
+  resourceId   String?
+
+  /// PII 금지: 건수와 필터 이름만 담는 비식별 요약. (AD-013)
   filterSummary String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([action, createdAt])
+  @@index([actorUserId, createdAt])
 }
+
 model AppSetting {
-  key String @id
+  key   String @id
   value String
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

@@ -1,0 +1,52 @@
+import { Suspense } from "react";
+import { EventList } from "@/components/public/event-list";
+import { LoadingBlock } from "@/components/ui/loading-block";
+import { PageBanner } from "@/components/ui/page-banner";
+import { loadEventGroups, loadRetentionPolicies } from "@/lib/data/public-content";
+import { buildPageMetadata } from "@/lib/metadata";
+import { SITE_TITLE_SUFFIX } from "@/lib/site-config";
+
+/**
+ * PG-010 현장설명회 예약 + FM-002 설명회 신청.
+ * 근거: docs/evidence/dom/phase1-presentation.yml (EV-0005)
+ * 레거시 관찰 시점에는 title 이 홈과 같았다(legacy-seo-map.md).
+ * 상태 문구와 마감 여부는 관리자가 고른 상태 옵션 값을 그대로 쓴다. (ASM-001)
+ */
+export const metadata = buildPageMetadata({
+  title: SITE_TITLE_SUFFIX,
+  description: "문사유 아카데미의 명쾌한 분석과 입시 전략, 현장에서 직접 확인하세요.",
+  path: "/sub/Presentation",
+});
+
+async function EventGroups() {
+  const [groups, retention] = await Promise.all([
+    loadEventGroups(),
+    loadRetentionPolicies(),
+  ]);
+  return <EventList groups={groups} retentionPolicy={retention.event} />;
+}
+
+export default function PresentationPage() {
+  return (
+    <>
+      <PageBanner
+        title="현장설명회 예약"
+        description="문사유 아카데미의 명쾌한 분석과 입시 전략, 현장에서 직접 확인하세요."
+      />
+      <section className="bg-canvas">
+        <div className="mx-auto max-w-5xl px-4 pt-14 text-center">
+          <h2 className="text-xl font-bold tracking-tight sm:text-2xl">
+            설명회 일정 확인 및 예약
+          </h2>
+          <p className="mt-4 text-sm leading-relaxed text-muted">
+            좌석이 한정되어 있으니 참석을 원하시는 지점의 설명회를 선택해 조기 예약해
+            주시기 바랍니다.
+          </p>
+        </div>
+        <Suspense fallback={<LoadingBlock label="설명회 일정을 불러오고 있습니다." />}>
+          <EventGroups />
+        </Suspense>
+      </section>
+    </>
+  );
+}
