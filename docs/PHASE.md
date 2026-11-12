@@ -11,10 +11,10 @@
 
 | 항목 | 값 |
 |---|---|
-| 현재 Phase | **3·4 — Frontend Reconstruction · Backend Replacement (병렬)** |
-| 상태 | `GATE_CHECK` |
+| 현재 Phase | **5 — Legacy Parity Testing** |
+| 상태 | `NOT_STARTED` |
 | 마지막 갱신 | 2026-11-12 |
-| 다음 행동 | **사람 승인 대기.** PR 검토 후 Phase 5 시작 여부 결정 |
+| 다음 행동 | Phase 5 시작 시 아래 **Phase 5 이월 항목**을 가장 먼저 처리 |
 | 막힌 것 | 없음 — 남은 의문은 ASM으로 기록하고 Phase 안에서 진행 |
 
 상태 값: `NOT_STARTED` → `IN_PROGRESS` → `GATE_CHECK` → `IN_REVIEW` → `APPROVED`
@@ -29,8 +29,8 @@
 | 0 | Harness Bootstrap | APPROVED | PASS (7/7) | 차단 0 / 권장 2 | ☑ | `reports/phase-0-report.md` |
 | 1 | PHP Black-Box Reconnaissance | APPROVED | PASS (6/6) | 차단 0 / 권장 0 | ☑ | `reports/phase-1-report.md` |
 | 2 | Migration Contract | APPROVED | PASS (7/7) | 차단 3 수정 / 권장 반영 | ☑ | `reports/phase-2-report.md` |
-| 3 | Frontend Reconstruction | GATE_CHECK | PASS (5/5) | 차단 1 수정 / 권장 12 기록 | ☐ | `reports/phase-3-report.md` |
-| 4 | Backend Replacement | GATE_CHECK | PASS (9/9 적용) | 차단 1 수정 / 권장 12 기록 | ☐ | `reports/phase-4-report.md` |
+| 3 | Frontend Reconstruction | APPROVED | PASS (5/5) | 차단 1 수정 / 권장 12 기록 | ☑ | `reports/phase-3-report.md` |
+| 4 | Backend Replacement | APPROVED | PASS (9/9 적용) | 차단 1 수정 / 권장 12 기록 | ☑ | `reports/phase-4-report.md` |
 | 5 | Legacy Parity Testing | NOT_STARTED | — | — | ☐ | `reports/phase-5-report.md` |
 | 6 | Performance & Security | NOT_STARTED | — | — | ☐ | `reports/phase-6-report.md` |
 | 7 | Cutover 준비 | NOT_STARTED | — | — | ☐ | `reports/phase-7-report.md` |
@@ -38,6 +38,21 @@
 - Gate 칸: `PASS (n/n)` 또는 `FAIL (통과 수/전체)`
 - 독립 리뷰 칸: `차단 0 / 권장 n` 형식
 - 3·4는 병렬 진행하고, 두 Phase의 Gate·독립 리뷰·보고를 마친 뒤 한 번만 사람 승인을 받습니다.
+
+---
+
+## Phase 5 이월 항목
+
+Phase 3·4 승인 시 사용자가 지정한 보완 사항입니다. **Phase 5를 시작하면 가장 먼저 처리합니다.**
+
+| 항목 | 내용 |
+|---|---|
+| 로컬 실행 안내 | `docs/LOCAL_DEV.md` 작성 — Docker·`.env` 키 이름, DB 실행 → 마이그레이션 → 시드 → 개발 서버 명령, 관리자 주소와 첫 관리자 계정 만드는 방법(값은 쓰지 않음), 회원·관리자 로그인 위치 |
+| 메인 원본 HTML 반영 | `docs/legacy/source/home/`의 사용자 저장본(없으면 Phase 1 DOM 증거 + 공개 CSS GET) 기준으로 메인 화면 구조·문구·스타일을 맞춘다. 상담 시간 두 가지와 `/sub/abouttch3` 링크는 원장님께 질문으로 남긴다 |
+| AD-010 설명회 알림 신청 | **범위 포함으로 결정**(사용자, 2026-11-12). 메인 하단 폼(학년·학생 이름·학교명·보호자 연락처, 레거시 `POST ./sms_subscribe.ajax.php`) + 개인정보·알림 수신 동의 신규 + 관리자 문자신청내역 목록·CSV. **문자 발송은 없다** |
+
+- 이 표의 항목은 Phase 5 보고서에서 처리 결과를 적습니다.
+- AD-010은 범위 포함으로 바뀌었으므로 `migration-matrix.md`·`migration-status.md`의 해당 행도 함께 갱신했습니다(구현은 Phase 5).
 
 ---
 
@@ -122,6 +137,7 @@ Claude는 Phase 상태가 바뀔 때마다 한 줄씩 추가합니다. 위쪽이
 
 | 날짜 | Phase | 변경 | 작성 |
 |---|---|---|---|
+| 2026-11-12 | 3·4→5 | Phase 3·4 승인, PR #4 squash 병합 (사용자 지시). 보완 3건은 Phase 5로 이월 | Claude Code |
 | 2026-11-12 | 3·4 | PR #4 생성, CI verify 통과. GitGuardian은 과거 커밋의 테스트 가짜 비밀번호로 빨간불 — 사람 판단 필요 | Claude Code |
 | 2026-11-12 | 3·4 | 독립 리뷰 차단 2건(BZ-002 보유기간 문구 연결, ASM 등록부 누락) 수정, Gate PASS로 GATE_CHECK 전환 | Claude Code |
 | 2026-11-12 | 3·4 | C-3 통합: FE·BE 병합, 전체 E2E 39건, 통합에서 찾은 결함 5건 수정 | Claude Code |
