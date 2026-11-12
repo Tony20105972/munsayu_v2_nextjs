@@ -122,6 +122,7 @@ Claude는 Phase 상태가 바뀔 때마다 한 줄씩 추가합니다. 위쪽이
 
 | 날짜 | Phase | 변경 | 작성 |
 |---|---|---|---|
+| 2026-11-12 | 3·4 | PR #4 생성, CI verify 통과. GitGuardian은 과거 커밋의 테스트 가짜 비밀번호로 빨간불 — 사람 판단 필요 | Claude Code |
 | 2026-11-12 | 3·4 | 독립 리뷰 차단 2건(BZ-002 보유기간 문구 연결, ASM 등록부 누락) 수정, Gate PASS로 GATE_CHECK 전환 | Claude Code |
 | 2026-11-12 | 3·4 | C-3 통합: FE·BE 병합, 전체 E2E 39건, 통합에서 찾은 결함 5건 수정 | Claude Code |
 | 2026-11-11 | 3·4 | 레거시 이미지 57개 수집·연결, 1MB 초과 축소, Unsplash 6종 로컬화 (사용자 지시) | Claude Code |
