@@ -145,6 +145,9 @@ describe("AD-013 개인정보 열람·내보내기·파기", () => {
         body: {
           courseRetentionPolicy: "강좌 종료 후 30일 보관 뒤 파기",
           eventRetentionPolicy: "설명회 종료 후 30일 보관 뒤 파기",
+          consultationRetentionPolicy: "상담 종료 후 30일 보관 뒤 파기",
+          instructorRetentionPolicy: "채용 종료 후 30일 보관 뒤 파기",
+          smsRetentionPolicy: "안내 종료 후 30일 보관 뒤 파기",
           automaticPurgeEnabled: true,
         },
       }),
@@ -258,7 +261,10 @@ describe("AD-013 개인정보 열람·내보내기·파기", () => {
     const audit = await db.auditLog.findFirstOrThrow({
       where: { action: "PII_PURGE" },
     });
-    expect(audit.filterSummary).toBe("course=1;event=1");
+    // Phase 5에서 상담·강사 지원·알림 신청이 파기 대상에 함께 들어왔다.
+    expect(audit.filterSummary).toBe(
+      "course=1;event=1;consultation=0;instructor=0;sms=0;files=0",
+    );
   });
 
   test("AD-013 파기 실행: 보존 기간이 남은 건은 지우지 않는다", async () => {

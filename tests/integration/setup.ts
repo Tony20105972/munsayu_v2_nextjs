@@ -1,3 +1,6 @@
+import { mkdtempSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import "dotenv/config";
 
 /**
@@ -14,3 +17,6 @@ process.env.NOTIFY_ADAPTER = "memory";
 process.env.AUTH_SECRET = process.env.AUTH_SECRET ?? "test-only-secret";
 process.env.PRIVACY_PURGE_SECRET =
   process.env.PRIVACY_PURGE_SECRET ?? "test-only-purge-secret";
+
+// 올린 파일(이력서·공지 첨부)이 저장소 폴더를 더럽히지 않도록 임시 폴더로 보낸다. (AD-011)
+process.env.STORAGE_ROOT = mkdtempSync(join(tmpdir(), "munsayu-test-storage-"));

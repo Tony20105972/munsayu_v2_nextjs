@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { Suspense } from "react";
+import { FooterReserveLinks } from "@/components/layout/footer-reserve-links";
 import {
   BUSINESS_INFO,
   CAMPUSES,
@@ -12,6 +14,7 @@ import {
 /**
  * 레거시 공개 푸터(EV-0003, EV-0007) 재현.
  * RESERVE 묶음의 `문해력 진단 신청`은 외부 Google Forms 주소를 그대로 유지한다. (RT-003)
+ * 그 주소와 `강사 지원` 노출 여부는 관리자 설정값이라 `FooterReserveLinks` 로 따로 뺐다.
  */
 export function SiteFooter() {
   return (
@@ -59,16 +62,22 @@ export function SiteFooter() {
             <nav aria-label="RESERVE">
               <h2 className="text-sm font-bold tracking-wider">RESERVE</h2>
               <ul className="mt-4 space-y-2 text-sm text-white/75">
-                <li>
-                  <a
-                    href={EXTERNAL_LINKS.literacyDiagnosis}
-                    target="_blank"
-                    rel="noreferrer noopener"
-                    className="hover:text-accent"
-                  >
-                    문해력 진단 신청
-                  </a>
-                </li>
+                <Suspense
+                  fallback={
+                    <li>
+                      <a
+                        href={EXTERNAL_LINKS.literacyDiagnosis}
+                        target="_blank"
+                        rel="noreferrer noopener"
+                        className="hover:text-accent"
+                      >
+                        문해력 진단 신청
+                      </a>
+                    </li>
+                  }
+                >
+                  <FooterReserveLinks />
+                </Suspense>
                 <li>
                   <Link href="/sub/Presentation" className="hover:text-accent">
                     설명회 신청

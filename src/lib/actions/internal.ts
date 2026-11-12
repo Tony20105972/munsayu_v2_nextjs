@@ -135,3 +135,23 @@ export function formEntries(formData: FormData): Record<string, string> {
   }
   return raw;
 }
+
+export function isNonEmptyString(value: FormDataEntryValue): value is string {
+  return typeof value === "string" && value.trim().length > 0;
+}
+
+/**
+ * 올라온 파일을 메모리로 읽는다. 비어 있는 입력란은 `null` 이다.
+ * 형식·용량 검사는 서비스 계층에서 한다. 이 함수는 옮기기만 한다.
+ */
+export async function readUploadedFile(
+  value: FormDataEntryValue | null,
+): Promise<{ filename: string; bytes: Uint8Array } | null> {
+  if (!value || typeof value === "string") return null;
+  if (value.size === 0) return null;
+
+  return {
+    filename: value.name,
+    bytes: new Uint8Array(await value.arrayBuffer()),
+  };
+}

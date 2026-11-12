@@ -15,10 +15,11 @@
 | AD-001 | 관리자 로그인·로그아웃·로그인 유지 | OBSERVED-USER | 관리자 전용 — 근거 EV-ADM-01만. 공개 `/bbs/login.php`은 회원 로그인 화면(EV-0007) | EV-ADM-01 |
 | AD-006 | 강사 관리 | OBSERVED-USER + OBSERVED | 관리자 전용 관리 기능은 EV-ADM-04, 공개 강사 소개는 `/sub/abouttch1` EV-0009 | EV-ADM-04, EV-0009 |
 | AD-007/008 | 시간표·강좌 신청 관리 | OBSERVED-USER + OBSERVED | 사용자 제공 관리자 화면과 공개 시간표·예약 모달 연결 | EV-ADM-05, EV-0006 |
-| AD-009 | 입학진단 | 확정(사용자 답변) | Google Forms 외부 링크 연결만, 신규 구현 없음 | EV-0006, EV-0007 |
-| AD-010 | 문자신청내역 | UNKNOWN | 공개 화면에서 범위 미확정 | Q-ADM-07, Q-ADM-11 |
-| AD-011 | 강사지원 | UNKNOWN | 공개 화면에서 범위 미확정 | Q-ADM-07 |
+| AD-009 | 입학진단 | 확정(사용자 답변) | Google Forms 외부 링크 유지. 주소는 관리자 설정에서 바꾼다. 관리 화면은 이관 (ADR-007) | EV-0006, EV-0007 |
+| AD-010 | 문자신청내역 | OBSERVED-USER + OBSERVED | 메인 하단 폼(EV-0003) 이관. 문자 발송은 없음 (ADR-007) | Q-ADM-07, Q-ADM-11 |
+| AD-011 | 강사지원 | OBSERVED-USER + OBSERVED | `/sub/Recruit` 공개 폼 관찰(EV-0014). 범위 포함 (ADR-007) | Q-ADM-07 |
 | AD-012 | 접속자 집계·검색 | OBSERVED-USER | 관리자 전용 — 근거 EV-ADM-06, EV-ADM-07만 | EV-ADM-06, EV-ADM-07 |
+| AD-014 | 공지사항 관리 | OBSERVED-USER + OBSERVED | 레거시 게시판은 `notice` 하나뿐(EV-ADM-10/11). 공지 단일 게시판으로 이관 (ADR-007) | EV-ADM-10, EV-ADM-11, EV-0007 |
 | PG-011 | 설명회 예약 조회/취소 | OBSERVED | 학생 이름·보호자 휴대폰 조회 UI와 취소/알림 안내 문구 | EV-0008 |
 
 ## AD 연결 대조
@@ -37,4 +38,5 @@
 | AD-010 | AD-010 행 |
 | AD-011 | AD-011 행 |
 | AD-012 | AD-012 행 |
+| AD-014 | AD-014 행, PG-012 |
 | AD-013 | FM-001, BZ-002 |

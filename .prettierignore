@@ -3,3 +3,6 @@ node_modules
 coverage
 playwright-report
 test-results
+
+# 증거 파일은 관찰한 그대로 보관한다. 서식을 바꾸면 원본과 달라진다. (CLAUDE.md 5장)
+docs/evidence

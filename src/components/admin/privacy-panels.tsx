@@ -11,10 +11,16 @@ import { runPurgeAction, updateRetentionSettingAction } from "@/lib/actions/admi
 export function RetentionSettingForm({
   courseRetentionPolicy,
   eventRetentionPolicy,
+  consultationRetentionPolicy,
+  instructorRetentionPolicy,
+  smsRetentionPolicy,
   automaticPurgeEnabled,
 }: {
   courseRetentionPolicy: string;
   eventRetentionPolicy: string;
+  consultationRetentionPolicy: string;
+  instructorRetentionPolicy: string;
+  smsRetentionPolicy: string;
   automaticPurgeEnabled: boolean;
 }) {
   return (
@@ -41,6 +47,30 @@ export function RetentionSettingForm({
             required
             errors={fieldErrors.eventRetentionPolicy}
           />
+          <AdminTextField
+            name="consultationRetentionPolicy"
+            label="입학진단·상담 신청 보유기간 문구"
+            hint="상담 신청 기록의 파기 기준입니다. (AD-009)"
+            defaultValue={consultationRetentionPolicy}
+            required
+            errors={fieldErrors.consultationRetentionPolicy}
+          />
+          <AdminTextField
+            name="instructorRetentionPolicy"
+            label="강사 지원 보유기간 문구"
+            hint="강사 지원서의 「보유기간」 안내에 그대로 나옵니다. 파기하면 제출 서류 파일도 함께 지웁니다. (AD-011)"
+            defaultValue={instructorRetentionPolicy}
+            required
+            errors={fieldErrors.instructorRetentionPolicy}
+          />
+          <AdminTextField
+            name="smsRetentionPolicy"
+            label="설명회 알림 신청 보유기간 문구"
+            hint="홈 하단 알림 신청 폼의 「보유기간」 안내에 그대로 나옵니다. (AD-010)"
+            defaultValue={smsRetentionPolicy}
+            required
+            errors={fieldErrors.smsRetentionPolicy}
+          />
           <AdminCheckboxField
             name="automaticPurgeEnabled"
             label="자동 파기 사용"
@@ -54,7 +84,14 @@ export function RetentionSettingForm({
   );
 }
 
-type PurgeCounts = { courseApplications: number; eventReservations: number };
+type PurgeCounts = {
+  courseApplications: number;
+  eventReservations: number;
+  consultationApplications: number;
+  instructorApplications: number;
+  smsSubscriptions: number;
+  removedFiles: number;
+};
 
 /**
  * 파기 실행. **먼저 미리 세기(dry-run)** 를 하고, 그 결과를 본 뒤에만 실제 파기 버튼이 열린다.
@@ -83,25 +120,32 @@ export function PurgeRunPanel() {
       return;
     }
 
+    const counts: PurgeCounts = {
+      courseApplications: actionResult.data.courseApplications,
+      eventReservations: actionResult.data.eventReservations,
+      consultationApplications: actionResult.data.consultationApplications,
+      instructorApplications: actionResult.data.instructorApplications,
+      smsSubscriptions: actionResult.data.smsSubscriptions,
+      removedFiles: actionResult.data.removedFiles,
+    };
+
     if (actionResult.data.dryRun) {
-      setDryRunCounts({
-        courseApplications: actionResult.data.courseApplications,
-        eventReservations: actionResult.data.eventReservations,
-      });
+      setDryRunCounts(counts);
       setResult(null);
       return;
     }
 
-    setResult({
-      courseApplications: actionResult.data.courseApplications,
-      eventReservations: actionResult.data.eventReservations,
-    });
+    setResult(counts);
     setDryRunCounts(null);
     setConfirmOpen(false);
   }
 
   const totalToPurge = dryRunCounts
-    ? dryRunCounts.courseApplications + dryRunCounts.eventReservations
+    ? dryRunCounts.courseApplications +
+      dryRunCounts.eventReservations +
+      dryRunCounts.consultationApplications +
+      dryRunCounts.instructorApplications +
+      dryRunCounts.smsSubscriptions
     : 0;
 
   return (
@@ -111,7 +155,7 @@ export function PurgeRunPanel() {
         <li>건수를 확인한 뒤에만 「실제 파기 실행」 버튼이 열립니다.</li>
         <li>
           실제 파기는 되돌릴 수 없습니다. 행은 남고 이름·연락처·학교 칸이 「파기됨」으로
-          바뀝니다.
+          바뀝니다. 강사 지원은 제출 서류 파일도 함께 지웁니다. (AD-011)
         </li>
       </ol>
 
@@ -149,7 +193,15 @@ export function PurgeRunPanel() {
           미리 세기 결과: 강좌 신청{" "}
           <strong className="font-bold">{dryRunCounts.courseApplications}건</strong>,
           설명회 예약{" "}
-          <strong className="font-bold">{dryRunCounts.eventReservations}건</strong> 이
+          <strong className="font-bold">{dryRunCounts.eventReservations}건</strong>,
+          입학진단·상담{" "}
+          <strong className="font-bold">
+            {dryRunCounts.consultationApplications}건
+          </strong>
+          , 강사 지원{" "}
+          <strong className="font-bold">{dryRunCounts.instructorApplications}건</strong>
+          , 설명회 알림 신청{" "}
+          <strong className="font-bold">{dryRunCounts.smsSubscriptions}건</strong> 이
           파기 대상입니다.
           {totalToPurge === 0
             ? " 지금은 파기할 건이 없습니다."
@@ -163,7 +215,10 @@ export function PurgeRunPanel() {
           className="rounded-md border border-brand/40 bg-brand/5 px-3 py-2 text-sm font-bold text-brand"
         >
           파기를 실행했습니다. 강좌 신청 {result.courseApplications}건, 설명회 예약{" "}
-          {result.eventReservations}건. 실행 기록이 남았습니다.
+          {result.eventReservations}건, 입학진단·상담 {result.consultationApplications}
+          건, 강사 지원 {result.instructorApplications}건(제출 서류{" "}
+          {result.removedFiles}개 삭제), 설명회 알림 신청 {result.smsSubscriptions}건.
+          실행 기록이 남았습니다.
         </p>
       ) : null}
 

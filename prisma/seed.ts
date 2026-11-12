@@ -1,5 +1,13 @@
 import "dotenv/config";
-import { COURSE_PRIVACY_CONSENT, EVENT_PRIVACY_CONSENT } from "@/lib/contracts";
+import {
+  CONSULTATION_PRIVACY_CONSENT,
+  COURSE_PRIVACY_CONSENT,
+  DEFAULT_CONSULTATION_TYPES,
+  DEFAULT_INSTRUCTOR_APPLICATION_STATUSES,
+  EVENT_PRIVACY_CONSENT,
+  INSTRUCTOR_PRIVACY_CONSENT,
+  SMS_SUBSCRIPTION_CONSENT,
+} from "@/lib/contracts";
 import { hashPassword } from "@/server/auth/password";
 import { db } from "@/server/db";
 import { fixturePassword } from "../tests/fixtures/passwords";
@@ -354,6 +362,8 @@ async function main(): Promise<void> {
       title: notice.title,
       body: notice.body,
       isPinned: notice.isPinned,
+      // 시드 공지는 바로 공개된다. 임시 저장 상태 확인은 테스트에서 따로 한다. (AD-014)
+      status: "PUBLISHED" as const,
       publishedAt: new Date(notice.publishedAt),
     };
     await db.notice.upsert({
@@ -371,9 +381,30 @@ async function main(): Promise<void> {
       id: 1,
       courseRetentionPolicy: COURSE_PRIVACY_CONSENT.retention,
       eventRetentionPolicy: EVENT_PRIVACY_CONSENT.retention,
+      consultationRetentionPolicy: CONSULTATION_PRIVACY_CONSENT.retention,
+      instructorRetentionPolicy: INSTRUCTOR_PRIVACY_CONSENT.retention,
+      smsRetentionPolicy: SMS_SUBSCRIPTION_CONSENT.retention,
       automaticPurgeEnabled: false,
     },
   });
+
+  // AD-009 상담 유형 기본 목록. 관리자가 추가·수정할 수 있다. // ASM-083
+  for (const [index, label] of DEFAULT_CONSULTATION_TYPES.entries()) {
+    await db.consultationTypeOption.upsert({
+      where: { label },
+      update: {},
+      create: { label, sortOrder: index },
+    });
+  }
+
+  // AD-011 강사 지원 상태 기본 목록. // ASM-087
+  for (const [index, label] of DEFAULT_INSTRUCTOR_APPLICATION_STATUSES.entries()) {
+    await db.instructorApplicationStatusOption.upsert({
+      where: { label },
+      update: {},
+      create: { label, sortOrder: index },
+    });
+  }
 
   await seedAccounts();
 

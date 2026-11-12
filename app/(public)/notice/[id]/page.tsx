@@ -4,11 +4,7 @@ import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { PageBanner } from "@/components/ui/page-banner";
 import { buildPageMetadata, pageTitle } from "@/lib/metadata";
-import {
-  formatNoticeDetailDate,
-  toParagraphs,
-  NOTICE_AUTHOR_LABEL,
-} from "@/lib/view-models";
+import { formatNoticeDetailDate, NOTICE_AUTHOR_LABEL } from "@/lib/view-models";
 import { AppError } from "@/server/errors";
 import { getNotice, type NoticeDetail } from "@/server/services/notices";
 
@@ -84,11 +80,35 @@ export default async function NoticeDetailPage({ params }: NoticeDetailPageProps
             <p className="mt-2 text-sm text-muted">
               {NOTICE_AUTHOR_LABEL} · {formatNoticeDetailDate(notice.publishedAt)}
             </p>
-            <div className="mt-6 space-y-4 text-sm leading-relaxed text-muted">
-              {toParagraphs(notice.body).map((paragraph) => (
-                <p key={paragraph}>{paragraph}</p>
-              ))}
-            </div>
+            {/*
+              본문은 서버가 저장 전과 조회 시 두 번 허용 목록으로 정리한 HTML 이다.
+              정리를 거치지 않은 값이 이 자리에 오면 안 된다. (AD-014, ADR-006)
+            */}
+            <div
+              className="notice-body mt-6 text-sm leading-relaxed text-muted"
+              dangerouslySetInnerHTML={{ __html: notice.body }}
+            />
+
+            {notice.attachments.length > 0 ? (
+              <section className="mt-8 border-t border-line pt-4">
+                <h3 className="text-sm font-bold text-ink">첨부파일</h3>
+                <ul className="mt-2 space-y-1">
+                  {notice.attachments.map((attachment) => (
+                    <li key={attachment.id}>
+                      <a
+                        href={`/api/notices/attachments/${attachment.id}`}
+                        className="text-sm font-bold text-brand hover:underline"
+                      >
+                        {attachment.filename}
+                      </a>
+                      <span className="ml-2 text-xs text-muted">
+                        {Math.max(1, Math.round(attachment.sizeBytes / 1024))}KB
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
           </article>
 
           <p className="mt-6">

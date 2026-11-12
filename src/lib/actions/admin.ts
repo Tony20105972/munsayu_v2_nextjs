@@ -524,6 +524,10 @@ export async function runPurgeAction(formData: FormData): Promise<
     dryRun: boolean;
     courseApplications: number;
     eventReservations: number;
+    consultationApplications: number;
+    instructorApplications: number;
+    smsSubscriptions: number;
+    removedFiles: number;
   }>
 > {
   try {
@@ -544,6 +548,10 @@ export async function runPurgeAction(formData: FormData): Promise<
       dryRun: result.dryRun,
       courseApplications: result.courseApplications,
       eventReservations: result.eventReservations,
+      consultationApplications: result.consultationApplications,
+      instructorApplications: result.instructorApplications,
+      smsSubscriptions: result.smsSubscriptions,
+      removedFiles: result.removedFiles,
     });
   } catch (error) {
     return toFailure(error);

@@ -13,6 +13,7 @@ import {
 } from "@/lib/contracts";
 import { db } from "@/server/db";
 import { notFound } from "@/server/errors";
+import { csvRows } from "@/server/lib/csv";
 import { summarizeFilter, writeAuditLog } from "@/server/services/audit";
 
 type CourseWhere = Prisma.CourseApplicationWhereInput;
@@ -216,14 +217,6 @@ export async function revealApplication(
     retentionPolicyVersion: row.retentionPolicyVersion,
     auditId: audit.id,
   };
-}
-
-function csvCell(value: unknown): string {
-  return `"${String(value ?? "").replaceAll('"', '""')}"`;
-}
-
-function csvRows(header: string[], rows: string[][]): string {
-  return [header, ...rows].map((row) => row.map(csvCell).join(",")).join("\r\n");
 }
 
 export type CsvExportResult = {

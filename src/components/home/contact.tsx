@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { EventNoticeForm } from "@/components/home/event-notice-form";
 import { CAMPUSES, EXTERNAL_LINKS, HOME_COUNSEL_HOURS } from "@/lib/site-config";
 
 const DAECHI = CAMPUSES[0];
@@ -40,12 +41,14 @@ export function HomeConsult() {
 }
 
 /**
- * 홈 하단 설명회 안내.
- * 레거시에는 여기에 학년·학생 이름·학교명·보호자 연락처를 받는 `설명회 알림 신청` 폼이 있었다.
- * 그 폼은 Phase 2 계약(FM-002)에 없고 개인정보 동의 절차도 없어 그대로 두지 않는다.
- * 같은 문구를 유지하고 신청은 설명회 예약 화면(PG-010)으로 보낸다. // ASM-047
+ * 홈 하단 설명회 안내 + AD-010 설명회 알림 신청.
+ *
+ * 레거시에는 여기에 학년·학생 이름·학교명·보호자 연락처를 받는 `설명회 알림 신청` 폼이
+ * 있었다(`POST ./sms_subscribe.ajax.php`, EV-0003). Phase 3 에서는 계약이 없어 링크만
+ * 두었으나(ASM-047), 사용자 결정(2026-11-12)으로 범위에 들어와 폼을 되살렸다.
+ * 레거시에 없던 개인정보·알림 수신 동의를 새로 받는다. **문자 발송은 하지 않는다.** // ASM-086
  */
-export function HomeEventNotice() {
+export function HomeEventNotice({ retentionPolicy }: { retentionPolicy: string }) {
   return (
     <section className="bg-ink text-white">
       <div className="mx-auto max-w-4xl px-4 py-16 text-center">
@@ -53,9 +56,14 @@ export function HomeEventNotice() {
           문사유 초등 교육 설명회
         </h2>
         <p className="mt-4 text-sm leading-relaxed text-white/80">
-          읽기·토론·글쓰기가 어떻게 하나의 수업으로 이어지는지 소개합니다. 일정이
-          정해지면 안내해 드립니다.
+          읽기·토론·글쓰기가 어떻게 하나의 수업으로 이어지는지 소개합니다. 아래에 남겨
+          주시면 일정이 정해질 때 안내해 드립니다.
         </p>
+
+        <div className="mx-auto mt-8 max-w-xl rounded-xl bg-surface p-6 text-ink">
+          <EventNoticeForm retentionPolicy={retentionPolicy} />
+        </div>
+
         <Link
           href="/sub/Presentation"
           className="mt-8 inline-block rounded-md bg-accent px-6 py-3 text-sm font-bold text-ink hover:bg-accent-soft"

@@ -87,3 +87,78 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/*
+ * AD-014 공지 본문. 서버가 허용 목록으로 정리한 HTML 만 이 안에 들어온다. (ADR-006)
+ * 허용 태그에 맞춰 최소한의 모양만 준다.
+ */
+.notice-body > * + * {
+  margin-top: 1rem;
+}
+
+.notice-body h2,
+.notice-body h3,
+.notice-body h4 {
+  color: var(--color-ink);
+  font-weight: 700;
+}
+
+.notice-body h2 {
+  font-size: 1.125rem;
+}
+
+.notice-body h3 {
+  font-size: 1rem;
+}
+
+.notice-body ul,
+.notice-body ol {
+  padding-left: 1.25rem;
+}
+
+.notice-body ul {
+  list-style: disc;
+}
+
+.notice-body ol {
+  list-style: decimal;
+}
+
+.notice-body li + li {
+  margin-top: 0.25rem;
+}
+
+.notice-body a {
+  color: var(--color-brand);
+  text-decoration: underline;
+}
+
+.notice-body img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+}
+
+.notice-body blockquote {
+  border-left: 3px solid var(--color-line);
+  padding-left: 0.875rem;
+}
+
+.notice-body table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.notice-body th,
+.notice-body td {
+  border: 1px solid var(--color-line);
+  padding: 0.5rem 0.625rem;
+  text-align: left;
+}
+
+.notice-body pre {
+  overflow-x: auto;
+  background: var(--color-canvas);
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+}

@@ -5,10 +5,17 @@ const DAECHI = CAMPUSES[0];
 
 /**
  * 진단평가·입학상담 안내.
- * 문구와 평가 영역 표는 docs/evidence/dom/phase1-home.yml 관찰값이고,
- * 문해력 진단 신청은 외부 Google Forms 링크를 그대로 쓴다. (RT-003)
+ * 문구와 평가 영역 표는 docs/evidence/dom/phase1-home.yml 관찰값이다.
+ *
+ * 「문해력 진단 신청」은 사이트 안에 폼을 두지 않고 구글 폼으로 보낸다. 주소는 관리자
+ * 설정(`diagnosis.cta.externalUrl`)에서 바꾼다. 설정이 없으면 레거시 주소를 쓴다.
+ * (RT-003, 사용자 결정 2026-11-12) // ASM-082
  */
-export function DiagnosisSection() {
+export function DiagnosisSection({
+  diagnosisUrl = EXTERNAL_LINKS.literacyDiagnosis,
+}: {
+  diagnosisUrl?: string;
+}) {
   return (
     <div className="mx-auto max-w-4xl px-4 py-14">
       <h2 className="text-xl font-bold tracking-tight sm:text-2xl">
@@ -28,7 +35,7 @@ export function DiagnosisSection() {
 
       <div className="mt-8 flex flex-wrap gap-3">
         <a
-          href={EXTERNAL_LINKS.literacyDiagnosis}
+          href={diagnosisUrl}
           target="_blank"
           rel="noreferrer noopener"
           className="rounded-md bg-brand px-6 py-3 text-sm font-bold text-white hover:bg-brand-dark"

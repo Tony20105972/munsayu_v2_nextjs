@@ -6,7 +6,7 @@ import { PageBanner } from "@/components/ui/page-banner";
 import { buildPageMetadata } from "@/lib/metadata";
 import { SITE_TITLE_SUFFIX } from "@/lib/site-config";
 import { toNoticeRowViews } from "@/lib/view-models";
-import { listNotices } from "@/server/services/notices";
+import { NOTICE_PAGE_SIZE, listNotices } from "@/server/services/notices";
 
 /**
  * PG-012 공지사항 목록.
@@ -20,7 +20,8 @@ export const metadata = buildPageMetadata({
   path: "/notice",
 });
 
-const PAGE_SIZE = 20;
+/** 레거시 목록이 한 쪽에 15건이었다. (`1 / 15 Page`, EV-0007) */
+const PAGE_SIZE = NOTICE_PAGE_SIZE;
 
 type NoticeListPageProps = {
   /** Next.js 16 에서 `searchParams` 는 Promise 다. */

@@ -44,6 +44,17 @@ enum ApplicationStatus {
   CANCELLED
 }
 
+enum ConsultationStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+}
+
+enum NoticePublicationStatus {
+  DRAFT
+  PUBLISHED
+}
+
 /// src/lib/contracts/admin.ts 의 AUDIT_ACTIONS 와 같은 목록을 유지한다.
 enum AuditAction {
   PII_VIEW
@@ -54,6 +65,8 @@ enum AuditAction {
   ADMIN_ACCOUNT_DELETE
   MEMBER_STATUS_CHANGE
   RETENTION_SETTING_CHANGE
+  RESUME_DOWNLOAD
+  NOTICE_IMPORT
 }
 
 model User {
@@ -321,13 +334,18 @@ model InstructorTeamMembership {
   @@index([teamId, displayOrder])
 }
 
-/// 공지(PG-012) 공개 읽기 전용. 관리자 작성 화면은 이번 범위 밖이다. (ASM-015)
 model Notice {
-  id          String    @id @default(cuid())
+  id          String                  @id @default(cuid())
+  /// Legacy Gnuboard `wr_id`; native posts are null. Used for idempotent import and 308 compatibility.
+  legacyWrId  Int?                    @unique
   title       String
+  /// Sanitized allow-list HTML only.
   body        String
-  isPinned    Boolean   @default(false)
+  isPinned    Boolean                 @default(false)
+  status      NoticePublicationStatus @default(DRAFT)
   publishedAt DateTime?
+
+  attachments NoticeAttachment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -335,11 +353,155 @@ model Notice {
   @@index([isPinned, publishedAt])
 }
 
+model NoticeAttachment {
+  id          String   @id @default(cuid())
+  noticeId    String
+  notice      Notice   @relation(fields: [noticeId], references: [id], onDelete: Cascade)
+  storageKey  String   @unique
+  filename    String
+  contentType String
+  sizeBytes   Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([noticeId])
+}
+
+/// Administrator-managed consultation-type labels. Defaults are seeded.
+model ConsultationTypeOption {
+  id           String                    @id @default(cuid())
+  label        String                    @unique
+  sortOrder    Int                       @default(0)
+  isActive     Boolean                   @default(true)
+  applications ConsultationApplication[]
+  createdAt    DateTime                  @default(now())
+  updatedAt    DateTime                  @updatedAt
+}
+
+model ConsultationApplication {
+  id                     String                 @id @default(cuid())
+  /// PII
+  guardianName           String
+  /// PII
+  guardianPhone          String
+  studentGrade           String
+  consultationTypeId     String
+  consultationType       ConsultationTypeOption @relation(fields: [consultationTypeId], references: [id])
+  /// PII
+  inquiry                String?
+  privacyConsentAt       DateTime
+  retentionPolicyVersion String
+  purgeEligibleAt        DateTime?
+  purgedAt               DateTime?
+  status                 ConsultationStatus     @default(PENDING)
+  idempotencyKey         String                 @unique
+  createdAt              DateTime               @default(now())
+  updatedAt              DateTime               @updatedAt
+
+  @@index([guardianName, createdAt])
+  @@index([guardianPhone, createdAt])
+  @@index([status, createdAt])
+  @@index([purgeEligibleAt, purgedAt])
+}
+
+/// Administrator-managed instructor-application status labels. Defaults are seeded.
+model InstructorApplicationStatusOption {
+  id        String   @id @default(cuid())
+  label     String   @unique
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model InstructorApplication {
+  id                     String    @id @default(cuid())
+  /// PII
+  name                   String
+  /// PII
+  phone                  String
+  /// PII
+  email                  String
+  /// PII
+  education              String
+  experienceYears        String
+  specialties            String[]
+  capabilities           String[]
+  /// PII
+  headline               String?
+  /// PII
+  careerDetail           String?
+  /// PII
+  coachingDetail         String?
+  resumeStorageKey       String    @unique
+  resumeFilename         String
+  resumeContentType      String
+  resumeSizeBytes        Int
+  /// EV-0014의 선택 첨부 `교재·기출 해제안`. 없으면 전부 null이다.
+  portfolioStorageKey    String?   @unique
+  portfolioFilename      String?
+  portfolioContentType   String?
+  portfolioSizeBytes     Int?
+  privacyConsentAt       DateTime
+  retentionPolicyVersion String
+  purgeEligibleAt        DateTime?
+  purgedAt               DateTime?
+  /// Label is intentionally a string: the administrator can alter status options.
+  status                 String    @default("접수")
+  idempotencyKey         String    @unique
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  @@index([name, createdAt])
+  @@index([status, createdAt])
+  @@index([purgeEligibleAt, purgedAt])
+}
+
+/// AD-010 설명회 알림 신청. 레거시 메인 하단 폼(`POST ./sms_subscribe.ajax.php`)을 대체한다.
+/// 문자 발송은 하지 않는다. 신청 내역만 보관한다. (사용자 결정 2026-11-12, D4)
+model SmsSubscription {
+  id String @id @default(cuid())
+
+  grade String
+
+  /// PII
+  studentName String
+
+  /// PII
+  schoolName String
+
+  /// PII
+  guardianPhone String
+
+  privacyConsentAt       DateTime
+  /// 알림 수신 동의는 개인정보 동의와 따로 받는다. 둘 다 필수다.
+  notifyConsentAt        DateTime
+  retentionPolicyVersion String
+
+  /// PII 파기 대상 시각. // ASM-009
+  purgeEligibleAt DateTime?
+  purgedAt        DateTime?
+
+  idempotencyKey String @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([guardianPhone, createdAt])
+  @@index([createdAt])
+  @@index([purgeEligibleAt, purgedAt])
+}
+
 /// 보존 설정은 한 행만 쓴다. 표시 문구와 파기 기준이 같은 값을 쓴다. (ASM-009, BZ-002)
 model PrivacyRetentionSetting {
   id                    Int    @id @default(1)
   courseRetentionPolicy String
   eventRetentionPolicy  String
+
+  /// Phase 5에서 추가된 신청 종류. 화면 문구와 파기 기준이 같은 값을 쓴다. (BZ-002)
+  consultationRetentionPolicy String @default("")
+  instructorRetentionPolicy   String @default("")
+  smsRetentionPolicy          String @default("")
 
   /// 자동 파기 기본값은 꺼짐이다.
   automaticPurgeEnabled Boolean @default(false)
