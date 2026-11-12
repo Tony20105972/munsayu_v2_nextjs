@@ -14,6 +14,7 @@ import {
   resetDatabase,
   routeContext,
 } from "./helpers";
+import { fixturePassword } from "../fixtures/passwords";
 
 let cookie: string;
 
@@ -94,7 +95,7 @@ describe("AD-002 회원 관리", () => {
         cookie,
         body: {
           loginId: "secondadmin",
-          password: "fake-admin-pw-0003",
+          password: fixturePassword("admin-0003"),
           name: "가상관리자2",
           email: "secondadmin@example.test",
           phone: "010-0000-0003",
@@ -110,7 +111,7 @@ describe("AD-002 회원 관리", () => {
 
     const { response: loginResponse, cookie: newCookie } = await login(
       "secondadmin",
-      "fake-admin-pw-0003",
+      fixturePassword("admin-0003"),
     );
     expect(loginResponse.status).toBe(200);
     expect(newCookie).toContain("munsayu_admin_session=");
@@ -122,7 +123,7 @@ describe("AD-002 회원 관리", () => {
         cookie,
         body: {
           loginId: FAKE.adminLoginId,
-          password: "fake-admin-pw-0004",
+          password: fixturePassword("admin-0004"),
           name: "가상관리자3",
           email: "thirdadmin@example.test",
           phone: "010-0000-0004",
@@ -138,7 +139,7 @@ describe("AD-002 회원 관리", () => {
         cookie,
         body: {
           loginId: "deletable",
-          password: "fake-admin-pw-0005",
+          password: fixturePassword("admin-0005"),
           name: "가상관리자4",
           email: "deletable@example.test",
           phone: "010-0000-0005",
@@ -162,7 +163,7 @@ describe("AD-002 회원 관리", () => {
 
   test("AD-002 관리자 계정 삭제: 자기 계정은 지울 수 없다", async () => {
     // 마지막 관리자 규칙과 섞이지 않게 관리자를 한 명 더 만들어 둔다.
-    await createAdminUser("backupadmin", "fake-admin-pw-0006");
+    await createAdminUser("backupadmin", fixturePassword("admin-0006"));
     const admin = await db.user.findFirstOrThrow({
       where: { loginId: FAKE.adminLoginId },
     });
@@ -190,7 +191,7 @@ describe("AD-002 회원 관리", () => {
   });
 
   test("AD-002 관리자 계정 삭제: 관리자가 둘이면 다른 관리자는 지울 수 있고 마지막 한 명은 남는다", async () => {
-    const second = await createAdminUser("backupadmin", "fake-admin-pw-0006");
+    const second = await createAdminUser("backupadmin", fixturePassword("admin-0006"));
 
     const deleted = await adminDelete(
       makeRequest("DELETE", `/api/admin/admins/${second.id}`, { cookie }),

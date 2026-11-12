@@ -50,6 +50,7 @@ import { GET as membersGet } from "../../app/api/admin/members/route";
 import { POST as memberStatus } from "../../app/api/admin/members/status/route";
 import { POST as adminsPost } from "../../app/api/admin/admins/route";
 import { DELETE as adminDelete } from "../../app/api/admin/admins/[id]/route";
+import { fixturePassword } from "../fixtures/passwords";
 
 export type AdminRouteCase = {
   name: string;
@@ -353,7 +354,7 @@ export const ADMIN_ROUTE_CASES: AdminRouteCase[] = [
           cookie,
           body: {
             loginId: "newadmin",
-            password: "fake-admin-pw-0002",
+            password: fixturePassword("admin-0002"),
             name: "가상관리자2",
             email: "newadmin@example.test",
             phone: "010-0000-0002",

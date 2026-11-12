@@ -17,7 +17,8 @@ jobs:
         image: postgres:16
         env:
           POSTGRES_USER: munsayu
-          POSTGRES_PASSWORD: munsayu
+          # 워크플로 실행마다 달라지는 일회용 값. 저장소에 비밀값 리터럴을 두지 않는다. (CLAUDE.md 7장)
+          POSTGRES_PASSWORD: ${{ github.run_id }}-${{ github.run_attempt }}
           POSTGRES_DB: munsayu_test
         ports:
           - 5432:5432
@@ -27,16 +28,19 @@ jobs:
           --health-timeout 5s
           --health-retries 10
     env:
-      DATABASE_URL: postgresql://munsayu:munsayu@127.0.0.1:5432/munsayu_test?schema=public
-      DATABASE_URL_TEST: postgresql://munsayu:munsayu@127.0.0.1:5432/munsayu_test?schema=public
-      AUTH_SECRET: ci-only-secret
+      DATABASE_URL: postgresql://munsayu:${{ github.run_id }}-${{ github.run_attempt }}@127.0.0.1:5432/munsayu_test?schema=public
+      DATABASE_URL_TEST: postgresql://munsayu:${{ github.run_id }}-${{ github.run_attempt }}@127.0.0.1:5432/munsayu_test?schema=public
       MAIL_ADAPTER: console
       MAIL_FROM: no-reply@munsayu.local
       NOTIFY_ADAPTER: console
       STORAGE_ADAPTER: local
-      PRIVACY_PURGE_SECRET: ci-only-purge-secret
     steps:
       - uses: actions/checkout@v4
+      # 세션·파기 비밀값은 실행할 때 만들어 쓴다. 저장소에 값이 남지 않는다. (CLAUDE.md 7장)
+      - name: 일회용 비밀값 생성
+        run: |
+          echo "AUTH_SECRET=$(openssl rand -hex 32)" >> "$GITHUB_ENV"
+          echo "PRIVACY_PURGE_SECRET=$(openssl rand -hex 32)" >> "$GITHUB_ENV"
       - uses: actions/setup-node@v4
         with:
           node-version: 24

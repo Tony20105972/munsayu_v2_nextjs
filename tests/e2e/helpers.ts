@@ -2,12 +2,16 @@ import { readFile } from "node:fs/promises";
 import { expect, type Locator, type Page } from "@playwright/test";
 import { COURSE_PRIVACY_CONSENT } from "../../src/lib/contracts";
 import { MAIL_OUTBOX_FILE } from "../../playwright.config";
+import { fixturePassword } from "../fixtures/passwords";
 
 /** seed 가 넣는 가짜 관리자. 운영 계정이 아니다. */
-export const SEED_ADMIN = { loginId: "admin", password: "fake-admin-pw-0000" } as const;
+export const SEED_ADMIN = {
+  loginId: "admin",
+  password: fixturePassword("admin-0000"),
+} as const;
 export const SEED_MEMBER = {
   loginId: "member01",
-  password: "fake-member-pw-0000",
+  password: fixturePassword("member-0000"),
 } as const;
 
 /** 테스트마다 다른 값이 필요한 곳에 쓴다. 같은 DB를 여러 번 쓰므로 충돌을 막는다. */

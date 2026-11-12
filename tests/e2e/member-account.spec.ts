@@ -6,6 +6,7 @@ import {
   unique,
   waitForMail,
 } from "./helpers";
+import { fixturePassword } from "../fixtures/passwords";
 
 /**
  * C-3 통합 흐름 3 — FM-003 회원 가입 → 로그인 → 비밀번호 재설정(메일) → 새 비밀번호 로그인.
@@ -23,8 +24,8 @@ test.describe("FM-003 회원 계정 전체 흐름", () => {
   }) => {
     const loginId = unique("e2e_");
     const email = `${loginId}@munsayu.local`;
-    const password = "e2epassword123";
-    const nextPassword = "e2enewpassword456";
+    const password = fixturePassword("e2e-base");
+    const nextPassword = fixturePassword("e2e-new");
 
     // 가입 1단계: 약관·개인정보 동의
     await page.goto("/register");

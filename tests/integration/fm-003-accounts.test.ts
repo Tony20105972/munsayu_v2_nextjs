@@ -11,11 +11,12 @@ import { PATCH as profileRoute } from "../../app/api/account/profile/route";
 import { POST as withdrawRoute } from "../../app/api/account/withdraw/route";
 import { GET as sessionRoute } from "../../app/api/auth/session/route";
 import { cookiesFrom, login, makeRequest, resetDatabase } from "./helpers";
+import { fixturePassword } from "../fixtures/passwords";
 
 const REGISTER_BODY = {
   loginId: "newmember",
-  password: "fake-member-pw-0001",
-  passwordConfirm: "fake-member-pw-0001",
+  password: fixturePassword("member-0001"),
+  passwordConfirm: fixturePassword("member-0001"),
   name: "가상회원",
   email: "newmember@example.test",
   phone: "010-1111-2222",
@@ -74,7 +75,7 @@ describe("FM-003 공개 회원 lifecycle", () => {
   });
 
   test("FM-003 회원가입: 비밀번호 확인이 다르면 422", async () => {
-    const response = await register({ passwordConfirm: "fake-other-pw-0002" });
+    const response = await register({ passwordConfirm: fixturePassword("other-0002") });
     expect(response.status).toBe(422);
     expect(Object.keys((await response.json()).fieldErrors)).toContain(
       "passwordConfirm",
@@ -221,8 +222,8 @@ describe("FM-003 공개 회원 lifecycle", () => {
       makeRequest("POST", "/api/auth/password-reset/confirm", {
         body: {
           token,
-          password: "fake-new-pw-0003",
-          passwordConfirm: "fake-new-pw-0003",
+          password: fixturePassword("new-0003"),
+          passwordConfirm: fixturePassword("new-0003"),
         },
       }),
     );
@@ -241,15 +242,15 @@ describe("FM-003 공개 회원 lifecycle", () => {
       makeRequest("POST", "/api/auth/password-reset/confirm", {
         body: {
           token,
-          password: "fake-new-pw-0004",
-          passwordConfirm: "fake-new-pw-0004",
+          password: fixturePassword("new-0004"),
+          passwordConfirm: fixturePassword("new-0004"),
         },
       }),
     );
     expect(reuse.status).toBe(400);
     expect((await reuse.json()).code).toBe("TOKEN_INVALID");
 
-    const relogin = await login(REGISTER_BODY.loginId, "fake-new-pw-0003");
+    const relogin = await login(REGISTER_BODY.loginId, fixturePassword("new-0003"));
     expect(relogin.response.status).toBe(200);
   });
 
@@ -273,8 +274,8 @@ describe("FM-003 공개 회원 lifecycle", () => {
       makeRequest("POST", "/api/auth/password-reset/confirm", {
         body: {
           token: expiredToken,
-          password: "fake-new-pw-0005",
-          passwordConfirm: "fake-new-pw-0005",
+          password: fixturePassword("new-0005"),
+          passwordConfirm: fixturePassword("new-0005"),
         },
       }),
     );
@@ -286,7 +287,7 @@ describe("FM-003 공개 회원 lifecycle", () => {
     await register();
 
     for (let attempt = 0; attempt < 5; attempt += 1) {
-      const failed = await login(REGISTER_BODY.loginId, "fake-wrong-pw-0001");
+      const failed = await login(REGISTER_BODY.loginId, fixturePassword("wrong-0001"));
       expect(failed.response.status).toBe(401);
     }
 
@@ -298,7 +299,7 @@ describe("FM-003 공개 회원 lifecycle", () => {
 
   test("FM-003 로그인 시도 제한: 기록은 DB에 남아 재시작 후에도 유지된다", async () => {
     await register();
-    await login(REGISTER_BODY.loginId, "fake-wrong-pw-0001");
+    await login(REGISTER_BODY.loginId, fixturePassword("wrong-0001"));
 
     const attempts = await db.loginAttempt.findMany();
     expect(attempts).toHaveLength(1);

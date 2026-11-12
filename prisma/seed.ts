@@ -2,6 +2,7 @@ import "dotenv/config";
 import { COURSE_PRIVACY_CONSENT, EVENT_PRIVACY_CONSENT } from "@/lib/contracts";
 import { hashPassword } from "@/server/auth/password";
 import { db } from "@/server/db";
+import { fixturePassword } from "../tests/fixtures/passwords";
 
 /**
  * 가짜 데이터만 넣는다. 실제 학생·학부모 정보를 쓰지 않는다. (CLAUDE.md 3장)
@@ -213,12 +214,16 @@ const NOTICES = [
 
 async function seedAccounts(): Promise<void> {
   // 분명히 가짜인 기본값을 쓴다. 운영에서는 환경 변수로 넣고 첫 로그인 후 바꾼다.
-  const adminPassword = process.env.SEED_ADMIN_PASSWORD ?? "fake-admin-pw-0000";
-  const memberPassword = process.env.SEED_MEMBER_PASSWORD ?? "fake-member-pw-0000";
+  const adminPassword =
+    process.env.SEED_ADMIN_PASSWORD ?? fixturePassword("admin-0000");
+  const memberPassword =
+    process.env.SEED_MEMBER_PASSWORD ?? fixturePassword("member-0000");
 
+  // 비밀번호도 다시 맞춘다. 기본값이 바뀌었는데 기존 행을 그대로 두면 아래에 찍히는
+  // 자격 증명으로 로그인할 수 없다. 가짜 데이터 seed 에서만 하는 처리다.
   await db.user.upsert({
     where: { loginId: "admin" },
-    update: {},
+    update: { passwordHash: await hashPassword(adminPassword), status: "ACTIVE" },
     create: {
       id: "seed-user-admin",
       loginId: "admin",
@@ -232,7 +237,7 @@ async function seedAccounts(): Promise<void> {
 
   await db.user.upsert({
     where: { loginId: "member01" },
-    update: {},
+    update: { passwordHash: await hashPassword(memberPassword), status: "ACTIVE" },
     create: {
       id: "seed-user-member",
       loginId: "member01",

@@ -4,15 +4,16 @@ import { getMemoryNotifyAdapter } from "@/server/adapters/notify";
 import { hashPassword } from "@/server/auth/password";
 import { resetRateLimits } from "@/server/rate-limit";
 import { POST as loginRoute } from "../../app/api/auth/login/route";
+import { fixturePassword } from "../fixtures/passwords";
 
 export const TEST_ORIGIN = "http://127.0.0.1";
 
 /** 통합 테스트용 가짜 자격 증명. 실제 계정과 겹치지 않는 값만 쓴다. */
 export const FAKE = {
   adminLoginId: "testadmin",
-  adminPassword: "fake-admin-pw-0001",
+  adminPassword: fixturePassword("admin-0001"),
   memberLoginId: "testmember",
-  memberPassword: "fake-member-pw-0001",
+  memberPassword: fixturePassword("member-0001"),
 } as const;
 
 /** 테스트 DB의 모든 테이블을 비운다. 마이그레이션 기록은 남긴다. */
