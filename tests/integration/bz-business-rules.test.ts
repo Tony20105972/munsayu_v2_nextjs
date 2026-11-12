@@ -185,6 +185,9 @@ describe("BZ-002 개인정보 보유 문구와 파기 기준", () => {
         body: {
           courseRetentionPolicy: "강좌 종료 후 30일 보관 뒤 파기",
           eventRetentionPolicy: "설명회 종료 후 30일 보관 뒤 파기",
+          consultationRetentionPolicy: "상담 종료 후 30일 보관 뒤 파기",
+          instructorRetentionPolicy: "채용 종료 후 30일 보관 뒤 파기",
+          smsRetentionPolicy: "안내 종료 후 30일 보관 뒤 파기",
           automaticPurgeEnabled: false,
         },
       }),

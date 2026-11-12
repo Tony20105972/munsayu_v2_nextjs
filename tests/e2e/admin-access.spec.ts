@@ -12,8 +12,13 @@ const ADMIN_PATHS = [
   "/admin/instructors",
   "/admin/courses",
   "/admin/applications",
+  "/admin/consultations",
+  "/admin/sms-subscriptions",
+  "/admin/instructor-applications",
+  "/admin/notices",
   "/admin/privacy",
   "/admin/analytics",
+  "/admin/settings",
 ] as const;
 
 test.describe("AD-001 관리자 접근 통제", () => {

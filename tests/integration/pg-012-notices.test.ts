@@ -16,6 +16,7 @@ describe("PG-012 공지", () => {
         body: "본문",
         isPinned: false,
         publishedAt: new Date("2026-01-01T00:00:00.000Z"),
+        status: "PUBLISHED",
       },
     });
     await db.notice.create({
@@ -24,6 +25,7 @@ describe("PG-012 공지", () => {
         body: "본문",
         isPinned: false,
         publishedAt: new Date("2026-06-01T00:00:00.000Z"),
+        status: "PUBLISHED",
       },
     });
     await db.notice.create({
@@ -32,6 +34,7 @@ describe("PG-012 공지", () => {
         body: "본문",
         isPinned: true,
         publishedAt: new Date("2025-01-01T00:00:00.000Z"),
+        status: "PUBLISHED",
       },
     });
 
@@ -50,6 +53,8 @@ describe("PG-012 공지", () => {
       data: {
         title: "예약 공지",
         body: "본문",
+        // 게시 상태지만 시각이 아직 오지 않았다. 시간 조건만으로 숨겨져야 한다.
+        status: "PUBLISHED",
         publishedAt: new Date("2099-01-01T00:00:00.000Z"),
       },
     });
@@ -65,6 +70,7 @@ describe("PG-012 공지", () => {
           title: `공지 ${index}`,
           body: "본문",
           publishedAt: new Date(`2026-0${index + 1}-01T00:00:00.000Z`),
+          status: "PUBLISHED",
         },
       });
     }
@@ -93,6 +99,7 @@ describe("PG-012 공지", () => {
         title: "공개 공지",
         body: "공개 본문",
         publishedAt: new Date("2026-01-01T00:00:00.000Z"),
+        status: "PUBLISHED",
       },
     });
     const draft = await db.notice.create({ data: { title: "작성 중", body: "본문" } });

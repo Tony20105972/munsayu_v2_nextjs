@@ -95,6 +95,138 @@ export const eventReservationSchema = z.object({
 });
 export type EventReservationInput = z.infer<typeof eventReservationSchema>;
 
+/** AD-009 사이트 내 입학진단·상담 신청 기본 계약. 레거시 공개 화면은 외부 Google Forms 링크였다. (EV-0013, ASM-082) */
+export const CONSULTATION_PRIVACY_CONSENT = {
+  heading: "개인정보 수집 및 이용 동의",
+  purpose: "입학진단 및 상담 신청 확인·상담 진행",
+  collectedItems: "학부모 성함, 연락처, 학생 학년, 상담 유형, 문의 내용",
+  retention: "상담 완료 및 안내 종료 시점까지 보관 후 파기",
+  checkboxLabel: "개인정보 수집 및 이용에 동의합니다. (필수)",
+  submitLabel: "입학진단 및 상담 신청하기",
+  policyVersion: "consultation-asm-057-v1",
+} as const;
+
+export const consultationApplicationSchema = z.object({
+  guardianName: personNameSchema,
+  guardianPhone: phoneSchema,
+  studentGrade: elementaryGradeSchema,
+  consultationTypeId: cuidLikeIdSchema,
+  inquiry: z.string().trim().max(2000).optional(),
+  privacyConsent: requiredConsentSchema,
+  idempotencyKey: idempotencyKeySchema,
+});
+export type ConsultationApplicationInput = z.infer<
+  typeof consultationApplicationSchema
+>;
+
+/** EV-0014에서 관찰된 강사 지원 선택값. 저장 전 서버에서 다시 검증한다. */
+export const INSTRUCTOR_EXPERIENCE_OPTIONS = [
+  "신입 (1년 미만)",
+  "1년 이상 ~ 3년 미만",
+  "3년 이상 ~ 5년 미만",
+  "5년 이상 ~ 10년 미만",
+  "10년 이상 베테랑",
+] as const;
+export const INSTRUCTOR_SPECIALTIES = [
+  "인문 논술 (언어/사회)",
+  "상경·수리 인문 논술",
+  "자연계 수리 논술",
+  "자연계 과학 논술",
+  "SKY구술면접/의약학/교대구술",
+  "학생부 종합 구술 면접",
+] as const;
+export const INSTRUCTOR_CAPABILITIES = [
+  "실시간 현장 대면 첨삭",
+  "정밀 서면 분석 채점",
+  "비대면 영상 첨삭 시스템",
+  "예시답안 직접 집필 가능",
+  "자체 모의고사 출제 가능",
+  "자체 기본서 커리 보유",
+] as const;
+
+/**
+ * AD-011 강사 지원. 레거시 `/sub/Recruit` 공개 폼을 관찰해 그 계약을 그대로 따른다. (EV-0014)
+ * 화면 안내 문구는 PDF·HWPM·DOCX였으나, 사용자 지시에 따라 HWP·HWPX를 포함한 4종으로 받는다. // ASM-085
+ */
+export const INSTRUCTOR_PRIVACY_CONSENT = {
+  heading: "개인정보 수집 및 이용 동의",
+  purpose: "강사 채용 서류 심사 및 채용 절차 진행",
+  collectedItems:
+    "강사명, 연락처, 이메일, 최종 학력, 경력 연수, 지원 분야, 자기소개·경력 기술, 제출 서류",
+  retention: "채용 절차 종료 후 보관 기간이 지나면 제출 서류와 함께 파기",
+  checkboxLabel:
+    "강사 채용·서류 심사를 위한 개인정보 수집 및 이용에 동의합니다. (필수)",
+  submitLabel: "문사유 아카데미 강사 지원서 제출하기",
+  policyVersion: "instructor-asm-085-v1",
+} as const;
+
+/** 제출 서류 허용 형식. 확장자가 아니라 파일 내용으로 다시 확인한다. // ASM-085 */
+export const RESUME_FILE_FORMATS = ["pdf", "docx", "hwp", "hwpx"] as const;
+export type ResumeFileFormat = (typeof RESUME_FILE_FORMATS)[number];
+
+export const RESUME_FORMAT_LABEL = "PDF, DOCX, HWP, HWPX";
+
+/** 기본 상한 10MB. 관리자 설정(`recruit.resume.maxBytes`)으로 바꾼다. // ASM-085 */
+export const RESUME_MAX_BYTES_DEFAULT = 10 * 1024 * 1024;
+export const RESUME_MAX_BYTES_LIMIT = 50 * 1024 * 1024;
+
+export const RESUME_CONTENT_TYPES: Record<ResumeFileFormat, string> = {
+  pdf: "application/pdf",
+  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  hwp: "application/x-hwp",
+  hwpx: "application/hwp+zip",
+};
+
+/** 파일 자체는 multipart로 받으므로 계약에는 텍스트 항목만 둔다. */
+export const instructorApplicationSchema = z.object({
+  name: personNameSchema,
+  phone: phoneSchema,
+  email: z.string().trim().email().max(254),
+  education: z.string().trim().min(2).max(500),
+  experienceYears: z.enum(INSTRUCTOR_EXPERIENCE_OPTIONS),
+  specialties: z
+    .array(z.enum(INSTRUCTOR_SPECIALTIES))
+    .min(1)
+    .max(INSTRUCTOR_SPECIALTIES.length),
+  capabilities: z
+    .array(z.enum(INSTRUCTOR_CAPABILITIES))
+    .min(1)
+    .max(INSTRUCTOR_CAPABILITIES.length),
+  headline: z.string().trim().min(2).max(300),
+  careerDetail: z.string().trim().min(2).max(5000),
+  coachingDetail: z.string().trim().min(2).max(5000),
+  privacyConsent: requiredConsentSchema,
+  idempotencyKey: idempotencyKeySchema,
+});
+export type InstructorApplicationInput = z.infer<typeof instructorApplicationSchema>;
+
+/**
+ * AD-010 설명회 알림 신청. 레거시 메인 하단 폼(`POST ./sms_subscribe.ajax.php`, EV-0003)의
+ * 입력 항목을 그대로 받되, 레거시에 없던 개인정보·알림 수신 동의를 새로 둔다. // ASM-086
+ * 문자 발송은 하지 않는다. (D4)
+ */
+export const SMS_SUBSCRIPTION_CONSENT = {
+  heading: "개인정보 수집 및 이용 동의",
+  purpose: "설명회 일정 안내 연락",
+  collectedItems: "학년, 학생 이름, 학교명, 보호자 연락처",
+  retention: "설명회 안내 종료 시점까지 보관 후 파기",
+  checkboxLabel: "개인정보 수집 및 이용에 동의합니다. (필수)",
+  notifyCheckboxLabel: "설명회 일정 안내 연락을 받는 데 동의합니다. (필수)",
+  submitLabel: "설명회 알림 신청하기",
+  policyVersion: "sms-asm-086-v1",
+} as const;
+
+export const smsSubscriptionSchema = z.object({
+  grade: elementaryGradeSchema,
+  studentName: personNameSchema,
+  schoolName: z.string().trim().min(2).max(60),
+  guardianPhone: phoneSchema,
+  privacyConsent: requiredConsentSchema,
+  notifyConsent: requiredConsentSchema,
+  idempotencyKey: idempotencyKeySchema,
+});
+export type SmsSubscriptionInput = z.infer<typeof smsSubscriptionSchema>;
+
 /** 신청·예약 생성 응답. 저장된 개인정보를 그대로 돌려주지 않는다. */
 export type ApplicationCreatedResult = {
   id: string;

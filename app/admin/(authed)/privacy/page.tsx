@@ -50,6 +50,9 @@ export default async function AdminPrivacyPage() {
         <RetentionSettingForm
           courseRetentionPolicy={setting.courseRetentionPolicy}
           eventRetentionPolicy={setting.eventRetentionPolicy}
+          consultationRetentionPolicy={setting.consultationRetentionPolicy}
+          instructorRetentionPolicy={setting.instructorRetentionPolicy}
+          smsRetentionPolicy={setting.smsRetentionPolicy}
           automaticPurgeEnabled={setting.automaticPurgeEnabled}
         />
       </AdminPanel>

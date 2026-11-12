@@ -7,6 +7,8 @@ type PageMetadataInput = {
   description: string;
   /** 신규 canonical 경로 */
   path: string;
+  /** 개인정보가 오가는 화면은 색인에서 뺀다. 지정하지 않으면 Next 기본값(색인 허용)이다. */
+  noIndex?: boolean;
 };
 
 /**
@@ -29,6 +31,7 @@ export function buildPageMetadata({
   title,
   description,
   path,
+  noIndex = false,
 }: PageMetadataInput): Metadata {
   const url = new URL(path, SITE_ORIGIN).toString();
 
@@ -36,6 +39,7 @@ export function buildPageMetadata({
     title,
     description,
     alternates: { canonical: path },
+    ...(noIndex ? { robots: { index: false, follow: false } } : {}),
     openGraph: {
       type: "website",
       siteName: SITE_NAME,

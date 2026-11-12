@@ -332,3 +332,166 @@ export function StatusMessage({ tone, children }: StatusMessageProps) {
     </p>
   );
 }
+
+type TextAreaFieldProps = {
+  controlId: string;
+  errorId: string;
+  name: string;
+  label: string;
+  required?: boolean;
+  hint?: string;
+  errors?: readonly string[];
+  defaultValue?: string;
+  placeholder?: string;
+  rows?: number;
+  maxLength?: number;
+};
+
+export function TextAreaField({
+  controlId,
+  errorId,
+  name,
+  label,
+  required,
+  hint,
+  errors,
+  defaultValue,
+  placeholder,
+  rows = 4,
+  maxLength,
+}: TextAreaFieldProps) {
+  const hasError = Boolean(errors && errors.length > 0);
+
+  return (
+    <FieldShell
+      controlId={controlId}
+      errorId={errorId}
+      label={label}
+      required={required}
+      hint={hint}
+      errors={errors}
+    >
+      <textarea
+        id={controlId}
+        name={name}
+        rows={rows}
+        maxLength={maxLength}
+        placeholder={placeholder}
+        defaultValue={defaultValue}
+        required={required}
+        aria-invalid={hasError || undefined}
+        aria-describedby={hasError ? errorId : undefined}
+        className={CONTROL_CLASS}
+      />
+    </FieldShell>
+  );
+}
+
+type CheckboxGroupFieldProps = {
+  name: string;
+  legend: string;
+  idPrefix: string;
+  errorId: string;
+  options: ReadonlyArray<{ value: string; label: string }>;
+  required?: boolean;
+  hint?: string;
+  errors?: readonly string[];
+};
+
+/** 여러 개를 고르는 묶음. 같은 `name` 으로 보내면 서버에서 배열로 받는다. */
+export function CheckboxGroupField({
+  name,
+  legend,
+  idPrefix,
+  errorId,
+  options,
+  required,
+  hint,
+  errors,
+}: CheckboxGroupFieldProps) {
+  const hasError = Boolean(errors && errors.length > 0);
+
+  return (
+    <fieldset
+      aria-invalid={hasError || undefined}
+      aria-describedby={hasError ? errorId : undefined}
+    >
+      <legend className="text-sm font-bold text-ink">
+        {legend}
+        {required ? <RequiredMark /> : null}
+      </legend>
+      {hint ? <p className="mt-1 text-xs text-muted">{hint}</p> : null}
+      <div className="mt-2 flex flex-wrap gap-2">
+        {options.map((option) => {
+          const optionId = `${idPrefix}-${option.value}`;
+
+          return (
+            <div key={option.value}>
+              <input
+                id={optionId}
+                type="checkbox"
+                name={name}
+                value={option.value}
+                className="peer sr-only"
+              />
+              <label
+                htmlFor={optionId}
+                className="inline-flex cursor-pointer items-center rounded-full border border-line bg-surface px-4 py-2 text-sm text-ink peer-checked:border-brand peer-checked:bg-brand peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-accent"
+              >
+                {option.label}
+              </label>
+            </div>
+          );
+        })}
+      </div>
+      <FieldErrors errorId={errorId} errors={errors} />
+    </fieldset>
+  );
+}
+
+type FileFieldProps = {
+  controlId: string;
+  errorId: string;
+  name: string;
+  label: string;
+  required?: boolean;
+  hint?: string;
+  errors?: readonly string[];
+  accept?: string;
+};
+
+/** 파일 입력. 형식·용량은 서버가 파일 내용을 보고 다시 확인한다. (AD-011) */
+export function FileField({
+  controlId,
+  errorId,
+  name,
+  label,
+  required,
+  hint,
+  errors,
+  accept,
+}: FileFieldProps) {
+  const hasError = Boolean(errors && errors.length > 0);
+
+  return (
+    <FieldShell
+      controlId={controlId}
+      errorId={errorId}
+      label={label}
+      required={required}
+      hint={hint}
+      errors={errors}
+    >
+      <input
+        id={controlId}
+        name={name}
+        type="file"
+        accept={accept}
+        required={required}
+        aria-invalid={hasError || undefined}
+        aria-describedby={hasError ? errorId : undefined}
+        className="w-full rounded-md border border-line bg-surface px-3 py-2.5 text-sm text-ink file:mr-3 file:rounded-md file:border-0 file:bg-canvas file:px-3 file:py-1.5 file:text-sm file:font-bold file:text-ink"
+      />
+    </FieldShell>
+  );
+}

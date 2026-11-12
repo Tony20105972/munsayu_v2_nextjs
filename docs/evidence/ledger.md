@@ -22,3 +22,9 @@
 | EV-ADM-05 | 2026-11-06 | OBSERVED-USER | 사용자 제공 화면 | 시간표관리 화면 | `../photo/스크린샷 2026-11-06 오후 8.42.18.png` |
 | EV-ADM-06 | 2026-11-06 | OBSERVED-USER | 사용자 제공 화면 | 접속자집계 화면 | `../photo/스크린샷 2026-11-06 오후 8.42.29.png` |
 | EV-ADM-07 | 2026-11-06 | OBSERVED-USER | 사용자 제공 화면 | 접속자검색 화면 | `../photo/스크린샷 2026-11-06 오후 8.42.36.png` |
+| EV-ADM-08 | 2026-11-12 | OBSERVED-USER | 사용자 제공 가림 화면 | 입학진단 및 상담 신청관리: 상태별 건수, 학부모 성함 검색, 신청 목록·상태 변경·선택수정/삭제 | `../photo/스크린샷 2026-11-12 오후 2.02.13.png` |
+| EV-ADM-09 | 2026-11-12 | OBSERVED-USER | 사용자 제공 가림 화면 | 강사지원관리: 지원자 수, 실명 검색, 이력서·상태·지원 일시 목록·선택수정/삭제 | `../photo/스크린샷 2026-11-12 오후 2.02.20.png` |
+| EV-ADM-10 | 2026-11-12 | OBSERVED-USER | 사용자 제공 가림 화면 | 그누보드 게시판 1개: group `community`, table `notice`, 제목 공지사항 및 스킨·SNS·검색·접속기기 설정 | `../photo/스크린샷 2026-11-12 오후 2.03.30.png` |
+| EV-ADM-11 | 2026-11-12 | OBSERVED-USER | 사용자 제공 가림 화면 | 게시판그룹 `community` 1개 | `../photo/스크린샷 2026-11-12 오후 2.03.45.png` |
+| EV-0013 | 2026-11-12 | OBSERVED | Playwright MCP + REA | `/sub/abouttch3`의 문해력 진단 신청은 사이트 내 폼이 아닌 Google Forms 외부 링크. REA evidence `ev_4015fa45b8e9316c53ee3eb09b168a05ae327f8d5a95266807656ad1988fc8b0` | `rea/phase5-abouttch3-diagnosis.md` |
+| EV-0014 | 2026-11-12 | OBSERVED | Playwright MCP | `/sub/Recruit` 공개 강사 지원 폼의 필드·선택지·필수 이력서·동의 관찰(입력·업로드·제출 없음) | `dom/phase5-recruit.yml` |

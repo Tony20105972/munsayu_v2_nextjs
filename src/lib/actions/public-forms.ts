@@ -4,19 +4,27 @@ import type { ActionResult } from "@/lib/action-result";
 import {
   courseApplicationSchema,
   eventReservationSchema,
+  instructorApplicationSchema,
   reservationCancelSchema,
   reservationLookupSchema,
+  smsSubscriptionSchema,
   type ReservationSummary,
 } from "@/lib/contracts";
 import {
   enforcePublicRateLimit,
+  failure,
+  formEntries,
+  isNonEmptyString,
   parseInput,
+  readUploadedFile,
   success,
   toFailure,
 } from "@/lib/actions/internal";
 import { createCourseApplication } from "@/server/services/course-applications";
 import { createEventReservation } from "@/server/services/event-reservations";
+import { createInstructorApplication } from "@/server/services/instructor-applications";
 import { cancelReservation, lookupReservations } from "@/server/services/reservations";
+import { createSmsSubscription } from "@/server/services/sms-subscriptions";
 
 /**
  * 공개 화면의 신청·예약·조회 Server Action.
@@ -89,6 +97,59 @@ export async function cancelReservationAction(
 
     const result = await cancelReservation(parsed.value);
     return success({ reservationId: result.reservationId });
+  } catch (error) {
+    return toFailure(error);
+  }
+}
+
+/** AD-010 설명회 알림 신청. 문자 발송은 하지 않고 신청 내역만 남긴다. // ASM-086 */
+export async function submitSmsSubscriptionAction(
+  input: unknown,
+): Promise<ActionResult<{ id: string; replayed: boolean }>> {
+  try {
+    await enforcePublicRateLimit("action-sms-subscription");
+    const parsed = parseInput(smsSubscriptionSchema, input);
+    if (!parsed.ok) return parsed.failure;
+
+    const created = await createSmsSubscription(parsed.value);
+    return success({ id: created.id, replayed: created.replayed });
+  } catch (error) {
+    return toFailure(error);
+  }
+}
+
+/**
+ * AD-011 강사 지원. 제출 서류가 있어 `FormData` 를 그대로 받는다.
+ * 파일 내용 검사·용량 확인·저장은 모두 서비스 계층에서 한다. (EV-0014)
+ */
+export async function submitInstructorApplicationAction(
+  formData: FormData,
+): Promise<ActionResult<{ id: string; replayed: boolean }>> {
+  try {
+    await enforcePublicRateLimit("action-instructor-application");
+
+    const raw = formEntries(formData);
+    const parsed = parseInput(instructorApplicationSchema, {
+      ...raw,
+      specialties: formData.getAll("specialties").filter(isNonEmptyString),
+      capabilities: formData.getAll("capabilities").filter(isNonEmptyString),
+      privacyConsent: raw.privacyConsent === "on" || raw.privacyConsent === "true",
+    });
+    if (!parsed.ok) return parsed.failure;
+
+    const resume = await readUploadedFile(formData.get("resume"));
+    if (!resume) {
+      return failure("입력값을 다시 확인해 주세요.", {
+        resume: ["이력서 및 자기소개서 파일을 올려 주세요."],
+      });
+    }
+    const portfolio = await readUploadedFile(formData.get("portfolio"));
+
+    const created = await createInstructorApplication(parsed.value, {
+      resume,
+      portfolio,
+    });
+    return success({ id: created.id, replayed: created.replayed });
   } catch (error) {
     return toFailure(error);
   }

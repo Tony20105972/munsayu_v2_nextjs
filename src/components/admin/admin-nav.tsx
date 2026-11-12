@@ -3,16 +3,28 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-/** 관리자 메뉴. 레거시 관리자 메뉴 구성(EV-ADM-01~07)에서 이관 확정된 항목만 둔다. */
+/**
+ * 관리자 메뉴.
+ *
+ * 순서는 레거시 관리자 메뉴를 따른다 (EV-ADM-01~11, 사용자 지시 2026-11-12):
+ * 회원관리 → 설명회관리 → 강사관리 → 시간표관리 → 입학진단관리 → 문자신청내역
+ * → 강사지원관리 → 공지사항.
+ * 「신청 목록」·「개인정보 관리」·「분석 도구」·「사이트 설정」은 레거시에 없던 항목이라 뒤에 둔다.
+ */
 const ADMIN_MENU = [
   { href: "/admin", label: "개요" },
   { href: "/admin/members", label: "회원 관리" },
   { href: "/admin/events", label: "설명회 관리" },
   { href: "/admin/instructors", label: "강사 관리" },
   { href: "/admin/courses", label: "시간표·강좌 관리" },
+  { href: "/admin/consultations", label: "입학진단 관리" },
+  { href: "/admin/sms-subscriptions", label: "문자신청내역" },
+  { href: "/admin/instructor-applications", label: "강사지원관리" },
+  { href: "/admin/notices", label: "공지사항" },
   { href: "/admin/applications", label: "신청 목록" },
   { href: "/admin/privacy", label: "개인정보 관리" },
   { href: "/admin/analytics", label: "분석 도구" },
+  { href: "/admin/settings", label: "사이트 설정" },
 ] as const;
 
 export function AdminNav() {

@@ -71,10 +71,16 @@ export async function loadBundangInstructors(): Promise<InstructorCardView[]> {
 export async function loadRetentionPolicies(): Promise<{
   course: string;
   event: string;
+  consultation: string;
+  instructor: string;
+  sms: string;
 }> {
   const setting = await getRetentionSetting();
   return {
     course: setting.courseRetentionPolicy,
     event: setting.eventRetentionPolicy,
+    consultation: setting.consultationRetentionPolicy,
+    instructor: setting.instructorRetentionPolicy,
+    sms: setting.smsRetentionPolicy,
   };
 }

@@ -49,6 +49,15 @@ import {
 import { GET as membersGet } from "../../app/api/admin/members/route";
 import { POST as memberStatus } from "../../app/api/admin/members/status/route";
 import { POST as adminsPost } from "../../app/api/admin/admins/route";
+import { GET as consultationsGet } from "../../app/api/admin/consultations/route";
+import { GET as consultationsExport } from "../../app/api/admin/consultations/export/route";
+import { GET as instructorApplicationsGet } from "../../app/api/admin/instructor-applications/route";
+import { GET as instructorApplicationsExport } from "../../app/api/admin/instructor-applications/export/route";
+import { GET as instructorApplicationDocument } from "../../app/api/admin/instructor-applications/document/route";
+import { GET as smsSubscriptionsGet } from "../../app/api/admin/sms-subscriptions/route";
+import { GET as smsSubscriptionsExport } from "../../app/api/admin/sms-subscriptions/export/route";
+import { GET as adminNoticesGet } from "../../app/api/admin/notices/route";
+import { GET as adminSettingsGet } from "../../app/api/admin/settings/route";
 import { DELETE as adminDelete } from "../../app/api/admin/admins/[id]/route";
 import { fixturePassword } from "../fixtures/passwords";
 
@@ -62,6 +71,67 @@ export type AdminRouteCase = {
  * 새 관리자 경로를 추가하면 여기에도 반드시 넣는다. (Phase 4 Gate)
  */
 export const ADMIN_ROUTE_CASES: AdminRouteCase[] = [
+  {
+    name: "GET /api/admin/consultations",
+    invoke: (cookie) =>
+      consultationsGet(makeRequest("GET", "/api/admin/consultations", { cookie })),
+  },
+  {
+    name: "GET /api/admin/consultations/export",
+    invoke: (cookie) =>
+      consultationsExport(
+        makeRequest("GET", "/api/admin/consultations/export", { cookie }),
+      ),
+  },
+  {
+    name: "GET /api/admin/instructor-applications",
+    invoke: (cookie) =>
+      instructorApplicationsGet(
+        makeRequest("GET", "/api/admin/instructor-applications", { cookie }),
+      ),
+  },
+  {
+    name: "GET /api/admin/instructor-applications/export",
+    invoke: (cookie) =>
+      instructorApplicationsExport(
+        makeRequest("GET", "/api/admin/instructor-applications/export", { cookie }),
+      ),
+  },
+  {
+    name: "GET /api/admin/instructor-applications/document",
+    invoke: (cookie) =>
+      instructorApplicationDocument(
+        makeRequest(
+          "GET",
+          "/api/admin/instructor-applications/document?applicationId=missing-id",
+          { cookie },
+        ),
+      ),
+  },
+  {
+    name: "GET /api/admin/sms-subscriptions",
+    invoke: (cookie) =>
+      smsSubscriptionsGet(
+        makeRequest("GET", "/api/admin/sms-subscriptions", { cookie }),
+      ),
+  },
+  {
+    name: "GET /api/admin/sms-subscriptions/export",
+    invoke: (cookie) =>
+      smsSubscriptionsExport(
+        makeRequest("GET", "/api/admin/sms-subscriptions/export", { cookie }),
+      ),
+  },
+  {
+    name: "GET /api/admin/notices",
+    invoke: (cookie) =>
+      adminNoticesGet(makeRequest("GET", "/api/admin/notices", { cookie })),
+  },
+  {
+    name: "GET /api/admin/settings",
+    invoke: (cookie) =>
+      adminSettingsGet(makeRequest("GET", "/api/admin/settings", { cookie })),
+  },
   {
     name: "GET /api/admin/applications",
     invoke: (cookie) =>
@@ -111,6 +181,9 @@ export const ADMIN_ROUTE_CASES: AdminRouteCase[] = [
           body: {
             courseRetentionPolicy: "테스트 보존 문구",
             eventRetentionPolicy: "테스트 보존 문구",
+            consultationRetentionPolicy: "테스트 보존 문구",
+            instructorRetentionPolicy: "테스트 보존 문구",
+            smsRetentionPolicy: "테스트 보존 문구",
             automaticPurgeEnabled: false,
           },
         }),
