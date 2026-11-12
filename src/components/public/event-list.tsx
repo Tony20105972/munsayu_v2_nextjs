@@ -10,7 +10,14 @@ import type { EventCardView, EventGroupView } from "@/lib/view-models";
  * docs/evidence/dom/phase1-presentation.yml 관찰값이다. (EV-0005, BZ-001)
  * 상태 이름은 관리자가 직접 바꾸며 자동 전환은 없다. (ASM-001)
  */
-export function EventList({ groups }: { groups: readonly EventGroupView[] }) {
+export function EventList({
+  groups,
+  retentionPolicy,
+}: {
+  groups: readonly EventGroupView[];
+  /** 관리자 보존 설정의 현재 문구. 예약 모달의 「보유기간」에 그대로 쓴다. (BZ-002) */
+  retentionPolicy: string;
+}) {
   const [selectedEvent, setSelectedEvent] = useState<EventCardView | null>(null);
 
   return (
@@ -44,6 +51,7 @@ export function EventList({ groups }: { groups: readonly EventGroupView[] }) {
       {selectedEvent ? (
         <EventReservationDialog
           event={selectedEvent}
+          retentionPolicy={retentionPolicy}
           onClose={() => setSelectedEvent(null)}
         />
       ) : null}

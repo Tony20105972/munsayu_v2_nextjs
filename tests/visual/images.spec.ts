@@ -82,11 +82,17 @@ test.describe("공개 화면 이미지", () => {
       state: "visible",
       timeout: 15_000,
     });
-    await page.getByRole("tab", { name: "분당점" }).click();
-    await page.getByText("책과 가까워지는 북카페").first().waitFor({
-      state: "visible",
-      timeout: 15_000,
-    });
+    // 탭은 Client Component 라서 hydration 전에 누른 클릭은 사라진다. 패널이 바뀔 때까지 다시 누른다.
+    const bundangCard = page.getByText("책과 가까워지는 북카페").first();
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      await page.getByRole("tab", { name: "분당점" }).click();
+      try {
+        await bundangCard.waitFor({ state: "visible", timeout: 3_000 });
+        break;
+      } catch {
+        if (attempt === 4) throw new Error("분당점 탭이 열리지 않았습니다.");
+      }
+    }
 
     await page.evaluate(async () => {
       const step = window.innerHeight;

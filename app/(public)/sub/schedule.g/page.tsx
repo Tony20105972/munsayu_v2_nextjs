@@ -3,7 +3,7 @@ import { Timetable } from "@/components/public/timetable";
 import { CampusLinkTabs } from "@/components/ui/campus-link-tabs";
 import { LoadingBlock } from "@/components/ui/loading-block";
 import { PageBanner } from "@/components/ui/page-banner";
-import { loadTimetable } from "@/lib/data/public-content";
+import { loadRetentionPolicies, loadTimetable } from "@/lib/data/public-content";
 import { buildPageMetadata, pageTitle } from "@/lib/metadata";
 
 /**
@@ -17,7 +17,11 @@ export const metadata = buildPageMetadata({
 });
 
 async function BundangTimetable() {
-  return <Timetable groups={await loadTimetable("분당점")} />;
+  const [groups, retention] = await Promise.all([
+    loadTimetable("분당점"),
+    loadRetentionPolicies(),
+  ]);
+  return <Timetable groups={groups} retentionPolicy={retention.course} />;
 }
 
 export default function BundangTimetablePage() {

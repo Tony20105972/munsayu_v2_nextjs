@@ -21,6 +21,11 @@ import { createIdempotencyKey } from "@/lib/idempotency";
 import type { CourseCardView } from "@/lib/view-models";
 
 type CourseReservationDialogProps = {
+  /**
+   * 관리자 보존 설정(`PrivacyRetentionSetting.courseRetentionPolicy`)의 현재 문구.
+   * 동의 안내의 「보유기간」은 코드 상수가 아니라 이 값을 보여 준다. (BZ-002)
+   */
+  retentionPolicy: string;
   course: CourseCardView;
   onClose: () => void;
 };
@@ -32,6 +37,7 @@ type CourseReservationDialogProps = {
  */
 export function CourseReservationDialog({
   course,
+  retentionPolicy,
   onClose,
 }: CourseReservationDialogProps) {
   const formId = useId();
@@ -207,7 +213,7 @@ export function CourseReservationDialog({
                 </div>
                 <div>
                   <dt className="inline font-bold text-ink">보유기간 : </dt>
-                  <dd className="inline">{COURSE_PRIVACY_CONSENT.retention}</dd>
+                  <dd className="inline">{retentionPolicy}</dd>
                 </div>
               </dl>
               <div className="mt-4">

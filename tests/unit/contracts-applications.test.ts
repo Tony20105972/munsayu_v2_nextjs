@@ -131,12 +131,17 @@ describe("FM-002 설명회 예약 계약", () => {
     ).toBe(false);
   });
 
-  it("FM-002: 설명회 동의 문구는 강좌와 같은 보존 정책 버전을 쓴다 (ASM-009)", () => {
-    expect(EVENT_PRIVACY_CONSENT.policyVersion).toBe(
+  it("FM-002: 설명회 동의 문구는 강좌와 다른 보존 정책 버전을 쓴다 (BZ-002)", () => {
+    // 문구가 서로 다르므로 버전도 달라야 한다. 같으면 동의 기록이 신청자가 보지 않은
+    // 문구를 가리킨다. 독립 리뷰 B-1에서 지적된 사안이다.
+    expect(EVENT_PRIVACY_CONSENT.retention).not.toBe(COURSE_PRIVACY_CONSENT.retention);
+    expect(EVENT_PRIVACY_CONSENT.policyVersion).not.toBe(
       COURSE_PRIVACY_CONSENT.policyVersion,
     );
+    // 동의 체크박스 문구와 안내 제목은 레거시 관찰값을 공유한다. (EV-0006, ASM-009)
     expect(EVENT_PRIVACY_CONSENT.checkboxLabel).toBe(
       COURSE_PRIVACY_CONSENT.checkboxLabel,
     );
+    expect(EVENT_PRIVACY_CONSENT.heading).toBe(COURSE_PRIVACY_CONSENT.heading);
   });
 });

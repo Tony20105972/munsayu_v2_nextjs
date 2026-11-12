@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { COURSE_PRIVACY_CONSENT } from "@/lib/contracts";
+import { COURSE_PRIVACY_CONSENT, EVENT_PRIVACY_CONSENT } from "@/lib/contracts";
 import { hashPassword } from "@/server/auth/password";
 import { db } from "@/server/db";
 
@@ -365,7 +365,7 @@ async function main(): Promise<void> {
     create: {
       id: 1,
       courseRetentionPolicy: COURSE_PRIVACY_CONSENT.retention,
-      eventRetentionPolicy: COURSE_PRIVACY_CONSENT.retention,
+      eventRetentionPolicy: EVENT_PRIVACY_CONSENT.retention,
       automaticPurgeEnabled: false,
     },
   });

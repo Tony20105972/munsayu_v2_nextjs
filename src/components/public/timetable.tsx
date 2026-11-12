@@ -9,7 +9,14 @@ import type { CourseCardView, CourseGroupView } from "@/lib/view-models";
  * 카드 구성(머리글·강좌명·강의시간·개강일·상세보기·수강예약)은
  * docs/evidence/dom/phase1-course.yml, phase1-schedule-g.yml 관찰값이다.
  */
-export function Timetable({ groups }: { groups: readonly CourseGroupView[] }) {
+export function Timetable({
+  groups,
+  retentionPolicy,
+}: {
+  groups: readonly CourseGroupView[];
+  /** 관리자 보존 설정의 현재 문구. 신청 모달의 「보유기간」에 그대로 쓴다. (BZ-002) */
+  retentionPolicy: string;
+}) {
   const [selectedCourse, setSelectedCourse] = useState<CourseCardView | null>(null);
 
   if (groups.length === 0) {
@@ -47,6 +54,7 @@ export function Timetable({ groups }: { groups: readonly CourseGroupView[] }) {
       {selectedCourse ? (
         <CourseReservationDialog
           course={selectedCourse}
+          retentionPolicy={retentionPolicy}
           onClose={() => setSelectedCourse(null)}
         />
       ) : null}

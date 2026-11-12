@@ -12,11 +12,11 @@
 
 ### D3 관리형 서비스 비교
 
-| 선택지 | Vercel 연동 | PostgreSQL | 이미지 저장소 | 판단 |
-|---|---|---|---|---|
-| Vercel + Neon | 간단한 서버리스 연동 | 서버리스 Postgres | Vercel Blob 또는 S3 호환 | 기본안: 소규모 시작에 단순 |
-| Vercel + Supabase | 환경 변수 연결 | Postgres·관리 UI | Supabase Storage | DB와 파일을 한 콘솔에서 관리하려면 적합 |
-| Vercel + AWS RDS/S3 | 별도 네트워크·운영 필요 | 관리형 Postgres | S3 | 운영 제어는 크나 초기 복잡도 큼 |
+| 선택지              | Vercel 연동             | PostgreSQL        | 이미지 저장소            | 판단                                    |
+| ------------------- | ----------------------- | ----------------- | ------------------------ | --------------------------------------- |
+| Vercel + Neon       | 간단한 서버리스 연동    | 서버리스 Postgres | Vercel Blob 또는 S3 호환 | 기본안: 소규모 시작에 단순              |
+| Vercel + Supabase   | 환경 변수 연결          | Postgres·관리 UI  | Supabase Storage         | DB와 파일을 한 콘솔에서 관리하려면 적합 |
+| Vercel + AWS RDS/S3 | 별도 네트워크·운영 필요 | 관리형 Postgres   | S3                       | 운영 제어는 크나 초기 복잡도 큼         |
 
 서비스 선택·비용·계정 생성은 사람 승인 전 수행하지 않는다. `StorageAdapter`와 DB 접근 계층으로 교체 가능하게 설계했다.
 

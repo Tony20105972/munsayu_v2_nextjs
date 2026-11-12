@@ -2,6 +2,7 @@ import "server-only";
 import { listCampuses, listPublicCourses } from "@/server/services/courses";
 import { listPublicEvents } from "@/server/services/events";
 import { listInstructors } from "@/server/services/instructors";
+import { getRetentionSetting } from "@/server/services/privacy";
 import type { Campus } from "@/lib/site-config";
 import {
   groupCoursesByGrade,
@@ -61,4 +62,19 @@ export async function loadInstructors(): Promise<InstructorCardView[]> {
 export async function loadBundangInstructors(): Promise<InstructorCardView[]> {
   const instructors = await listInstructors();
   return selectInstructorsByTeamKeyword(instructors, "분당");
+}
+
+/**
+ * BZ-002 동의 안내의 「보유기간」에 쓰는 현재 문구.
+ * 관리자 보존 설정이 단일 원본이고, 신청·예약 모달이 이 값을 그대로 보여 준다.
+ */
+export async function loadRetentionPolicies(): Promise<{
+  course: string;
+  event: string;
+}> {
+  const setting = await getRetentionSetting();
+  return {
+    course: setting.courseRetentionPolicy,
+    event: setting.eventRetentionPolicy,
+  };
 }

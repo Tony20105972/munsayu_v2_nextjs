@@ -87,6 +87,16 @@ function readBoolean(raw: Record<string, string>, key: string): boolean {
   return value === "true" || value === "on" || value === "1";
 }
 
+/**
+ * 개인정보 동의 안내의 「보유기간」 문구를 보여 주는 공개 경로.
+ * 보존 설정이 바뀌면 이 경로들도 함께 무효화해야 한다. (BZ-002)
+ */
+const PUBLIC_CONSENT_PATHS = [
+  "/sub/schedule.n",
+  "/sub/schedule.g",
+  "/sub/Presentation",
+] as const;
+
 function revalidateAdmin(...paths: string[]): void {
   for (const path of paths) {
     revalidatePath(path);
@@ -473,7 +483,9 @@ export async function updateRetentionSettingAction(
     if (!parsed.ok) return parsed.failure;
 
     await updateRetentionSetting(admin.id, parsed.value);
-    revalidateAdmin("/admin/privacy");
+    // 보유기간 문구는 공개 신청·예약 모달의 동의 안내에도 그대로 나온다. 관리자 화면만
+    // 무효화하면 공개 화면이 옛 문구를 계속 보여 준다. (BZ-002, 독립 리뷰 B-1)
+    revalidateAdmin("/admin/privacy", ...PUBLIC_CONSENT_PATHS);
     return success();
   } catch (error) {
     return toFailure(error);

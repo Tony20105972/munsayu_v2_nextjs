@@ -13,15 +13,20 @@ import { ModalDialog } from "@/components/ui/modal-dialog";
 import {
   ELEMENTARY_GRADES,
   EVENT_ATTENDEE_MAX,
+  EVENT_PRIVACY_CONSENT,
   eventReservationSchema,
 } from "@/lib/contracts";
 import { submitEventReservationAction } from "@/lib/actions/public-forms";
-import { EVENT_PRIVACY_CONSENT } from "@/lib/event-consent";
 import { errorElementId, toFieldErrors, type FieldErrors } from "@/lib/form-errors";
 import { createIdempotencyKey } from "@/lib/idempotency";
 import type { EventCardView } from "@/lib/view-models";
 
 type EventReservationDialogProps = {
+  /**
+   * 관리자 보존 설정(`PrivacyRetentionSetting.eventRetentionPolicy`)의 현재 문구.
+   * 동의 안내의 「보유기간」은 코드 상수가 아니라 이 값을 보여 준다. (BZ-002)
+   */
+  retentionPolicy: string;
   event: EventCardView;
   onClose: () => void;
 };
@@ -38,6 +43,7 @@ const ATTENDEE_OPTIONS = Array.from({ length: EVENT_ATTENDEE_MAX }, (_, index) =
  */
 export function EventReservationDialog({
   event,
+  retentionPolicy,
   onClose,
 }: EventReservationDialogProps) {
   const formId = useId();
@@ -192,7 +198,7 @@ export function EventReservationDialog({
                 </div>
                 <div>
                   <dt className="inline font-bold text-ink">보유기간 : </dt>
-                  <dd className="inline">{EVENT_PRIVACY_CONSENT.retention}</dd>
+                  <dd className="inline">{retentionPolicy}</dd>
                 </div>
               </dl>
               <div className="mt-4">

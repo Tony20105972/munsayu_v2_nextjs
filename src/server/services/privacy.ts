@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import type { PrivacyRetentionSetting, Prisma } from "@prisma/client";
 import {
   COURSE_PRIVACY_CONSENT,
+  EVENT_PRIVACY_CONSENT,
   type PrivacyRetentionSettingInput,
   type PurgeEligibilityInput,
 } from "@/lib/contracts";
@@ -31,7 +32,9 @@ export async function getRetentionSetting(
       data: {
         id: 1,
         courseRetentionPolicy: COURSE_PRIVACY_CONSENT.retention,
-        eventRetentionPolicy: COURSE_PRIVACY_CONSENT.retention,
+        // 설명회는 설명회 문구를 기본값으로 쓴다. 강좌 문구를 넣으면 신청자가 본 문구와
+        // 저장된 정책 버전이 달라진다. (BZ-002, ASM-009)
+        eventRetentionPolicy: EVENT_PRIVACY_CONSENT.retention,
         automaticPurgeEnabled: false,
       },
     });
@@ -44,8 +47,11 @@ export async function getRetentionSetting(
 }
 
 /**
- * 접수 당시 보존 정책 버전. 문구가 레거시 기본값이면 관찰된 버전 ID를 쓰고,
+ * 접수 당시 보존 정책 버전. 문구가 기본값이면 관찰된 버전 ID를 쓰고,
  * 관리자가 바꾼 뒤에는 문구에서 나온 결정적 버전 값을 쓴다.
+ *
+ * 비교 대상은 **종류별 기본 문구**다. 강좌 기본값과만 비교하면 설명회 예약이
+ * 신청자가 보지 않은 문구의 버전을 저장한다. (BZ-002)
  */
 export function resolveRetentionPolicyVersion(
   kind: "course" | "event",
@@ -53,8 +59,16 @@ export function resolveRetentionPolicyVersion(
 ): string {
   const policy =
     kind === "course" ? setting.courseRetentionPolicy : setting.eventRetentionPolicy;
-  if (policy === COURSE_PRIVACY_CONSENT.retention) {
-    return COURSE_PRIVACY_CONSENT.policyVersion;
+  const defaultPolicy =
+    kind === "course"
+      ? COURSE_PRIVACY_CONSENT.retention
+      : EVENT_PRIVACY_CONSENT.retention;
+  const defaultVersion =
+    kind === "course"
+      ? COURSE_PRIVACY_CONSENT.policyVersion
+      : EVENT_PRIVACY_CONSENT.policyVersion;
+  if (policy === defaultPolicy) {
+    return defaultVersion;
   }
   const digest = createHash("sha256").update(policy).digest("hex").slice(0, 12);
   return `custom-${digest}`;

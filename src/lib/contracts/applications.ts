@@ -57,7 +57,8 @@ export const EVENT_PRIVACY_CONSENT = {
   retention: "해당 설명회 종료 및 안내 완료 시점 즉시 파기",
   checkboxLabel: COURSE_PRIVACY_CONSENT.checkboxLabel,
   submitLabel: "설명회 예약 신청서 제출하기",
-  policyVersion: COURSE_PRIVACY_CONSENT.policyVersion,
+  // 문구가 강좌와 다르므로 버전도 따로 둔다. 동의 기록이 가리키는 문구가 신청자가 본 문구여야 한다.
+  policyVersion: "event-asm-009-v1",
 } as const;
 
 export const courseApplicationSchema = z.object({

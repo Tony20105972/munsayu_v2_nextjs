@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, test } from "vitest";
+import { EVENT_PRIVACY_CONSENT } from "@/lib/contracts";
 import { db } from "@/server/db";
 import { getMemoryNotifyAdapter } from "@/server/adapters/notify";
 import { POST as createEventReservation } from "../../app/api/event-reservations/route";
@@ -35,7 +36,9 @@ describe("FM-002 설명회 예약", () => {
     });
     expect(saved.attendeeCount).toBe(2);
     expect(saved.status).toBe("PENDING");
-    expect(saved.retentionPolicyVersion).toBe("legacy-ev-0006-v1");
+    // 설명회는 설명회 문구의 버전을 저장한다. 강좌 버전을 저장하면 동의 기록이
+    // 신청자가 보지 않은 문구를 가리킨다. (BZ-002, 독립 리뷰 B-1)
+    expect(saved.retentionPolicyVersion).toBe(EVENT_PRIVACY_CONSENT.policyVersion);
   });
 
   test("FM-002 설명회 예약: 참석 인원 1명은 허용한다", async () => {

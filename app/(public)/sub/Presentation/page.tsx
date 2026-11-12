@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { EventList } from "@/components/public/event-list";
 import { LoadingBlock } from "@/components/ui/loading-block";
 import { PageBanner } from "@/components/ui/page-banner";
-import { loadEventGroups } from "@/lib/data/public-content";
+import { loadEventGroups, loadRetentionPolicies } from "@/lib/data/public-content";
 import { buildPageMetadata } from "@/lib/metadata";
 import { SITE_TITLE_SUFFIX } from "@/lib/site-config";
 
@@ -19,7 +19,11 @@ export const metadata = buildPageMetadata({
 });
 
 async function EventGroups() {
-  return <EventList groups={await loadEventGroups()} />;
+  const [groups, retention] = await Promise.all([
+    loadEventGroups(),
+    loadRetentionPolicies(),
+  ]);
+  return <EventList groups={groups} retentionPolicy={retention.event} />;
 }
 
 export default function PresentationPage() {
