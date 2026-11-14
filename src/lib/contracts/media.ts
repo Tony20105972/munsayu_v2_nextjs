@@ -291,7 +291,12 @@ export const homeBannerUpsertSchema = z.object({
   secondaryLabel: z.string().trim().max(40).default(""),
   secondaryHref: bannerHrefSchema.default(""),
   displayOrder: z.coerce.number().int().min(0).max(999).default(0),
-  isVisible: z.coerce.boolean().default(true),
+  /*
+    `z.coerce.boolean()` 을 쓰지 않는다 — `Boolean("false")` 가 `true` 라서 폼이 보낸
+    `"false"` 가 뒤집힌다. 위 `mediaHideSchema` 와 같은 규칙이다. 문자열 → 참·거짓은
+    Server Action 의 `readBoolean()` 이 맡고 계약은 참·거짓만 받는다.
+  */
+  isVisible: z.boolean().default(true),
 });
 export type HomeBannerUpsertInput = z.infer<typeof homeBannerUpsertSchema>;
 

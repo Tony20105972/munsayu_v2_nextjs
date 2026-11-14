@@ -2,7 +2,7 @@ import "server-only";
 import { createHash, createHmac, randomUUID, timingSafeEqual } from "node:crypto";
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, join, normalize, resolve, sep } from "node:path";
-import { envValue } from "@/server/env";
+import { envValue, requireEnvValue } from "@/server/env";
 
 export type StoredObject = {
   key: string;
@@ -81,10 +81,16 @@ function resolveSafePath(root: string, key: string): string {
 
 const UPLOAD_TICKET_TTL_SECONDS = 15 * 60;
 
-/** 티켓 서명 키. `AUTH_SECRET` 에서 갈라 쓴다. 비밀값을 새로 늘리지 않는다. */
+/**
+ * 티켓 서명 키. `AUTH_SECRET` 에서 갈라 쓴다. 비밀값을 새로 늘리지 않는다.
+ *
+ * 값이 없으면 **던진다.** 빈 문자열로 넘어가면 서명 키가 누구나 계산할 수 있는 상수가
+ * 되어 업로드 티켓을 위조할 수 있다. 관리자 세션이 한 겹 더 막지만, 비밀값이 없을 때는
+ * 조용히 약해지는 대신 멈추는 쪽이 맞다.
+ */
 function ticketSigningKey(): Buffer {
   return createHash("sha256")
-    .update(`${envValue("AUTH_SECRET") ?? ""}:media-upload-ticket`)
+    .update(`${requireEnvValue("AUTH_SECRET")}:media-upload-ticket`)
     .digest();
 }
 

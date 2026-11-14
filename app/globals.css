@@ -48,28 +48,39 @@ body {
  *
  * 장수는 관리자가 정하므로(AD-015) 한 바퀴 시간과 시작 지연을 컴포넌트가 변수로 넘긴다.
  * 3장이면 18초 한 바퀴에 0·6·12초 지연으로 Phase 3 과 같은 움직임이 된다.
+ *
+ * `opacity` 만 쓰면 안 보이는 장도 **클릭을 가로챈다.** 세 장이 같은 칸에 겹쳐 있어
+ * DOM 마지막 장이 배너 전체를 덮기 때문이다. 장마다 버튼 주소가 다르므로(EV-0015)
+ * 1번 장의 「문해력 진단 신청」을 눌러도 3번 장 주소로 가고, 키보드로는 보이지 않는
+ * 링크에 초점이 들어간다. 그래서 `visibility` 를 함께 바꾼다. `visibility: hidden` 은
+ * 클릭 대상에서도, 탭 순서에서도 빠진다. (WCAG 4.1.2)
  */
 .home-hero-slide {
   animation: home-hero-fade var(--home-hero-cycle, 18s) linear infinite;
   animation-delay: var(--home-hero-delay, 0s);
   opacity: 0;
+  visibility: hidden;
 }
 
 .home-hero-slide:first-child {
   opacity: 1;
+  visibility: visible;
 }
 
 @keyframes home-hero-fade {
   0%,
   28% {
     opacity: 1;
+    visibility: visible;
   }
   33%,
   95% {
     opacity: 0;
+    visibility: hidden;
   }
   100% {
     opacity: 1;
+    visibility: visible;
   }
 }
 
@@ -89,10 +100,12 @@ body {
   .home-hero-slide {
     animation: none !important;
     opacity: 0;
+    visibility: hidden;
   }
 
   .home-hero-slide:first-child {
     opacity: 1;
+    visibility: visible;
   }
 }
 

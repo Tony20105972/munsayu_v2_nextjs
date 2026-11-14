@@ -15,7 +15,32 @@ import { MAIL_OUTBOX_FILE } from "../../playwright.config";
  * 봐야 하므로 `playwright.config.ts` 에서 `.env` 를 읽고 `helpers.ts` 가 같은 규칙으로
  * 비밀번호를 만든다. 여기서 비밀번호를 덮어쓰지 않는다.
  */
+/**
+ * 이 설정은 **행을 지운다.** 실수로 운영 DB 를 가리킨 채 돌면 신청·공지·강사가 사라진다.
+ * `scripts/unlock-login.ts` 와 같은 기준으로 로컬·CI 가 아니면 멈춘다.
+ */
+function assertDisposableDatabase(): void {
+  const blockers: string[] = [];
+  if (process.env.NODE_ENV === "production") blockers.push("NODE_ENV=production");
+  if (process.env.VERCEL) blockers.push("VERCEL");
+
+  const url = process.env.DATABASE_URL?.trim() ?? "";
+  const local = /@(127\.0\.0\.1|localhost|\[::1\])[:/]/.test(url);
+  // CI 는 서비스 컨테이너를 쓰므로 호스트가 로컬이 아니어도 괜찮다.
+  if (!local && !process.env.CI) {
+    blockers.push("DATABASE_URL 이 로컬 주소가 아님");
+  }
+
+  if (blockers.length > 0) {
+    throw new Error(
+      `E2E 는 버려도 되는 DB 에서만 돌린다. 다음 때문에 멈췄다: ${blockers.join(", ")}`,
+    );
+  }
+}
+
 export default async function globalSetup(): Promise<void> {
+  assertDisposableDatabase();
+
   execFileSync("npx", ["tsx", "--conditions=react-server", "prisma/seed.ts"], {
     stdio: "inherit",
   });
