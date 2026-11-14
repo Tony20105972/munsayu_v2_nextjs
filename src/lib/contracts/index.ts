@@ -10,3 +10,4 @@ export * from "./applications";
 export * from "./reservations";
 export * from "./auth";
 export * from "./admin";
+export * from "./media";

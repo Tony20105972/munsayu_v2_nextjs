@@ -21,8 +21,11 @@ import { sanitizeNoticeHtml } from "@/server/lib/sanitize-notice-html";
  * 본문 HTML 은 **저장 전에** 허용 목록으로 정리한다. 화면에서 거르는 것에 기대지 않는다.
  */
 
-/** 본문 이미지·첨부 용량 상한. 본문 이미지는 화면에 바로 뜨므로 더 작게 잡는다. */
-export const NOTICE_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
+/**
+ * 첨부파일 용량 상한.
+ * 본문 **이미지**는 AD-015 공통 업로드가 맡는다(`src/server/services/media.ts`).
+ * 그래서 형식 검사·크기 줄이기·EXIF 제거가 보관함과 똑같이 적용된다.
+ */
 export const NOTICE_ATTACHMENT_MAX_BYTES = 20 * 1024 * 1024;
 
 export type AdminNoticeDetail = {
@@ -139,43 +142,6 @@ export async function deleteNotices(
   }
 
   return { deleted: result.count, removedFiles };
-}
-
-/**
- * 본문에 넣을 이미지를 올린다. 형식은 파일 내용으로 확인하고 SVG 는 받지 않는다.
- * SVG 안에는 스크립트를 넣을 수 있어서다. (AD-014 보안)
- */
-export async function uploadNoticeImage(file: {
-  filename: string;
-  bytes: Uint8Array;
-}): Promise<{ url: string }> {
-  if (file.bytes.byteLength > NOTICE_IMAGE_MAX_BYTES) {
-    throw validationFailed({
-      image: [
-        `본문 이미지는 ${NOTICE_IMAGE_MAX_BYTES / (1024 * 1024)}MB 이하여야 합니다.`,
-      ],
-    });
-  }
-
-  const detected = detectImageFormat(file.bytes);
-  if (!detected) {
-    throw validationFailed({
-      image: ["PNG, JPG, GIF, WEBP 이미지만 올릴 수 있습니다."],
-    });
-  }
-
-  const key = createStorageKey("notice-images", detected.format);
-  const stored = await getStorageAdapter().put(
-    "public",
-    key,
-    file.bytes,
-    detected.contentType,
-  );
-  if (!stored.url) {
-    throw new Error("NOTICE_IMAGE_URL_MISSING");
-  }
-
-  return { url: stored.url };
 }
 
 /** 글 첨부 파일. 본문 이미지와 달리 문서 형식만 받는다. */

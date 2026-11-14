@@ -1,5 +1,12 @@
 import Image from "next/image";
-import { FACILITY_FEATURE_PHOTOS, FACILITY_SLIDE_PHOTOS } from "@/lib/images";
+import { Suspense } from "react";
+import { connection } from "next/server";
+import { loadFacilityPhotos } from "@/lib/data/public-content";
+import {
+  DEFAULT_FACILITY_PHOTOS,
+  FACILITY_FEATURE_PHOTOS,
+  type FacilityPhotoView,
+} from "@/lib/images";
 import { CAMPUSES, EXTERNAL_LINKS, type Campus } from "@/lib/site-config";
 
 /**
@@ -12,6 +19,11 @@ import { CAMPUSES, EXTERNAL_LINKS, type Campus } from "@/lib/site-config";
  *
  * 공간 카드 사진은 레거시가 Unsplash 를 핫링크하던 자리다. 같은 사진을 내려받아
  * 커밋했고, 원본이 404 인 `책과 글을 위한 교실` 칸만 사진 없이 CSS 처리로 둔다. // ASM-079
+ *
+ * 지점별 사진 갤러리는 관리자가 「이미지 관리 → 시설안내 사진」에서 추가·삭제·순서
+ * 변경·설명 수정을 한다. (AD-015) 등록된 사진이 없거나 DB 를 읽지 못하면 지금
+ * 커밋돼 있는 4장으로 그린다. 공간 카드 4칸 사진은 카드 제목과 1:1로 묶여 있어
+ * 코드에 그대로 둔다. // ASM-093
  */
 
 type FeatureCard = {
@@ -121,9 +133,7 @@ function FeatureList({ features }: { features: readonly FeatureCard[] }) {
   );
 }
 
-function SlidePhotos({ campusId }: { campusId: Campus["id"] }) {
-  const photos = FACILITY_SLIDE_PHOTOS[campusId] ?? [];
-
+function SlidePhotos({ photos }: { photos: readonly FacilityPhotoView[] }) {
   if (photos.length === 0) {
     return null;
   }
@@ -132,12 +142,13 @@ function SlidePhotos({ campusId }: { campusId: Campus["id"] }) {
     <ul className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
       {photos.map((photo) => (
         <li
-          key={photo.src}
+          key={photo.id}
           className="relative aspect-4/3 overflow-hidden rounded-md bg-canvas"
         >
+          {/* 설명을 비워 두면 레거시처럼 장식용 사진으로 본다(빈 alt). */}
           <Image
-            src={photo.src}
-            alt={photo.alt}
+            src={photo.url}
+            alt={photo.caption}
             fill
             sizes="(min-width: 640px) 12rem, 45vw"
             className="object-cover"
@@ -146,6 +157,12 @@ function SlidePhotos({ campusId }: { campusId: Campus["id"] }) {
       ))}
     </ul>
   );
+}
+
+/** 관리자가 등록한 사진을 읽는다. 기다리는 동안에는 커밋된 기본 사진을 보여 준다. */
+async function ManagedSlidePhotos({ campusId }: { campusId: Campus["id"] }) {
+  await connection();
+  return <SlidePhotos photos={await loadFacilityPhotos(campusId)} />;
 }
 
 function ContactCard({ campus }: { campus: Campus }) {
@@ -193,7 +210,11 @@ export function FacilityPanel({ campusId }: { campusId: Campus["id"] }) {
           공간은 간결하게, 생각은 깊이 있게.
         </h3>
         <p className="mt-3 text-sm text-muted">{intro.sliderNote}</p>
-        <SlidePhotos campusId={campusId} />
+        <Suspense
+          fallback={<SlidePhotos photos={DEFAULT_FACILITY_PHOTOS[campusId] ?? []} />}
+        >
+          <ManagedSlidePhotos campusId={campusId} />
+        </Suspense>
         <p className="mt-4 text-xs text-muted">
           {campus.address} · 방문 상담 {campus.phone}
         </p>

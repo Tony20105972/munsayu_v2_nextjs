@@ -4,14 +4,24 @@ import { COURSE_PRIVACY_CONSENT } from "../../src/lib/contracts";
 import { MAIL_OUTBOX_FILE } from "../../playwright.config";
 import { fixturePassword } from "../fixtures/passwords";
 
-/** seed 가 넣는 가짜 관리자. 운영 계정이 아니다. */
+/**
+ * seed 가 넣는 가짜 관리자·회원. 운영 계정이 아니다.
+ *
+ * 비밀번호는 `prisma/seed.ts` 와 **같은 규칙**으로 정한다. `.env` 에 `SEED_*_PASSWORD`
+ * 가 있으면 seed 가 그 값을 쓰므로, 여기서 코드 기본값만 보면 개발자 `.env` 가 있는
+ * 환경에서 모든 로그인 흐름이 깨진다. 빈 문자열은 "값 없음"으로 본다.
+ */
+function seedPassword(envKey: string, label: string): string {
+  return process.env[envKey]?.trim() || fixturePassword(label);
+}
+
 export const SEED_ADMIN = {
   loginId: "admin",
-  password: fixturePassword("admin-0000"),
+  password: seedPassword("SEED_ADMIN_PASSWORD", "admin-0000"),
 } as const;
 export const SEED_MEMBER = {
   loginId: "member01",
-  password: fixturePassword("member-0000"),
+  password: seedPassword("SEED_MEMBER_PASSWORD", "member-0000"),
 } as const;
 
 /** 테스트마다 다른 값이 필요한 곳에 쓴다. 같은 DB를 여러 번 쓰므로 충돌을 막는다. */

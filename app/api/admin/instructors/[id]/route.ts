@@ -9,10 +9,10 @@ export async function PUT(
   context: { params: Promise<{ id: string }> },
 ): Promise<Response> {
   try {
-    await requireAdmin(request);
+    const admin = await requireAdmin(request);
     const { id } = await context.params;
     const input = await parseJsonBody(request, instructorUpsertSchema);
-    const instructor = await updateInstructor(id, input);
+    const instructor = await updateInstructor(admin.id, id, input);
     return jsonNoStore({ id: instructor.id }, 200);
   } catch (error) {
     return errorResponse(error);

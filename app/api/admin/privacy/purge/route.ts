@@ -1,6 +1,7 @@
 import { purgeRunSchema } from "@/lib/contracts";
 import { requireAdmin, secretEquals } from "@/server/auth";
 import { unauthenticated } from "@/server/errors";
+import { envValue } from "@/server/env";
 import { runPurge } from "@/server/services/privacy";
 import { errorResponse, jsonNoStore, parseJsonBody } from "@/server/http";
 
@@ -11,7 +12,8 @@ import { errorResponse, jsonNoStore, parseJsonBody } from "@/server/http";
  */
 async function resolveActor(request: Request): Promise<string | null> {
   const provided = request.headers.get("x-purge-secret");
-  const expected = process.env.PRIVACY_PURGE_SECRET;
+  // 빈 문자열은 "설정 안 됨"이다. 빈 비밀값으로 통과시키지 않는다.
+  const expected = envValue("PRIVACY_PURGE_SECRET");
   if (provided && expected && secretEquals(provided, expected)) {
     return null;
   }

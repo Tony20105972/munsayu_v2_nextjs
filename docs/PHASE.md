@@ -12,10 +12,10 @@
 | 항목 | 값 |
 |---|---|
 | 현재 Phase | **5 — Legacy Parity Testing** |
-| 상태 | `NOT_STARTED` |
-| 마지막 갱신 | 2026-11-12 |
-| 다음 행동 | Phase 5 시작 시 아래 **Phase 5 이월 항목**을 가장 먼저 처리 |
-| 막힌 것 | 없음 — 남은 의문은 ASM으로 기록하고 Phase 안에서 진행 |
+| 상태 | `IN_PROGRESS` |
+| 마지막 갱신 | 2026-11-14 |
+| 다음 행동 | 남은 비교 2건(`/sub/Facility` 공간 카드·`/sub/about` 2·3탭) 뒤 Gate 판정 → 독립 리뷰 → PR |
+| 막힌 것 | **분석용 Chrome(9222) 연결이 작업 중 끊겼다.** 레거시 재관찰이 필요한 항목은 대기 중. 원장님 답 6건(`Q-ADM-15`~`20`)도 대기 |
 
 상태 값: `NOT_STARTED` → `IN_PROGRESS` → `GATE_CHECK` → `IN_REVIEW` → `APPROVED`
 (Gate 실패 시 `GATE_FAIL` → 수정 후 다시 `GATE_CHECK`)
@@ -31,7 +31,7 @@
 | 2 | Migration Contract | APPROVED | PASS (7/7) | 차단 3 수정 / 권장 반영 | ☑ | `reports/phase-2-report.md` |
 | 3 | Frontend Reconstruction | APPROVED | PASS (5/5) | 차단 1 수정 / 권장 12 기록 | ☑ | `reports/phase-3-report.md` |
 | 4 | Backend Replacement | APPROVED | PASS (9/9 적용) | 차단 1 수정 / 권장 12 기록 | ☑ | `reports/phase-4-report.md` |
-| 5 | Legacy Parity Testing | NOT_STARTED | — | — | ☐ | `reports/phase-5-report.md` |
+| 5 | Legacy Parity Testing | IN_PROGRESS | — | — | ☐ | `reports/phase-5-report.md` |
 | 6 | Performance & Security | NOT_STARTED | — | — | ☐ | `reports/phase-6-report.md` |
 | 7 | Cutover 준비 | NOT_STARTED | — | — | ☐ | `reports/phase-7-report.md` |
 
@@ -115,6 +115,12 @@ Phase 0에서 Claude가 채웁니다. 필수 도구가 `정상`이 아니면 Pha
 | Q-ADM-12 | 신청자 개인정보는 얼마나 보관하고 언제 지우나요? | AD-013 | 관리자 설정으로 변경; 기본은 EV-0006 동의 문구, 자동 파기 기본 꺼짐 | 2026-11-11 |
 | Q-ADM-13 | 신청 내역을 엑셀로 내려받아 쓰나요? 어떤 항목이 필요한가요? | AD-003~005, AD-008, AD-013 | 필터 결과 전체 CSV, 개인정보 다운로드 기록 유지 | 2026-11-11 |
 | Q-ADM-14 | 지금 관리자 화면에서 불편하거나 꼭 바뀌었으면 하는 점은? (답은 기록하되, 레거시에 없는 기능은 Phase 2에서 사용자가 따로 승인한다) | AD-001~013 | | |
+| Q-ADM-15 | 홈 배너의 「문해력 진단 신청」이 가리키는 구글 폼 주소가 `/sub/abouttch3` 푸터의 주소와 **다릅니다**(`hB9ViXT51HkRUkjU7` vs `XUjFY9jVStQDKskg8`). 어느 쪽이 지금 쓰시는 폼인가요? | AD-009, ASM-082 | | |
+| Q-ADM-16 | 학원 소개(`/sub/about`) 화면의 「상담 및 진단평가 신청하기」 폼을 새 사이트에도 둘까요? 지난번 「폼은 지우고 구글 폼 링크만」 지시는 사이트 안에 폼이 없다는 전제였는데, 확인해 보니 이 화면에는 폼이 있습니다 | AD-009, ASM-096 | | |
+| Q-ADM-17 | `/sub/abouttch3` 주소에 「문해력 진단 안내」 화면을 그대로 두어도 될까요? 레거시에서는 강사 카드가 비어 있는 「컨설팅팀」 강사진 화면이었고 메뉴에서도 꺼져 있었습니다 | PG-007, ASM-043 | | |
+| Q-ADM-18 | 상담 시간이 두 가지로 적혀 있습니다. 푸터는 `월-금 13:00-21:00 / 토·일 9:30-21:00`, 학원 소개 화면은 `평일 14:00-22:00 / 주말 08:30-22:00` 입니다. 어느 쪽이 맞나요? | PG-002 | | |
+| Q-ADM-19 | 설명회 신청 학년을 레거시는 `초등4~중2`로 받고 있었는데 새 사이트는 `예비초~초6`만 받습니다. 중학생 설명회 신청도 받으셔야 하나요? | FM-002, ASM-084 | | |
+| Q-ADM-20 | 검색 결과에 화면마다 다른 제목·설명이 나오게 해도 될까요? 지금 레거시는 모든 화면의 제목·설명이 같습니다 | ASM-095 | | |
 
 ---
 
@@ -138,6 +144,8 @@ Claude는 Phase 상태가 바뀔 때마다 한 줄씩 추가합니다. 위쪽이
 
 | 날짜 | Phase | 변경 | 작성 |
 |---|---|---|---|
+| 2026-11-14 | 5 | 레거시 동등성 검증 1단계: 공개 16경로 전수 대조. 버그 9건 수정(홈 배너 2·3, 4대 차별화 섹션, 메뉴 링크 미노출, Next 내부 예외 삼킴, E2E 수화 차단 등), 의도된 변경 7건, 원장님 질문 6건 등록. ASM-040 해소·ASM-043 반증·ASM-095/096 신설. Chrome 9222 끊겨 중단 | Claude Code |
+| 2026-11-14 | 5 | 동등성 검증 선행 수정 6건 처리(로그 개인정보·빈 환경 변수·db:unlock·prisma generate·배포 범위). 함께 찾은 결함 3건 수정. `verify:all` 통과. 레거시 관찰은 Chrome 9222 미기동으로 대기 | Claude Code |
 | 2026-11-12 | 3·4→5 | Phase 3·4 승인, PR #4 squash 병합 (사용자 지시). 보완 3건은 Phase 5로 이월 | Claude Code |
 | 2026-11-12 | 3·4 | PR #4 생성, CI verify 통과. GitGuardian은 과거 커밋의 테스트 가짜 비밀번호로 빨간불 — 사람 판단 필요 | Claude Code |
 | 2026-11-12 | 3·4 | 독립 리뷰 차단 2건(BZ-002 보유기간 문구 연결, ASM 등록부 누락) 수정, Gate PASS로 GATE_CHECK 전환 | Claude Code |
@@ -158,34 +166,14 @@ Claude는 Phase 상태가 바뀔 때마다 한 줄씩 추가합니다. 위쪽이
 | 2026-11-09 | 1 | 3-2 완료: 공개 페이지 형식별 1440/390·DOM 증거 보강 | Codex |
 | 2026-11-09 | 1 | 3-1 완료: 내부 메뉴·푸터 반복 링크 포화 확인, 관리자 경로 미접속 | Codex |
 | 2026-11-09 | 1 | 사용자 답변 반영 및 보정 Gate 기준 재조사 시작 | Codex |
-| 2026-11-09 | 1 | 1-F 완료: 기능 매트릭스·UNKNOWN·자산·SEO 문서화, Gate FAIL 보고서 작성 | Codex |
-| 2026-11-09 | 1 | 1-D 완료: 관찰 자산·SEO 정리 (Chrome DevTools MCP 미설치로 1-E 건너뜀) | Codex |
-| 2026-11-09 | 1 | 1-C 완료: 대표 폼·스크립트·네트워크 관찰, 운영 사이트 쓰기 요청 0건 | Codex |
-| 2026-11-09 | 1 | 1-B 완료: 대표 공개 화면 스크린샷·DOM·REA 증거 수집, 관리자 AD-* 연결 | Codex |
-| 2026-11-09 | 1 | 1-A 완료: 공개 경로 14개, 상세·인증 URL 형식 3개 기록; sitemap.xml 404 | Codex |
-| 2026-11-09 | 1 | 1-B 재개: 공개된 사업자·개인정보관리책임자 정보는 사용자 확인으로 증거 보관 허용 | Codex |
-| 2026-11-09 | 1 | 1-B 중단: 설명회 공개 화면에서 개인정보 노출 확인, 원본 증거 파일 폐기 | Codex |
-| 2026-11-09 | 1 | 1-A 초안: 공개 경로 14개 수집, robots 금지 경로 제외 | Codex |
-| 2026-11-09 | 1 | Phase 1 재개: Chrome CDP·robots.txt 확인, 공개 조사 시작 | Codex |
-| 2026-11-09 | 1 | 범위 보강: 백엔드·관리자 기능 확정, 관리자 화면 EV-ADM-01~07 반영 (사용자 지시) | Codex |
-| 2026-11-06 | 1 | 사용자 제공 관리자 화면 근거(EV-ADM-01~07) 및 조사 항목 반영 | Codex |
-| 2026-11-06 | 1 | 범위 보강: 백엔드·관리자 기능 확정 (사용자 지시) | Codex |
-| 2026-11-06 | 0 | Phase 0 승인, PR #1 병합 (사용자 지시) | Codex |
-| 2026-11-06 | 0 | 독립 리뷰 완료: 차단 0 / 권장 2, 상태를 IN_REVIEW로 변경 | Codex |
-| 2026-11-06 | 0 | Gate PASS (7/7), 상태를 GATE_CHECK로 변경 | Claude Code |
-| 2026-11-06 | 0 | 하네스 구현 및 Gate 재검증 완료 | Claude Code |
-| 2026-11-06 | 0 | Phase 0 재개 (Claude Code) — 상태를 IN_PROGRESS로 변경 | Claude Code |
-| 2026-11-06 | 0 | 재검증도 FAIL: REA CDP endpoint 및 Playwright MCP 미연결 지속 | Codex |
-| 2026-11-06 | 0 | 상태를 IN_PROGRESS로 변경, Gate FAIL 항목 재검증 시작 | Codex |
-| 2026-11-06 | 0 | Gate FAIL: REA CDP endpoint 및 Playwright MCP 미연결 | Codex |
-| 2026-11-06 | 0 | 상태를 IN_PROGRESS로 변경, 하네스 검증 시작 | Codex |
-| — | 0 | 상태판 생성 | 사람 |
+
+이전 이력(2026-11-09 이전 22줄)은 `docs/reports/phase-history.md`에 있습니다.
 
 ---
 
 ## Claude 갱신 규칙
 
-1. 세션 시작 시: 이 파일 → `CLAUDE.md` → `BLUEPRINT.md` → `MIGRATION_PLAN.md` → `TOOLING.md` 순서로 읽습니다.
+1. 세션 시작 시: `docs/CONTEXT.md`를 읽습니다. 이 파일·`CLAUDE.md`·`BLUEPRINT.md`·`MIGRATION_PLAN.md`·`TOOLING.md`는 필요한 부분만 찾아 읽습니다.
 2. 작업 시작 시: 상태를 `IN_PROGRESS`로 바꾸고 변경 이력에 한 줄 추가합니다.
 3. 작업 종료 시: Gate를 확인하고 결과를 표에 적은 뒤 상태를 `GATE_CHECK` 또는 `GATE_FAIL`로 바꿉니다.
 4. Gate 확인 뒤 독립 리뷰를 수행하고 차단 항목을 같은 Phase에서 수정합니다. 보고 완료 시 상태를 `GATE_CHECK`로 바꾸고 **멈춥니다.**

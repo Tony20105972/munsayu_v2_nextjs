@@ -43,26 +43,20 @@ body {
 }
 
 /*
- * 홈 상단 배경 슬라이드. 레거시도 CSS background 로 사진 3장을 돌렸다. (EV-0012)
- * 세 장을 겹쳐 두고 투명도만 바꾼다. 움직임을 줄이도록 설정한 환경에서는
- * 아래 `prefers-reduced-motion` 규칙이 애니메이션을 사실상 멈춰 첫 장만 보인다.
+ * 홈 상단 배너 슬라이드. 레거시도 CSS background 로 사진을 돌렸다. (EV-0012)
+ * 여러 장을 한 칸에 겹쳐 두고 투명도만 바꾼다.
+ *
+ * 장수는 관리자가 정하므로(AD-015) 한 바퀴 시간과 시작 지연을 컴포넌트가 변수로 넘긴다.
+ * 3장이면 18초 한 바퀴에 0·6·12초 지연으로 Phase 3 과 같은 움직임이 된다.
  */
 .home-hero-slide {
-  animation: home-hero-fade 18s linear infinite;
+  animation: home-hero-fade var(--home-hero-cycle, 18s) linear infinite;
+  animation-delay: var(--home-hero-delay, 0s);
   opacity: 0;
 }
 
-.home-hero-slide:nth-child(1) {
-  animation-delay: 0s;
+.home-hero-slide:first-child {
   opacity: 1;
-}
-
-.home-hero-slide:nth-child(2) {
-  animation-delay: 6s;
-}
-
-.home-hero-slide:nth-child(3) {
-  animation-delay: 12s;
 }
 
 @keyframes home-hero-fade {
@@ -85,6 +79,20 @@ body {
   *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+  }
+
+  /*
+   * 움직임을 줄이도록 설정한 환경에서는 첫 장만 보여 준다.
+   * 위 규칙만 두면 애니메이션이 끝 상태(opacity: 1)로 건너뛰어 모든 장이 한꺼번에
+   * 겹쳐 보인다. 슬라이드마다 제목·버튼이 따로 있으므로(AD-015) 반드시 끊어야 한다.
+   */
+  .home-hero-slide {
+    animation: none !important;
+    opacity: 0;
+  }
+
+  .home-hero-slide:first-child {
+    opacity: 1;
   }
 }
 

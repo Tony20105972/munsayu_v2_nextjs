@@ -44,7 +44,6 @@ import {
   addNoticeAttachment,
   deleteNotices,
   removeNoticeAttachment,
-  uploadNoticeImage,
   upsertNotice,
 } from "@/server/services/notices-admin";
 import {
@@ -322,21 +321,6 @@ export async function deleteNoticesAction(
     const result = await deleteNotices(parsed.value);
     revalidateAdmin("/admin/notices", "/notice");
     return success(result);
-  } catch (error) {
-    return toFailure(error);
-  }
-}
-
-/** 본문 편집기에서 쓰는 이미지 업로드. 돌려준 주소를 본문 HTML 에 넣는다. */
-export async function uploadNoticeImageAction(
-  formData: FormData,
-): Promise<ActionResult<{ url: string }>> {
-  try {
-    await requireAdminFromCookies();
-    const file = await readUploadedFile(formData.get("image"));
-    if (!file) return failure("올릴 이미지를 선택해 주세요.");
-
-    return success(await uploadNoticeImage(file));
   } catch (error) {
     return toFailure(error);
   }

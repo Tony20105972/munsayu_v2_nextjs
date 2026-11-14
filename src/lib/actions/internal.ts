@@ -1,5 +1,6 @@
 import "server-only";
 import { cookies, headers } from "next/headers";
+import { unstable_rethrow } from "next/navigation";
 import type { SessionScope } from "@prisma/client";
 import { ZodError, type ZodType } from "zod";
 import type { ActionFailure, ActionSuccess } from "@/lib/action-result";
@@ -32,8 +33,13 @@ export function failure(message: string, fieldErrors?: FieldErrors): ActionFailu
 /**
  * 서비스·검증 예외를 화면용 실패 값으로 바꾼다.
  * `AppError` 가 아닌 예외는 내용을 숨기고 공통 문구만 돌려준다.
+ *
+ * Next 의 리다이렉트·`notFound()` 는 예외로 전달된다. 그것까지 삼키면 Server Action
+ * 뒤의 화면 이동이 조용히 사라진다. 우리 오류를 보기 전에 먼저 돌려보낸다. (EV-0015)
  */
 export function toFailure(error: unknown): ActionFailure {
+  unstable_rethrow(error);
+
   if (error instanceof AppError) {
     return failure(error.message, error.fieldErrors);
   }

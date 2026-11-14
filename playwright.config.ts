@@ -1,3 +1,5 @@
+// seed 와 같은 `.env` 를 읽는다. 로그인 비밀번호(`SEED_*_PASSWORD`)를 테스트도 알아야 한다.
+import "dotenv/config";
 import { defineConfig, devices } from "@playwright/test";
 import { join } from "node:path";
 

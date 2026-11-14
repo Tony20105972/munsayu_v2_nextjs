@@ -12,6 +12,7 @@ import {
   type WithdrawInput,
 } from "@/lib/contracts";
 import { db } from "@/server/db";
+import { envValue } from "@/server/env";
 import { conflict, tokenInvalid, unauthenticated } from "@/server/errors";
 import { hashPassword, verifyPassword } from "@/server/auth/password";
 import { invalidateUserSessions } from "@/server/auth/session";
@@ -21,7 +22,7 @@ import { getMailAdapter } from "@/server/adapters/mail";
 
 function appBaseUrl(): string {
   // 배포 주소는 환경 변수로 받는다. 없으면 로컬 기본값을 쓴다. // ASM-023
-  return process.env.APP_BASE_URL ?? "http://localhost:3000";
+  return envValue("APP_BASE_URL") ?? "http://localhost:3000";
 }
 
 /** FM-003 회원가입. 아이디·이메일 중복은 409로 막는다. */

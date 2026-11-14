@@ -133,10 +133,14 @@ export async function hideDevOverlay(page: Page): Promise<void> {
 export async function waitForPage(page: Page, testCase: PublicPageCase): Promise<void> {
   await page.goto(testCase.path, { waitUntil: "domcontentloaded" });
   await hideDevOverlay(page);
-  await page.getByText(testCase.readyText, { exact: false }).first().waitFor({
-    state: "visible",
-    timeout: 15_000,
-  });
+  // 보이는 것 중 첫 번째를 기다린다. 헤더 하위 메뉴는 접혀 있어도 HTML 에 남아 있어
+  // (크롤러가 찾아갈 수 있도록 — EV-0015) 같은 문구가 숨은 링크로 먼저 잡힌다.
+  // `.first()` 만 쓰면 영영 보이지 않는 그 링크를 기다리다 시간이 넘는다.
+  await page
+    .getByText(testCase.readyText, { exact: false })
+    .locator("visible=true")
+    .first()
+    .waitFor({ state: "visible", timeout: 15_000 });
   // 자리표시(Suspense fallback)가 사라질 때까지 기다린다.
   await page
     .getByRole("status")

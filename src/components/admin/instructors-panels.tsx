@@ -13,7 +13,7 @@ import {
   AdminConfirmButton,
   AdminInlineForm,
 } from "@/components/admin/forms";
-import { INSTRUCTOR_PHOTO_KEYS } from "@/lib/images";
+import type { MediaChoice } from "@/components/admin/media-panels";
 import {
   createInstructorAction,
   createTeamAction,
@@ -27,16 +27,22 @@ import {
 
 const BIO_HINT = "한 줄에 한 항목씩 적으면 공개 화면에서 목록으로 보입니다.";
 
-/** 커밋돼 있는 강사 사진 파일 목록. 고르지 않으면 학원 로고 자리표시가 들어간다. */
-const PHOTO_OPTIONS: AdminOption[] = INSTRUCTOR_PHOTO_KEYS.map((key) => ({
-  value: key,
-  label: key,
-}));
+/** 보관함에 있는 사진 목록. 고르지 않으면 기본 이미지가 들어간다. (AD-015) */
+function photoOptions(choices: readonly MediaChoice[]): AdminOption[] {
+  return choices.map((choice) => ({
+    value: choice.id,
+    label: `${choice.filename} — ${choice.alt}`,
+  }));
+}
 
 const PHOTO_HINT =
-  "public/images/instructors/ 에 올려 둔 사진 파일 키입니다. 고르지 않으면 학원 로고 자리표시가 들어갑니다.";
+  "「이미지 관리」에 올려 둔 사진에서 고릅니다. 고르지 않으면 기본 이미지가 들어갑니다.";
 
-export function InstructorCreateForm() {
+export function InstructorCreateForm({
+  photoChoices,
+}: {
+  photoChoices: readonly MediaChoice[];
+}) {
   return (
     <AdminActionForm
       action={createInstructorAction}
@@ -62,12 +68,12 @@ export function InstructorCreateForm() {
             errors={fieldErrors.profileCode}
           />
           <AdminSelectField
-            name="photoStorageKey"
+            name="photoMediaId"
             label="강사 사진"
             hint={PHOTO_HINT}
-            options={PHOTO_OPTIONS}
-            placeholder="사진 없음(로고 자리표시)"
-            errors={fieldErrors.photoStorageKey}
+            options={photoOptions(photoChoices)}
+            placeholder="사진 없음(기본 이미지)"
+            errors={fieldErrors.photoMediaId}
           />
           <div className="sm:col-span-2 lg:col-span-3">
             <AdminTextArea
@@ -88,13 +94,15 @@ export function InstructorEditForm({
   name,
   profileCode,
   bio,
-  photoStorageKey,
+  photoMediaId,
+  photoChoices,
 }: {
   instructorId: string;
   name: string;
   profileCode: string;
   bio: string | null;
-  photoStorageKey: string | null;
+  photoMediaId: string | null;
+  photoChoices: readonly MediaChoice[];
 }) {
   return (
     <AdminActionForm
@@ -123,13 +131,13 @@ export function InstructorEditForm({
               errors={fieldErrors.profileCode}
             />
             <AdminSelectField
-              name="photoStorageKey"
+              name="photoMediaId"
               label="강사 사진"
               hint={PHOTO_HINT}
-              options={PHOTO_OPTIONS}
-              defaultValue={photoStorageKey ?? ""}
-              placeholder="사진 없음(로고 자리표시)"
-              errors={fieldErrors.photoStorageKey}
+              options={photoOptions(photoChoices)}
+              defaultValue={photoMediaId ?? ""}
+              placeholder="사진 없음(기본 이미지)"
+              errors={fieldErrors.photoMediaId}
             />
             <div className="sm:col-span-2 lg:col-span-3">
               <AdminTextArea

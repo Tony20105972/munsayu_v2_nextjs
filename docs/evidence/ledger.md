@@ -28,3 +28,4 @@
 | EV-ADM-11 | 2026-11-12 | OBSERVED-USER | 사용자 제공 가림 화면 | 게시판그룹 `community` 1개 | `../photo/스크린샷 2026-11-12 오후 2.03.45.png` |
 | EV-0013 | 2026-11-12 | OBSERVED | Playwright MCP + REA | `/sub/abouttch3`의 문해력 진단 신청은 사이트 내 폼이 아닌 Google Forms 외부 링크. REA evidence `ev_4015fa45b8e9316c53ee3eb09b168a05ae327f8d5a95266807656ad1988fc8b0` | `rea/phase5-abouttch3-diagnosis.md` |
 | EV-0014 | 2026-11-12 | OBSERVED | Playwright MCP | `/sub/Recruit` 공개 강사 지원 폼의 필드·선택지·필수 이력서·동의 관찰(입력·업로드·제출 없음) | `dom/phase5-recruit.yml` |
+| EV-0015 | 2026-11-14 | OBSERVED | REA + Playwright + curl GET | Phase 5 동등성 전수 관찰: 공개 경로 16개의 title·description·canonical·OG, 주 메뉴 마크업(ASM-040 해소), `/sub/abouttch3` 정체(ASM-043 반증), 공개 폼 전수, 홈 누락 문구 4건, `/sub/about` 상담·진단 신청 폼과 운영 시간, robots.txt 404, 1440/390 문서 크기. GET·화면 관찰만, 요청 간 1초, 관리자 경로 미접근 | `parity/EV-0015-phase5-parity.md` (원본 HTML 은 강사 실명 때문에 미커밋) |
