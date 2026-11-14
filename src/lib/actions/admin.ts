@@ -265,8 +265,8 @@ function instructorUpsertInput(formData: FormData): Record<string, unknown> {
   return {
     ...raw,
     bio: raw.bio ?? null,
-    // 사진은 `public/images/instructors/` 에 커밋된 파일의 키로 고른다. (EV-0012)
-    photoStorageKey: raw.photoStorageKey ?? null,
+    // 사진은 이미지 보관함(AD-015)에서 고른다. 비우면 기본 이미지를 쓴다.
+    photoMediaId: raw.photoMediaId || null,
   };
 }
 
@@ -274,11 +274,11 @@ export async function createInstructorAction(
   formData: FormData,
 ): Promise<ActionResult> {
   try {
-    await requireAdminFromCookies();
+    const admin = await requireAdminFromCookies();
     const parsed = parseInput(instructorUpsertSchema, instructorUpsertInput(formData));
     if (!parsed.ok) return parsed.failure;
 
-    await createInstructor(parsed.value);
+    await createInstructor(admin.id, parsed.value);
     revalidateAdmin("/admin/instructors", "/sub/abouttch1", "/sub/abouttch2");
     return success();
   } catch (error) {
@@ -290,14 +290,14 @@ export async function updateInstructorAction(
   formData: FormData,
 ): Promise<ActionResult> {
   try {
-    await requireAdminFromCookies();
+    const admin = await requireAdminFromCookies();
     const instructorId = cuidLikeIdSchema.safeParse(formData.get("instructorId"));
     if (!instructorId.success) return failure("강사를 찾을 수 없습니다.");
 
     const parsed = parseInput(instructorUpsertSchema, instructorUpsertInput(formData));
     if (!parsed.ok) return parsed.failure;
 
-    await updateInstructor(instructorId.data, parsed.value);
+    await updateInstructor(admin.id, instructorId.data, parsed.value);
     revalidateAdmin("/admin/instructors", "/sub/abouttch1", "/sub/abouttch2");
     return success();
   } catch (error) {

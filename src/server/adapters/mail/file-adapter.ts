@@ -2,6 +2,7 @@ import "server-only";
 import { appendFile, mkdir } from "node:fs/promises";
 import { dirname } from "node:path";
 import type { MailAdapter, MailMessage } from "@/server/adapters/mail/types";
+import { envValue } from "@/server/env";
 
 /**
  * E2E 전용 어댑터. 실제로 보내지 않고 `MAIL_OUTBOX_FILE` 에 한 줄 JSON으로 덧붙인다.
@@ -16,7 +17,7 @@ export class FileMailAdapter implements MailAdapter {
   readonly name = "file" as const;
 
   async send(message: MailMessage): Promise<void> {
-    const target = process.env.MAIL_OUTBOX_FILE;
+    const target = envValue("MAIL_OUTBOX_FILE");
     if (!target) {
       throw new Error("MAIL_OUTBOX_FILE 이 없어 file 메일 어댑터를 쓸 수 없습니다.");
     }

@@ -250,6 +250,7 @@ describe("AD-009 진단 신청 버튼 주소 설정", () => {
       diagnosisCtaExternalUrl: "https://forms.gle/example-new-form",
       recruitMenuVisible: true,
       resumeMaxBytes: 10 * 1024 * 1024,
+      mediaMaxUploadBytes: 20 * 1024 * 1024,
     });
 
     const response = await settingsGet(

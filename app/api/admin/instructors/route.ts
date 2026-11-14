@@ -15,9 +15,9 @@ export async function GET(request: Request): Promise<Response> {
 
 export async function POST(request: Request): Promise<Response> {
   try {
-    await requireAdmin(request);
+    const admin = await requireAdmin(request);
     const input = await parseJsonBody(request, instructorUpsertSchema);
-    const instructor = await createInstructor(input);
+    const instructor = await createInstructor(admin.id, input);
     return jsonNoStore({ id: instructor.id }, 201);
   } catch (error) {
     return errorResponse(error);

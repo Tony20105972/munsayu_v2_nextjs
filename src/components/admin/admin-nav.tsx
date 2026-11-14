@@ -9,7 +9,8 @@ import { usePathname } from "next/navigation";
  * 순서는 레거시 관리자 메뉴를 따른다 (EV-ADM-01~11, 사용자 지시 2026-11-12):
  * 회원관리 → 설명회관리 → 강사관리 → 시간표관리 → 입학진단관리 → 문자신청내역
  * → 강사지원관리 → 공지사항.
- * 「신청 목록」·「개인정보 관리」·「분석 도구」·「사이트 설정」은 레거시에 없던 항목이라 뒤에 둔다.
+ * 「이미지 관리」·「신청 목록」·「개인정보 관리」·「분석 도구」·「사이트 설정」은
+ * 레거시에 없던 항목이라 뒤에 둔다.
  */
 const ADMIN_MENU = [
   { href: "/admin", label: "개요" },
@@ -21,6 +22,7 @@ const ADMIN_MENU = [
   { href: "/admin/sms-subscriptions", label: "문자신청내역" },
   { href: "/admin/instructor-applications", label: "강사지원관리" },
   { href: "/admin/notices", label: "공지사항" },
+  { href: "/admin/media", label: "이미지 관리" },
   { href: "/admin/applications", label: "신청 목록" },
   { href: "/admin/privacy", label: "개인정보 관리" },
   { href: "/admin/analytics", label: "분석 도구" },

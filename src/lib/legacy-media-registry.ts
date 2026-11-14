@@ -1,0 +1,412 @@
+/**
+ * AD-015 레거시 커밋 이미지 등록부 — **생성 파일이다. 직접 고치지 않는다.**
+ *
+ * 만드는 명령: `npm run build:media-registry`
+ * 만드는 코드: `scripts/build-legacy-media-registry.ts`
+ *
+ * `public/images/` 아래 파일을 보관함(`MediaAsset`)에 등록할 때 쓴다.
+ * 권리 표시는 `docs/legacy/legacy-assets.json` 에서 옮겨 왔다. (D6)
+ * "Unsplash" 표시가 붙은 사진은 `replaceRecommended` 가 `true` 이고,
+ * 관리자 화면에서 「교체 권장」으로 보인다.
+ */
+
+export type LegacyMediaEntry = {
+  url: string;
+  filename: string;
+  alt: string;
+  contentType: string;
+  sizeBytes: number;
+  width: number;
+  height: number;
+  rightsNote: string;
+  replaceRecommended: boolean;
+};
+
+export const LEGACY_MEDIA_REGISTRY: readonly LegacyMediaEntry[] = [
+  {
+    url: "/images/about/class-scene.jpg",
+    filename: "class-scene.jpg",
+    alt: "문사유 수업현장",
+    contentType: "image/jpeg",
+    sizeBytes: 368052,
+    width: 2000,
+    height: 1334,
+    rightsNote:
+      "Unsplash License · 레거시는 외부 호스트를 직접 연결(핫링크)했다. 사용자 결정에 따라 내려받아 로컬에서 제공하고 핫링크는 쓰지 않는다.",
+    replaceRecommended: true,
+  },
+  {
+    url: "/images/brand/logo-munsayu.png",
+    filename: "logo-munsayu.png",
+    alt: "문사유 아카데미 로고",
+    contentType: "image/png",
+    sizeBytes: 18614,
+    width: 800,
+    height: 172,
+    rightsNote: "학원 귀속(사용자 확인 2026-11-11)",
+    replaceRecommended: false,
+  },
+  {
+    url: "/images/facility/facility-01.jpg",
+    filename: "facility-01.jpg",
+    alt: "대치본원 시설 사진 1",
+    contentType: "image/jpeg",
+    sizeBytes: 258839,
+    width: 957,
+    height: 900,
+    rightsNote: "학원 귀속(사용자 확인 2026-11-11)",
+    replaceRecommended: false,
+  },
+  {
+    url: "/images/facility/facility-02.jpg",
+    filename: "facility-02.jpg",
+    alt: "대치본원 시설 사진 2",
+    contentType: "image/jpeg",
+    sizeBytes: 172622,
+    width: 805,
+    height: 1125,
+    rightsNote: "학원 귀속(사용자 확인 2026-11-11)",
+    replaceRecommended: false,
+  },
+  {
+    url: "/images/facility/facility-03.jpg",
+    filename: "facility-03.jpg",
+    alt: "대치본원 시설 사진 3",
+    contentType: "image/jpeg",
+    sizeBytes: 110614,
+    width: 1078,
+    height: 659,
+    rightsNote: "학원 귀속(사용자 확인 2026-11-11)",
+    replaceRecommended: false,
+  },
+  {
+    url: "/images/facility/facility-04.jpg",
+    filename: "facility-04.jpg",
+    alt: "대치본원 시설 사진 4",
+    contentType: "image/jpeg",
+    sizeBytes: 138012,
+    width: 994,
+    height: 825,
+    rightsNote: "학원 귀속(사용자 확인 2026-11-11)",
+    replaceRecommended: false,
+  },
+  {
+    url: "/images/facility/facility-05.jpg",
+    filename: "facility-05.jpg",
+    alt: "분당점 시설 사진 1",
+    contentType: "image/jpeg",
+    sizeBytes: 120070,
+    width: 782,
+    height: 619,
+    rightsNote: "학원 귀속(사용자 확인 2026-11-11)",
+    replaceRecommended: false,
+  },
+  {
+    url: "/images/facility/facility-06.jpg",
+    filename: "facility-06.jpg",
+    alt: "분당점 시설 사진 2",
+    contentType: "image/jpeg",
+    sizeBytes: 161825,
+    width: 1000,
+    height: 563,
+    rightsNote: "학원 귀속(사용자 확인 2026-11-11)",
+    replaceRecommended: false,
+  },
+  {
+    url: "/images/facility/facility-07.jpg",
+    filename: "facility-07.jpg",
+    alt: "분당점 시설 사진 3",
+    contentType: "image/jpeg",
+    sizeBytes: 165315,
+    width: 923,
+    height: 563,
+    rightsNote: "학원 귀속(사용자 확인 2026-11-11)",
+    replaceRecommended: false,
+  },
+  {
+    url: "/images/facility/facility-08.jpg",
+    filename: "facility-08.jpg",
+    alt: "분당점 시설 사진 4",
+    contentType: "image/jpeg",
+    sizeBytes: 151537,
+    width: 1000,
+    height: 563,
+    rightsNote: "학원 귀속(사용자 확인 2026-11-11)",
+    replaceRecommended: false,
+  },
+  {
+    url: "/images/facility/stock-01.jpg",
+    filename: "stock-01.jpg",
+    alt: "절제된 색감과 따뜻한 소재",
+    contentType: "image/jpeg",
+    sizeBytes: 441232,
+    width: 2000,
+    height: 1333,
+    rightsNote:
+      "Unsplash License · 레거시는 외부 호스트를 직접 연결(핫링크)했다. 사용자 결정에 따라 내려받아 로컬에서 제공하고 핫링크는 쓰지 않는다.",
+    replaceRecommended: true,
+  },
+  {
+    url: "/images/facility/stock-02.jpg",
+    filename: "stock-02.jpg",
+    alt: "편안하게 머무는 독서 자리",
+    contentType: "image/jpeg",
+    sizeBytes: 442628,
+    width: 2000,
+    height: 1333,
+    rightsNote:
+      "Unsplash License · 레거시는 외부 호스트를 직접 연결(핫링크)했다. 사용자 결정에 따라 내려받아 로컬에서 제공하고 핫링크는 쓰지 않는다.",
+    replaceRecommended: true,
+  },
+  {
+    url: "/images/facility/stock-03.jpg",
+    filename: "stock-03.jpg",
+    alt: "머무는 시간 내내 쾌적하게",
+    contentType: "image/jpeg",
+    sizeBytes: 272230,
+    width: 2000,
+    height: 1335,
+    rightsNote:
+      "Unsplash License · 레거시는 외부 호스트를 직접 연결(핫링크)했다. 사용자 결정에 따라 내려받아 로컬에서 제공하고 핫링크는 쓰지 않는다.",
+    replaceRecommended: true,
+  },
+  {
+    url: "/images/facility/stock-04.jpg",
+    filename: "stock-04.jpg",
+    alt: "책과 가까워지는 북카페",
+    contentType: "image/jpeg",
+    sizeBytes: 349129,
+    width: 2000,
+    height: 1333,
+    rightsNote:
+      "Unsplash License · 레거시는 외부 호스트를 직접 연결(핫링크)했다. 사용자 결정에 따라 내려받아 로컬에서 제공하고 핫링크는 쓰지 않는다.",
+    replaceRecommended: true,
+  },
+  {
+    url: "/images/facility/stock-05.jpg",
+    filename: "stock-05.jpg",
+    alt: "아이의 움직임까지 세심하게",
+    contentType: "image/jpeg",
+    sizeBytes: 324662,
+    width: 2000,
+    height: 1333,
+    rightsNote:
+      "Unsplash License · 레거시는 외부 호스트를 직접 연결(핫링크)했다. 사용자 결정에 따라 내려받아 로컬에서 제공하고 핫링크는 쓰지 않는다.",
+    replaceRecommended: true,
+  },
+  {
+    url: "/images/hero/home-slide-1.jpeg",
+    filename: "home-slide-1.jpeg",
+    alt: "메인 배너 배경 1",
+    contentType: "image/jpeg",
+    sizeBytes: 37188,
+    width: 600,
+    height: 400,
+    rightsNote:
+      "학원 귀속(사용자 확인 2026-11-11) — Unsplash 가능성 있음(출처 확인 필요) · 파일명이 Unsplash 서명형 해시",
+    replaceRecommended: true,
+  },
+  {
+    url: "/images/hero/home-slide-2.avif",
+    filename: "home-slide-2.avif",
+    alt: "메인 배너 배경 2",
+    contentType: "image/avif",
+    sizeBytes: 63781,
+    width: 1920,
+    height: 1277,
+    rightsNote:
+      "Unsplash License · 레거시가 munsayu.com에 올려 둔 사본을 그대로 쓴다(형식 유지, 1MB 미만).",
+    replaceRecommended: true,
+  },
+  {
+    url: "/images/hero/home-slide-3.jpeg",
+    filename: "home-slide-3.jpeg",
+    alt: "메인 배너 배경 3",
+    contentType: "image/jpeg",
+    sizeBytes: 43467,
+    width: 640,
+    height: 640,
+    rightsNote:
+      "학원 귀속(사용자 확인 2026-11-11) — Unsplash 가능성 있음(출처 확인 필요) · 파일명이 Unsplash 서명형 해시",
+    replaceRecommended: true,
+  },
+  {
+    url: "/images/hero/sub-hero.avif",
+    filename: "sub-hero.avif",
+    alt: "하위 페이지 상단 배경 사진",
+    contentType: "image/avif",
+    sizeBytes: 272960,
+    width: 1920,
+    height: 1280,
+    rightsNote:
+      "Unsplash License · 레거시가 munsayu.com에 올려 둔 사본을 그대로 쓴다(형식 유지, 1MB 미만).",
+    replaceRecommended: true,
+  },
+  {
+    url: "/images/instructors/choi-eunji.jpg",
+    filename: "choi-eunji.jpg",
+    alt: "최은지 선생님 사진",
+    contentType: "image/jpeg",
+    sizeBytes: 215443,
+    width: 1000,
+    height: 1499,
+    rightsNote:
+      "학원 귀속(사용자 확인 2026-11-11) · abouttch1·abouttch2에 같은 파일이 다른 이름으로 중복 업로드돼 있다 (ASM-003)",
+    replaceRecommended: false,
+  },
+  {
+    url: "/images/instructors/choi-jina.jpg",
+    filename: "choi-jina.jpg",
+    alt: "최지나 선생님 사진",
+    contentType: "image/jpeg",
+    sizeBytes: 566885,
+    width: 1600,
+    height: 2000,
+    rightsNote:
+      "학원 귀속(사용자 확인 2026-11-11) · abouttch1·abouttch2에 같은 파일이 다른 이름으로 중복 업로드돼 있다 (ASM-003)",
+    replaceRecommended: false,
+  },
+  {
+    url: "/images/instructors/jung-geonwoo.jpg",
+    filename: "jung-geonwoo.jpg",
+    alt: "정건우 선생님 사진",
+    contentType: "image/jpeg",
+    sizeBytes: 245071,
+    width: 1000,
+    height: 1499,
+    rightsNote:
+      "학원 귀속(사용자 확인 2026-11-11) · abouttch1·abouttch2에 같은 파일이 다른 이름으로 중복 업로드돼 있다 (ASM-003)",
+    replaceRecommended: false,
+  },
+  {
+    url: "/images/instructors/kim-bomin.jpg",
+    filename: "kim-bomin.jpg",
+    alt: "김보민 선생님 사진",
+    contentType: "image/jpeg",
+    sizeBytes: 231807,
+    width: 1000,
+    height: 1499,
+    rightsNote:
+      "학원 귀속(사용자 확인 2026-11-11) · abouttch1·abouttch2에 같은 파일이 다른 이름으로 중복 업로드돼 있다 (ASM-003)",
+    replaceRecommended: false,
+  },
+  {
+    url: "/images/instructors/kim-jimin.jpg",
+    filename: "kim-jimin.jpg",
+    alt: "김지민 선생님 사진",
+    contentType: "image/jpeg",
+    sizeBytes: 190747,
+    width: 1000,
+    height: 1499,
+    rightsNote:
+      "학원 귀속(사용자 확인 2026-11-11) · abouttch1·abouttch2에 같은 파일이 다른 이름으로 중복 업로드돼 있다 (ASM-003)",
+    replaceRecommended: false,
+  },
+  {
+    url: "/images/instructors/kim-minju.jpg",
+    filename: "kim-minju.jpg",
+    alt: "김민주 선생님 사진",
+    contentType: "image/jpeg",
+    sizeBytes: 191974,
+    width: 1000,
+    height: 1499,
+    rightsNote:
+      "학원 귀속(사용자 확인 2026-11-11) · abouttch1·abouttch2에 같은 파일이 다른 이름으로 중복 업로드돼 있다 (ASM-003)",
+    replaceRecommended: false,
+  },
+  {
+    url: "/images/instructors/kim-sehyun.jpg",
+    filename: "kim-sehyun.jpg",
+    alt: "김세현 선생님 사진",
+    contentType: "image/jpeg",
+    sizeBytes: 278616,
+    width: 1000,
+    height: 1499,
+    rightsNote:
+      "학원 귀속(사용자 확인 2026-11-11) · abouttch1·abouttch2에 같은 파일이 다른 이름으로 중복 업로드돼 있다 (ASM-003)",
+    replaceRecommended: false,
+  },
+  {
+    url: "/images/instructors/kim-yoonhwan.jpg",
+    filename: "kim-yoonhwan.jpg",
+    alt: "김윤환 원장 사진",
+    contentType: "image/jpeg",
+    sizeBytes: 228752,
+    width: 1000,
+    height: 1500,
+    rightsNote:
+      "학원 귀속(사용자 확인 2026-11-11) · abouttch1·abouttch2에 같은 파일이 다른 이름으로 중복 업로드돼 있다 (ASM-003)",
+    replaceRecommended: false,
+  },
+  {
+    url: "/images/instructors/munsayu-class.jpg",
+    filename: "munsayu-class.jpg",
+    alt: "문해와 사유 사진",
+    contentType: "image/jpeg",
+    sizeBytes: 608952,
+    width: 3000,
+    height: 3000,
+    rightsNote: "학원 귀속(사용자 확인 2026-11-11) · 석혜선 선생님 사진과 같은 파일",
+    replaceRecommended: false,
+  },
+  {
+    url: "/images/instructors/park-sunmi.jpg",
+    filename: "park-sunmi.jpg",
+    alt: "박선미 선생님 사진",
+    contentType: "image/jpeg",
+    sizeBytes: 233096,
+    width: 1000,
+    height: 1499,
+    rightsNote:
+      "학원 귀속(사용자 확인 2026-11-11) · abouttch1·abouttch2에 같은 파일이 다른 이름으로 중복 업로드돼 있다 (ASM-003)",
+    replaceRecommended: false,
+  },
+  {
+    url: "/images/instructors/seok-hyeseon.jpg",
+    filename: "seok-hyeseon.jpg",
+    alt: "석혜선 선생님 사진",
+    contentType: "image/jpeg",
+    sizeBytes: 608952,
+    width: 3000,
+    height: 3000,
+    rightsNote:
+      "학원 귀속(사용자 확인 2026-11-11) · `문해와 사유 사진`과 바이트 단위로 같은 파일이다. 자리표시용으로 보여 원장님 확인이 필요하다",
+    replaceRecommended: false,
+  },
+  {
+    url: "/images/instructors/shin-seojin.jpg",
+    filename: "shin-seojin.jpg",
+    alt: "신서진 선생님 사진",
+    contentType: "image/jpeg",
+    sizeBytes: 454290,
+    width: 1334,
+    height: 2000,
+    rightsNote:
+      "학원 귀속(사용자 확인 2026-11-11) · abouttch1·abouttch2에 같은 파일이 다른 이름으로 중복 업로드돼 있다 (ASM-003)",
+    replaceRecommended: false,
+  },
+  {
+    url: "/images/instructors/won-dahyun.jpg",
+    filename: "won-dahyun.jpg",
+    alt: "원다현 선생님 사진",
+    contentType: "image/jpeg",
+    sizeBytes: 221542,
+    width: 1000,
+    height: 1499,
+    rightsNote:
+      "학원 귀속(사용자 확인 2026-11-11) · abouttch1·abouttch2에 같은 파일이 다른 이름으로 중복 업로드돼 있다 (ASM-003)",
+    replaceRecommended: false,
+  },
+  {
+    url: "/images/instructors/yoo-hyun.jpg",
+    filename: "yoo-hyun.jpg",
+    alt: "유 현 선생님 사진",
+    contentType: "image/jpeg",
+    sizeBytes: 246925,
+    width: 1000,
+    height: 1499,
+    rightsNote:
+      "학원 귀속(사용자 확인 2026-11-11) · abouttch1·abouttch2에 같은 파일이 다른 이름으로 중복 업로드돼 있다 (ASM-003)",
+    replaceRecommended: false,
+  },
+];

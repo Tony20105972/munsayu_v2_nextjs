@@ -58,6 +58,9 @@ import { GET as smsSubscriptionsGet } from "../../app/api/admin/sms-subscription
 import { GET as smsSubscriptionsExport } from "../../app/api/admin/sms-subscriptions/export/route";
 import { GET as adminNoticesGet } from "../../app/api/admin/notices/route";
 import { GET as adminSettingsGet } from "../../app/api/admin/settings/route";
+import { PUT as mediaDirectUploadPut } from "../../app/api/admin/media/direct-upload/route";
+import { DELETE as mediaDelete } from "../../app/api/admin/media/route";
+import { POST as mediaHide } from "../../app/api/admin/media/hide/route";
 import { DELETE as adminDelete } from "../../app/api/admin/admins/[id]/route";
 import { fixturePassword } from "../fixtures/passwords";
 
@@ -126,6 +129,33 @@ export const ADMIN_ROUTE_CASES: AdminRouteCase[] = [
     name: "GET /api/admin/notices",
     invoke: (cookie) =>
       adminNoticesGet(makeRequest("GET", "/api/admin/notices", { cookie })),
+  },
+  {
+    name: "PUT /api/admin/media/direct-upload",
+    invoke: (cookie) =>
+      mediaDirectUploadPut(
+        makeRequest("PUT", "/api/admin/media/direct-upload", { cookie }),
+      ),
+  },
+  {
+    name: "DELETE /api/admin/media",
+    invoke: (cookie) =>
+      mediaDelete(
+        makeRequest("DELETE", "/api/admin/media", {
+          cookie,
+          body: { mediaIds: ["missing-id"] },
+        }),
+      ),
+  },
+  {
+    name: "POST /api/admin/media/hide",
+    invoke: (cookie) =>
+      mediaHide(
+        makeRequest("POST", "/api/admin/media/hide", {
+          cookie,
+          body: { mediaId: "missing-id", hidden: true },
+        }),
+      ),
   },
   {
     name: "GET /api/admin/settings",

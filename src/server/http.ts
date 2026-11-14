@@ -1,3 +1,4 @@
+import { unstable_rethrow } from "next/navigation";
 import { ZodError, type ZodType } from "zod";
 import type { ApiError } from "@/lib/contracts";
 import { AppError, validationFailed } from "@/server/errors";
@@ -28,8 +29,15 @@ export function toFieldErrors(error: ZodError): Record<string, string[]> {
 /**
  * 오류 → HTTP 변환의 단일 지점. 내부 예외 내용은 응답에 내보내지 않는다.
  * 로그에도 오류 이름과 코드만 남긴다. (BLUEPRINT 10장)
+ *
+ * Next 는 리다이렉트·`notFound()`·동적 렌더 전환을 **예외를 던져서** 처리한다. 모든 것을
+ * 삼키는 catch 가 그 예외까지 500 JSON 으로 바꾸면 프레임워크가 흐름을 넘겨받지 못한다.
+ * 실제로 빌드 때 `unhandled_request_error` 36줄이 이렇게 찍히고 있었다. (EV-0015)
+ * 그래서 우리 오류를 다루기 **전에** 프레임워크 예외를 먼저 돌려보낸다.
  */
 export function errorResponse(error: unknown): Response {
+  unstable_rethrow(error);
+
   if (error instanceof AppError) {
     const body: ApiError = { code: error.code, message: error.message };
     if (error.fieldErrors) {

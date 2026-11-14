@@ -367,7 +367,8 @@ type InstructorLike = {
   id: string;
   name: string;
   bio: string | null;
-  photoStorageKey: string | null;
+  /** AD-015 관리자가 보관함에서 지정한 사진. 지정하지 않았으면 `null`. */
+  photo: { url: string; alt: string } | null;
   teams: { teamId: string; teamName: string; displayOrder: number }[];
 };
 
@@ -377,7 +378,7 @@ export type InstructorCardView = {
   /** 카드 머리글. 소속 팀 이름을 이어 붙인다. */
   affiliation: string;
   careers: string[];
-  /** 레거시 강사 사진. 지정된 사진이 없으면 로고 자리표시를 쓴다. (EV-0012) */
+  /** 강사 사진. 지정된 사진이 없으면 레거시 사진·로고 자리표시를 쓴다. (EV-0012, AD-015) */
   photo: ImageAsset;
 };
 

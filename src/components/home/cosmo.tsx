@@ -102,6 +102,35 @@ export function AssessmentTable() {
   );
 }
 
+/**
+ * PROJECT COSMO 의 두 축. 레거시는 설명 문단 위에 묶음 이름(`COSMO: CORE (어휘)`)과
+ * 제목을 함께 보여 준다. Phase 3 구현에는 설명만 있고 이름·제목이 빠져 있었다. (EV-0015)
+ */
+const COSMO_PILLARS = [
+  {
+    eyebrow: "COSMO: CORE (어휘)",
+    title: "모든 힘의 근원이 되는 단단한 중심핵",
+    body: "평생 쓸 필수 어휘를 정교하게 체화합니다. 헷갈리는 단어를 짝으로 묶어 비교하며 뜻의 경계를 익힙니다.",
+  },
+  {
+    eyebrow: "COSMO: FLARE (독서)",
+    title: "세상 밖으로 터뜨리는 폭발적 확장",
+    body: "엄선된 텍스트를 깊이 읽어내며 구조적 사고와 독해력을 키웁니다. 토론보다 먼저 잘 읽는 근본 실력을 배양합니다.",
+  },
+] as const;
+
+/** 레거시 단어쌍 비교 카드. 뜻풀이 문구까지 관찰값 그대로다. (EV-0015) */
+const WORD_PAIRS = [
+  {
+    left: { word: "결재", meaning: "윗사람이 안건을 승인하다" },
+    right: { word: "결제", meaning: "값을 치러 거래를 끝내다" },
+  },
+  {
+    left: { word: "맞히다", meaning: "문제의 답을 옳게 하다" },
+    right: { word: "맞추다", meaning: "둘을 서로 비교하거나 붙이다" },
+  },
+] as const;
+
 export function HomeCosmo() {
   return (
     <Section
@@ -121,15 +150,52 @@ export function HomeCosmo() {
         ))}
       </ul>
 
+      {/* 레거시는 두 설명 위에 묶음 이름과 제목을 함께 보여 준다. (EV-0015) */}
       <div className="mt-6 grid gap-5 md:grid-cols-2">
-        <p className="rounded-xl border border-line bg-surface p-6 text-sm leading-relaxed text-muted">
-          평생 쓸 필수 어휘를 정교하게 체화합니다. 헷갈리는 단어를 짝으로 묶어 비교하며
-          뜻의 경계를 익힙니다.
-        </p>
-        <p className="rounded-xl border border-line bg-surface p-6 text-sm leading-relaxed text-muted">
-          엄선된 텍스트를 깊이 읽어내며 구조적 사고와 독해력을 키웁니다. 토론보다 먼저
-          잘 읽는 근본 실력을 배양합니다.
-        </p>
+        {COSMO_PILLARS.map((pillar) => (
+          <div
+            key={pillar.eyebrow}
+            className="rounded-xl border border-line bg-surface p-6"
+          >
+            <p className="text-xs font-bold tracking-[0.2em] text-accent">
+              {pillar.eyebrow}
+            </p>
+            <h3 className="mt-2 text-base font-bold text-ink">{pillar.title}</h3>
+            <p className="mt-3 text-sm leading-relaxed text-muted">{pillar.body}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* 헷갈리는 단어쌍 비교. 레거시 「우리 아이는 이 차이를 설명할 수 있을까요?」 (EV-0015) */}
+      <div className="mt-12">
+        <h3 className="text-lg font-bold text-ink">
+          우리 아이는 이 차이를 설명할 수 있을까요?
+        </h3>
+        <ul className="mt-5 grid gap-5 md:grid-cols-2">
+          {WORD_PAIRS.map((pair) => (
+            <li
+              key={`${pair.left.word}-${pair.right.word}`}
+              className="rounded-xl border border-line bg-surface p-6"
+            >
+              <div className="flex items-center gap-4">
+                <div className="flex-1">
+                  <p className="text-base font-bold text-ink">{pair.left.word}</p>
+                  <p className="mt-1 text-sm text-muted">{pair.left.meaning}</p>
+                </div>
+                <span
+                  className="text-xs font-bold tracking-[0.2em] text-accent"
+                  aria-hidden="true"
+                >
+                  VS
+                </span>
+                <div className="flex-1">
+                  <p className="text-base font-bold text-ink">{pair.right.word}</p>
+                  <p className="mt-1 text-sm text-muted">{pair.right.meaning}</p>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
       </div>
 
       <div className="mt-12">

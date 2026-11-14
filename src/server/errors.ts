@@ -52,12 +52,10 @@ export function conflict(message = "이미 사용 중인 값입니다."): AppErr
   return new AppError(ERROR_CODES.CONFLICT, 409, message);
 }
 
-export function rateLimited(): AppError {
-  return new AppError(
-    ERROR_CODES.RATE_LIMITED,
-    429,
-    "요청이 너무 많습니다. 잠시 후 다시 시도해 주세요.",
-  );
+export function rateLimited(
+  message = "요청이 너무 많습니다. 잠시 후 다시 시도해 주세요.",
+): AppError {
+  return new AppError(ERROR_CODES.RATE_LIMITED, 429, message);
 }
 
 export function tokenInvalid(): AppError {

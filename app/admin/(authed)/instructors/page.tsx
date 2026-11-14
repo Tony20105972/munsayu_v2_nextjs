@@ -1,3 +1,4 @@
+import Image from "next/image";
 import {
   InstructorCreateForm,
   InstructorDeleteButton,
@@ -17,6 +18,8 @@ import {
   AdminTableScroll,
 } from "@/components/admin/ui";
 import { listInstructors, listTeams } from "@/server/services/instructors";
+import { listMediaOptions } from "@/server/services/media";
+import { resolveInstructorPhoto } from "@/lib/images";
 
 /**
  * AD-006 강사 관리.
@@ -25,11 +28,18 @@ import { listInstructors, listTeams } from "@/server/services/instructors";
  * EV-ADM-04). 신규 설계는 **강사 1명 : 소속 팀 여러 개**이고 노출 순서는 팀마다 따로
  * 둔다. (Q-ADM-04 답변, ASM-003) 화면에서 이 관계가 바로 보이도록 강사 줄마다 소속
  * 팀과 그 팀에서의 순서를 함께 보여 준다.
+ *
+ * 사진은 「이미지 관리」 보관함(AD-015)에서 고른다. 고르지 않으면 공개 화면이
+ * 레거시 사진이나 기본 이미지를 쓴다.
  */
 export const instant = false;
 
 export default async function AdminInstructorsPage() {
-  const [instructors, teams] = await Promise.all([listInstructors(), listTeams()]);
+  const [instructors, teams, photoChoices] = await Promise.all([
+    listInstructors(),
+    listTeams(),
+    listMediaOptions(),
+  ]);
 
   const instructorOptions = instructors.map((instructor) => ({
     value: instructor.id,
@@ -85,6 +95,9 @@ export default async function AdminInstructorsPage() {
             <thead>
               <tr>
                 <th scope="col" className={ADMIN_TH_CLASS}>
+                  사진
+                </th>
+                <th scope="col" className={ADMIN_TH_CLASS}>
                   성명
                 </th>
                 <th scope="col" className={ADMIN_TH_CLASS}>
@@ -100,70 +113,89 @@ export default async function AdminInstructorsPage() {
             </thead>
             <tbody>
               {instructors.length === 0 ? (
-                <AdminEmptyRow colSpan={4} label="등록된 강사가 없습니다." />
+                <AdminEmptyRow colSpan={5} label="등록된 강사가 없습니다." />
               ) : (
-                instructors.map((instructor) => (
-                  <tr key={instructor.id}>
-                    <th scope="row" className={`${ADMIN_TD_CLASS} font-bold`}>
-                      {instructor.name}
-                    </th>
-                    <td className={`${ADMIN_TD_CLASS} font-mono`}>
-                      {instructor.profileCode}
-                    </td>
-                    <td className={ADMIN_TD_CLASS}>
-                      {instructor.teams.length === 0 ? (
-                        <span className="text-muted">소속 없음</span>
-                      ) : (
-                        <ul className="space-y-1">
-                          {instructor.teams.map((team) => (
-                            <li
-                              key={team.teamId}
-                              className="flex flex-wrap items-center gap-1"
-                            >
-                              <span className="font-bold text-ink">
-                                {team.teamName}
-                              </span>
-                              <MembershipOrderForm
-                                instructorId={instructor.id}
-                                teamId={team.teamId}
-                                displayOrder={team.displayOrder}
-                              />
-                              <MembershipRemoveButton
-                                instructorId={instructor.id}
-                                teamId={team.teamId}
-                                instructorName={instructor.name}
-                                teamName={team.teamName}
-                              />
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </td>
-                    <td className={`${ADMIN_TD_CLASS} max-w-sm`}>
-                      <p className="line-clamp-3 whitespace-pre-line text-muted">
-                        {instructor.bio ?? "-"}
-                      </p>
-                      <details className="mt-2">
-                        <summary className="cursor-pointer text-xs font-bold text-brand">
-                          수정
-                        </summary>
-                        <div className="mt-3 space-y-3 rounded-md border border-line bg-canvas p-3">
-                          <InstructorEditForm
-                            instructorId={instructor.id}
-                            name={instructor.name}
-                            profileCode={instructor.profileCode}
-                            bio={instructor.bio}
-                            photoStorageKey={instructor.photoStorageKey}
-                          />
-                          <InstructorDeleteButton
-                            instructorId={instructor.id}
-                            name={instructor.name}
-                          />
-                        </div>
-                      </details>
-                    </td>
-                  </tr>
-                ))
+                instructors.map((instructor) => {
+                  const photo = resolveInstructorPhoto(instructor);
+
+                  return (
+                    <tr key={instructor.id}>
+                      <td className={ADMIN_TD_CLASS}>
+                        <Image
+                          src={photo.src}
+                          alt={photo.alt}
+                          width={48}
+                          height={64}
+                          className="h-16 w-12 rounded-md object-cover"
+                        />
+                        {instructor.photoMediaId ? null : (
+                          <span className="mt-1 block text-xs text-muted">
+                            기본 이미지
+                          </span>
+                        )}
+                      </td>
+                      <th scope="row" className={`${ADMIN_TD_CLASS} font-bold`}>
+                        {instructor.name}
+                      </th>
+                      <td className={`${ADMIN_TD_CLASS} font-mono`}>
+                        {instructor.profileCode}
+                      </td>
+                      <td className={ADMIN_TD_CLASS}>
+                        {instructor.teams.length === 0 ? (
+                          <span className="text-muted">소속 없음</span>
+                        ) : (
+                          <ul className="space-y-1">
+                            {instructor.teams.map((team) => (
+                              <li
+                                key={team.teamId}
+                                className="flex flex-wrap items-center gap-1"
+                              >
+                                <span className="font-bold text-ink">
+                                  {team.teamName}
+                                </span>
+                                <MembershipOrderForm
+                                  instructorId={instructor.id}
+                                  teamId={team.teamId}
+                                  displayOrder={team.displayOrder}
+                                />
+                                <MembershipRemoveButton
+                                  instructorId={instructor.id}
+                                  teamId={team.teamId}
+                                  instructorName={instructor.name}
+                                  teamName={team.teamName}
+                                />
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </td>
+                      <td className={`${ADMIN_TD_CLASS} max-w-sm`}>
+                        <p className="line-clamp-3 whitespace-pre-line text-muted">
+                          {instructor.bio ?? "-"}
+                        </p>
+                        <details className="mt-2">
+                          <summary className="cursor-pointer text-xs font-bold text-brand">
+                            수정
+                          </summary>
+                          <div className="mt-3 space-y-3 rounded-md border border-line bg-canvas p-3">
+                            <InstructorEditForm
+                              instructorId={instructor.id}
+                              name={instructor.name}
+                              profileCode={instructor.profileCode}
+                              bio={instructor.bio}
+                              photoMediaId={instructor.photoMediaId}
+                              photoChoices={photoChoices}
+                            />
+                            <InstructorDeleteButton
+                              instructorId={instructor.id}
+                              name={instructor.name}
+                            />
+                          </div>
+                        </details>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
@@ -172,9 +204,9 @@ export default async function AdminInstructorsPage() {
 
       <AdminPanel title="강사 추가" headingId="instructor-create">
         <p className="mb-3 text-xs text-muted">
-          사진은 아직 올릴 수 없습니다. 파일 저장소가 정해지지 않았습니다. (ASM-008)
+          사진은 「이미지 관리」에서 먼저 올린 뒤 아래에서 고릅니다.
         </p>
-        <InstructorCreateForm />
+        <InstructorCreateForm photoChoices={photoChoices} />
       </AdminPanel>
 
       <AdminPanel

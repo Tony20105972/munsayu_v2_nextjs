@@ -2,6 +2,7 @@ import "server-only";
 import { ConsoleNotifyAdapter } from "@/server/adapters/notify/console-adapter";
 import { MemoryNotifyAdapter } from "@/server/adapters/notify/memory-adapter";
 import type { NotifyAdapter, NotifyMessage } from "@/server/adapters/notify/types";
+import { envValue } from "@/server/env";
 
 export type { NotifyAdapter, NotifyMessage } from "@/server/adapters/notify/types";
 export { MemoryNotifyAdapter } from "@/server/adapters/notify/memory-adapter";
@@ -12,7 +13,7 @@ const adapters = {
 } as const;
 
 export function getNotifyAdapter(): NotifyAdapter {
-  return process.env.NOTIFY_ADAPTER === "memory" ? adapters.memory : adapters.console;
+  return envValue("NOTIFY_ADAPTER") === "memory" ? adapters.memory : adapters.console;
 }
 
 export function getMemoryNotifyAdapter(): MemoryNotifyAdapter {
