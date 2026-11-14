@@ -12,10 +12,10 @@
 | 항목 | 값 |
 |---|---|
 | 현재 Phase | **5 — Legacy Parity Testing** |
-| 상태 | `IN_PROGRESS` |
+| 상태 | `GATE_CHECK` |
 | 마지막 갱신 | 2026-11-14 |
-| 다음 행동 | 남은 비교 2건(`/sub/Facility` 공간 카드·`/sub/about` 2·3탭) 뒤 Gate 판정 → 독립 리뷰 → PR |
-| 막힌 것 | **분석용 Chrome(9222) 연결이 작업 중 끊겼다.** 레거시 재관찰이 필요한 항목은 대기 중. 원장님 답 6건(`Q-ADM-15`~`20`)도 대기 |
+| 다음 행동 | 사람 승인 대기. Gate 2번 기준(REA `compare_web_captures`)을 방법 대체로 둘지 사람 판단 필요 |
+| 막힌 것 | 원장님 답 6건(`Q-ADM-15`~`20`) 대기. 기능에는 영향 없고 문구·주소 확정만 남았다 |
 
 상태 값: `NOT_STARTED` → `IN_PROGRESS` → `GATE_CHECK` → `IN_REVIEW` → `APPROVED`
 (Gate 실패 시 `GATE_FAIL` → 수정 후 다시 `GATE_CHECK`)
@@ -31,7 +31,7 @@
 | 2 | Migration Contract | APPROVED | PASS (7/7) | 차단 3 수정 / 권장 반영 | ☑ | `reports/phase-2-report.md` |
 | 3 | Frontend Reconstruction | APPROVED | PASS (5/5) | 차단 1 수정 / 권장 12 기록 | ☑ | `reports/phase-3-report.md` |
 | 4 | Backend Replacement | APPROVED | PASS (9/9 적용) | 차단 1 수정 / 권장 12 기록 | ☑ | `reports/phase-4-report.md` |
-| 5 | Legacy Parity Testing | IN_PROGRESS | — | — | ☐ | `reports/phase-5-report.md` |
+| 5 | Legacy Parity Testing | GATE_CHECK | PASS (4/5, 1건 방법 대체) | (리뷰 결과 기재 예정) | ☐ | `reports/phase-5-report.md` |
 | 6 | Performance & Security | NOT_STARTED | — | — | ☐ | `reports/phase-6-report.md` |
 | 7 | Cutover 준비 | NOT_STARTED | — | — | ☐ | `reports/phase-7-report.md` |
 
@@ -144,6 +144,7 @@ Claude는 Phase 상태가 바뀔 때마다 한 줄씩 추가합니다. 위쪽이
 
 | 날짜 | Phase | 변경 | 작성 |
 |---|---|---|---|
+| 2026-11-14 | 5 | 남은 비교 2건 완료(접혀 있던 분당점 탭·학원 소개 3번 탭 본문을 관찰값으로 채움). ASM-081·049 해소, 048 부분 해소. E2E 서버 재사용 결함 수정. Gate 판정 4/5(2번은 방법 대체) → GATE_CHECK | Claude Code |
 | 2026-11-14 | 5 | 레거시 동등성 검증 1단계: 공개 16경로 전수 대조. 버그 9건 수정(홈 배너 2·3, 4대 차별화 섹션, 메뉴 링크 미노출, Next 내부 예외 삼킴, E2E 수화 차단 등), 의도된 변경 7건, 원장님 질문 6건 등록. ASM-040 해소·ASM-043 반증·ASM-095/096 신설. Chrome 9222 끊겨 중단 | Claude Code |
 | 2026-11-14 | 5 | 동등성 검증 선행 수정 6건 처리(로그 개인정보·빈 환경 변수·db:unlock·prisma generate·배포 범위). 함께 찾은 결함 3건 수정. `verify:all` 통과. 레거시 관찰은 Chrome 9222 미기동으로 대기 | Claude Code |
 | 2026-11-12 | 3·4→5 | Phase 3·4 승인, PR #4 squash 병합 (사용자 지시). 보완 3건은 Phase 5로 이월 | Claude Code |

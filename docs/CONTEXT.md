@@ -6,14 +6,15 @@
 ## 1. 프로젝트와 현재 상태
 
 - 원본 `https://munsayu.com` (PHP) → 목표 Next.js 16 App Router + TS strict + Prisma/PostgreSQL. PHP 소스·DB 접근 불가, **블랙박스 마이그레이션**(관찰된 HTML·JS·HTTP·흐름 근거로 재구현).
-- 현재 Phase **5 — Legacy Parity Testing / 진행 중** (Gate 미판정). 보고서 `docs/reports/phase-5-report.md`.
+- 현재 Phase **5 — Legacy Parity Testing / `GATE_CHECK`** (Gate 4/5 충족, 2번은 방법 대체 — 사람 판단 필요). 보고서 `docs/reports/phase-5-report.md`.
 - 브랜치 `feat/admin-media` — AD-015 관리자 이미지 관리(ADR-008) 구현분 + Phase 5 선행 수정. Phase 0~4 승인·병합 완료.
 - Phase 5 0단계(선행 수정) **완료**(2026-11-14). 1단계 레거시 동등성 검증 **대부분 완료** — 보고서 `docs/reports/legacy-parity-report.md`, 근거 `docs/evidence/parity/EV-0015-phase5-parity.md`.
-- 1단계 결과: 버그 9건 고침 · 의도된 변경 7건 · 원장님 질문 6건(`Q-ADM-15`~`20`) · 시드 데이터 차이 4건. 내부 링크 404 0, 절대 주소 0, 깨진 이미지 0.
+- 1단계 결과: 버그 12건 고침 · 의도된 변경 7건 · 원장님 질문 6건(`Q-ADM-15`~`20`) · 시드 데이터 차이 4건. 내부 링크 404 0, 절대 주소 0, 깨진 이미지 0.
 - **메인 화면 원본 HTML 반영 완료** — 배너 슬라이드 2·3, 「4대 차별화 시스템」 섹션, PROJECT COSMO 문구를 레거시 관찰값으로 복원.
-- Phase 5 남은 일: ① `/sub/Facility` 공간 카드·`/sub/about` 2·3탭 본문 비교(ASM-081·048) ② Gate 판정 → 독립 리뷰 → PR.
-- **막힌 것: 분석용 Chrome(9222) 연결이 작업 중 끊겼다.** 레거시 재관찰이 필요한 항목은 Chrome 을 다시 띄워야 한다. 레거시는 GET·화면 관찰만, 1초 간격, `/uAdmin/`·`/adm/` 금지.
-- 해소: ASM-040(주 메뉴). 어긋남: ASM-043(`/sub/abouttch3` 은 컨설팅팀 강사진). 신규: ASM-095(화면별 SEO)·ASM-096(`/sub/about` 상담 폼 보류).
+- **남은 비교 완료**(2026-11-14): 레거시의 접혀 있던 탭도 본문이 HTML 에 모두 있었다. `/sub/Facility`·`/sub/Location` 분당점 탭과 `/sub/about` 3번 탭을 관찰값으로 채웠다.
+- Phase 5 남은 일: 사람 승인. (Gate 2번 기준을 방법 대체로 인정할지 판단 필요 — `phase-5-report.md` Gate 절)
+- 해소: ASM-040(주 메뉴) · ASM-081(분당 시설 카드) · ASM-049(분당 오시는 길) · ASM-048(부분). 어긋남: ASM-043(`/sub/abouttch3` 은 컨설팅팀 강사진). 신규: ASM-095(화면별 SEO)·ASM-096(`/sub/about` 상담 폼 보류).
+- 원장님 답 대기 6건: `Q-ADM-15`~`20` (구글 폼 주소 2종·상담 폼 복원·abouttch3 내용·상담 시간 2종·설명회 학년·화면별 SEO).
 - 사람 승인 없이 다음 Phase로 넘어가지 않는다. `docs/PHASE.md`의 승인 칸·결정 내용은 사람만 채운다.
 
 ## 2. 확정 결정 (D = `docs/PHASE.md` 결정표, ADR = `docs/decisions/`)
@@ -60,8 +61,7 @@
 - ASM-043 `/sub/abouttch2`는 분당 강사진, `/sub/abouttch3`은 문해력 진단 안내
 - ASM-044 강좌·설명회 상세보기는 카드 안에서 펼침
 - ASM-046 홈 히어로 제목을 `h1`으로 올림
-- ASM-048 학원 소개 2·3탭은 PROJECT COSMO·진단평가 내용
-- ASM-049 오시는 길·시설안내 분당 탭은 공개 주소·전화만
+- ASM-048 학원 소개 2번 탭 PROJECT COSMO 확인, 3번 탭은 상담 절차·학원 안내까지 반영(폼은 ASM-096)
 - ASM-050 오시는 길에 지도 iframe 없이 링크만
 - ASM-051 강사 카드의 수강 예약 링크를 항상 노출
 - ASM-052 설명회 동의 문구는 강좌 문구에서 목적·항목·보유기간만 변경
@@ -78,7 +78,6 @@
 - ASM-078 관리자 계정 묶음은 `role === "ADMIN"`으로 추림
 - ASM-079 `/sub/Facility` 「책과 글을 위한 교실」은 CSS 배경
 - ASM-080 사진 없는 강사 자리에 학원 로고
-- ASM-081 `/sub/Facility` 분당 탭 공간 카드는 제목만
 - ASM-082 문해력 진단 버튼은 `AppSetting.diagnosis.cta.externalUrl`의 구글 폼으로 이동
 - ASM-083 상담 유형 기본값 `COSMO 스펙트럼 진단평가 예약`·`일반 상담`
 - ASM-084 상담 학생 학년은 예비초~초6
@@ -95,7 +94,7 @@
 - ASM-095 공개 화면 title·description·canonical·og 는 화면별로 다르게 (레거시는 전 화면 동일)
 - ASM-096 `/sub/about` 상담·진단 신청 폼은 사용자 재확인 전까지 되살리지 않음
 
-해소·무효: ASM-040(EV-0015 관찰값으로 교체) · ASM-007(AD-010·AD-011 범위 포함) · 015(AD-014 구현) · 020 · 024(→025) · 047(AD-010 구현) · 058 · 074 · 076.
+해소·무효: ASM-040·049·081(EV-0015 관찰값으로 교체) · ASM-007(AD-010·AD-011 범위 포함) · 015(AD-014 구현) · 020 · 024(→025) · 047(AD-010 구현) · 058 · 074 · 076.
 
 ## 4. 기능 ID 상태 (전부 구현·테스트 통과. 동등성 확인만 Phase 5에 남음 — `docs/reports/migration-status.md`)
 
