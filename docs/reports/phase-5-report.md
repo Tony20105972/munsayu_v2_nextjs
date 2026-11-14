@@ -206,11 +206,12 @@
 ### 1. Server Action 인자 로그 (`OBSERVED`)
 
 Next 16 개발 서버는 Server Function 호출을 **인자까지 그대로** 터미널에 찍는다. 로컬 개발
-서버에 카나리 비밀번호로 관리자 로그인을 한 번 시도해 직접 확인했다.
+서버에 표식용 비밀번호로 관리자 로그인을 한 번 시도해 직접 확인했다.
+(아래 로그에서 비밀번호 자리는 가렸다. 실제로는 **입력한 값이 그대로** 찍혔다.)
 
 ```
 POST /admin/login 200 in 94ms
-  └─ ƒ adminLoginAction({"loginId":"admin","password":"DEV-canary-pw-4Zt2","rememberMe":false}) in 83ms
+  └─ ƒ adminLoginAction({"loginId":"admin","password":"<입력한 값이 그대로>","rememberMe":false}) in 83ms
 ```
 
 같은 방법으로 **운영 빌드(`next build` → `next start`)에서는 찍히지 않는** 것도 확인했다.

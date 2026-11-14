@@ -39,13 +39,13 @@ describe("환경 변수 읽기", () => {
   it("필수 값이 비면 키 이름만 담아 던진다 — 값은 메시지에 넣지 않는다", () => {
     process.env[KEY] = "   ";
     expect(() => requireEnvValue(KEY)).toThrowError(new RegExp(KEY));
-    process.env[KEY] = "secret-value";
-    expect(requireEnvValue(KEY)).toBe("secret-value");
+    process.env[KEY] = "value-must-not-leak";
+    expect(requireEnvValue(KEY)).toBe("value-must-not-leak");
     try {
       delete process.env[KEY];
       requireEnvValue(KEY);
     } catch (error) {
-      expect((error as Error).message).not.toContain("secret-value");
+      expect((error as Error).message).not.toContain("value-must-not-leak");
     }
   });
 });
