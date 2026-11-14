@@ -40,7 +40,16 @@ export default defineConfig({
   webServer: {
     command: "npm run dev -- --hostname 127.0.0.1 --port 3000",
     url: "http://127.0.0.1:3000",
-    reuseExistingServer: !process.env.CI,
+    /*
+     * **이미 떠 있는 서버를 쓰지 않는다.**
+     *
+     * 아래 `env` 는 Playwright 가 직접 띄운 서버에만 붙는다. `npm run dev` 로 미리
+     * 띄워 둔 서버를 재사용하면 `MAIL_ADAPTER=file` 이 빠진 채로 돌아서, 비밀번호
+     * 재설정 흐름이 메일 파일을 찾지 못해 `ENOENT` 로 깨진다. 원인이 드러나지 않는
+     * 실패라 찾는 데 오래 걸린다. 매번 새로 띄워 설정이 항상 맞게 한다.
+     * 포트가 이미 쓰이면 Playwright 가 그 사실을 바로 알려 준다.
+     */
+    reuseExistingServer: false,
     timeout: 120_000,
     env: {
       // 비밀번호 재설정 링크를 테스트가 읽어야 해서 메일을 파일로 떨어뜨린다. 실제 발송은 없다.

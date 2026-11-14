@@ -3,7 +3,13 @@ import { CAMPUSES, type Campus } from "@/lib/site-config";
 /**
  * 오시는 길 지점 패널.
  * 대치본원 내용은 docs/evidence/dom/phase1-location.yml 관찰값이다.
- * 분당점 패널은 레거시 탭이 접혀 있어 관찰하지 못했고, 푸터에 공개된 주소·전화만 쓴다. // ASM-049
+ *
+ * 분당점 패널은 Phase 3 때 탭이 접혀 있어 보지 못해 주소·전화만 두었다(ASM-049).
+ * Phase 5 동등성 검증에서 레거시 HTML 을 직접 받아 분당점 탭 본문이 문서 안에 모두
+ * 있는 것을 확인하고 관찰값으로 채웠다. ASM-049 해소. (EV-0015)
+ *
+ * 레거시 분당점 탭의 「버스 이용 시」 표는 머리글(`정류장명 (정류장번호)` ·
+ * `운행 버스 노선`)만 있고 **줄이 하나도 없다.** 그래서 신규도 버스 칸을 비워 둔다.
  * 레거시의 지도 iframe은 외부 요청을 만들어 신규 화면에서는 지도 서비스 링크만 제공한다. // ASM-050
  */
 
@@ -56,10 +62,25 @@ const LOCATION_DETAILS: readonly LocationDetail[] = [
   },
   {
     campus: BUNDANG,
-    addressDetail: null,
+    addressDetail: "(내정로173번길 1)",
     nearbyBadge: null,
-    walkingNotes: [],
-    subway: [],
+    walkingNotes: [
+      "수인분당선 수내역 2번 출구 도보 8분",
+      "수인분당선 정자역 1번 출구 도보 15분",
+    ],
+    subway: [
+      {
+        line: "수인분당선",
+        exit: "수내역 2번 출구 이용",
+        detail: "(내정로 방면 도보 약 8분 직진)",
+      },
+      {
+        line: "신분당선",
+        exit: "정자역 1번 출구 이용",
+        detail: "(수내교 방면 버스 환승 또는 도보 이동)",
+      },
+    ],
+    // 레거시 분당점 탭의 버스 표에는 머리글만 있고 줄이 없다. (EV-0015)
     buses: [],
   },
 ];
