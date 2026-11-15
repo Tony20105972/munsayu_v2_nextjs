@@ -262,8 +262,9 @@ describe("AD-013 개인정보 열람·내보내기·파기", () => {
       where: { action: "PII_PURGE" },
     });
     // Phase 5에서 상담·강사 지원·알림 신청이 파기 대상에 함께 들어왔다.
+    // Phase 7에서 출처(`source`)가 앞에 붙었다. 관리자 화면에서 부른 것은 `MANUAL` 이다.
     expect(audit.filterSummary).toBe(
-      "course=1;event=1;consultation=0;instructor=0;sms=0;files=0",
+      "source=MANUAL;course=1;event=1;consultation=0;instructor=0;sms=0;files=0",
     );
   });
 

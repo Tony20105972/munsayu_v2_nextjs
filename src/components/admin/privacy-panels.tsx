@@ -74,7 +74,7 @@ export function RetentionSettingForm({
           <AdminCheckboxField
             name="automaticPurgeEnabled"
             label="자동 파기 사용"
-            hint="기본값은 꺼짐입니다. 지금은 설정값만 저장하고 주기 실행은 붙어 있지 않습니다. 켜 두어도 자동으로 지워지지 않습니다."
+            hint="기본값은 꺼짐입니다. 켜면 매일 새벽 3시에 보유기간이 지난 기록을 자동으로 지웁니다. 꺼 두면 지우지 않습니다. 지운 것은 되돌릴 수 없습니다."
             defaultChecked={automaticPurgeEnabled}
             errors={fieldErrors.automaticPurgeEnabled}
           />

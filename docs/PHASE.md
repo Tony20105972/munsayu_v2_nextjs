@@ -11,11 +11,11 @@
 
 | 항목 | 값 |
 |---|---|
-| 현재 Phase | **6 — Performance & Security** |
-| 상태 | `GATE_CHECK` |
+| 현재 Phase | **7 — Cutover 준비** |
+| 상태 | `GATE_FAIL` |
 | 마지막 갱신 | 2026-11-15 |
-| 다음 행동 | 사람 승인 대기. Gate 3번(스테이징 부하 테스트)을 방법 대체로 둘지 사람 판단 필요 |
-| 막힌 것 | 원장님 답 6건(`Q-ADM-15`~`20`) 대기. 문구·주소 확정만 남았고 Phase 6 작업에는 영향 없다 |
+| 다음 행동 | 사람이 `npx vercel login`·`npx vercel link` 를 1회 실행 → 스테이징 구축 → Gate 1·4·5 재판정. **실제 전환은 하지 않는다** |
+| 막힌 것 | 로컬에 Vercel CLI 로그인이 없어 `vercel env pull`·스테이징 마이그레이션·스테이징 E2E·롤백 연습을 **한 건도 실행하지 못했다.** Gate 실패 원인은 코드 결함이 아니라 이 1회 작업이다. 그 밖에 `CRON_SECRET` 환경 변수 미설정, D7·D8·D4 미정, 원장님 답 7건(`Q-ADM-15`~`21`) |
 
 상태 값: `NOT_STARTED` → `IN_PROGRESS` → `GATE_CHECK` → `IN_REVIEW` → `APPROVED`
 (Gate 실패 시 `GATE_FAIL` → 수정 후 다시 `GATE_CHECK`)
@@ -32,8 +32,8 @@
 | 3 | Frontend Reconstruction | APPROVED | PASS (5/5) | 차단 1 수정 / 권장 12 기록 | ☑ | `reports/phase-3-report.md` |
 | 4 | Backend Replacement | APPROVED | PASS (9/9 적용) | 차단 1 수정 / 권장 12 기록 | ☑ | `reports/phase-4-report.md` |
 | 5 | Legacy Parity Testing | APPROVED | PASS (4/5, 1건 방법 대체) | 차단 1 수정 / 권장 5 중 3 수정 | ☑ | `reports/phase-5-report.md` |
-| 6 | Performance & Security | GATE_CHECK | PASS (2/3, 1건 방법 대체) | 차단 3 수정 / 권장 6 중 4 수정 | ☐ | `reports/phase-6-report.md` |
-| 7 | Cutover 준비 | NOT_STARTED | — | — | ☐ | `reports/phase-7-report.md` |
+| 6 | Performance & Security | APPROVED | PASS (2/3, 1건 방법 대체) | 차단 3 수정 / 권장 6 중 4 수정 | ☑ | `reports/phase-6-report.md` |
+| 7 | Cutover 준비 | GATE_FAIL | FAIL (1/5, 1건 부분·방법 대체 1건) | 차단 3 수정 / 권장 6 중 5 수정 | ☐ | `reports/phase-7-report.md` |
 
 - Gate 칸: `PASS (n/n)` 또는 `FAIL (통과 수/전체)`
 - 독립 리뷰 칸: `차단 0 / 권장 n` 형식
@@ -121,6 +121,7 @@ Phase 0에서 Claude가 채웁니다. 필수 도구가 `정상`이 아니면 Pha
 | Q-ADM-18 | 상담 시간이 두 가지로 적혀 있습니다. 푸터는 `월-금 13:00-21:00 / 토·일 9:30-21:00`, 학원 소개 화면은 `평일 14:00-22:00 / 주말 08:30-22:00` 입니다. 어느 쪽이 맞나요? | PG-002 | | |
 | Q-ADM-19 | 설명회 신청 학년을 레거시는 `초등4~중2`로 받고 있었는데 새 사이트는 `예비초~초6`만 받습니다. 중학생 설명회 신청도 받으셔야 하나요? | FM-002, ASM-084 | | |
 | Q-ADM-20 | 검색 결과에 화면마다 다른 제목·설명이 나오게 해도 될까요? 지금 레거시는 모든 화면의 제목·설명이 같습니다 | ASM-095 | | |
+| Q-ADM-21 | 전환 직전에 직원이 따로 보관하는 「진행 중 신청」 CSV 를 언제까지 두고 지울까요? (기본안 6개월) | Phase 7, `legacy-records-handling.md` | | |
 
 ---
 
@@ -144,6 +145,8 @@ Claude는 Phase 상태가 바뀔 때마다 한 줄씩 추가합니다. 위쪽이
 
 | 날짜 | Phase | 변경 | 작성 |
 |---|---|---|---|
+| 2026-11-15 | 7 | 전환 준비: Blob 저장 어댑터 신설(공개 public / 이력서·임시 private, 서명된 PUT 티켓) · 배포 시 마이그레이션 자동 실행 · 자동 파기 예약 경로 · 첫 관리자 생성 스크립트 · 문서 5종 신설과 `ADMIN_GUIDE` 완성. 로컬 `verify:all` 통과. 독립 리뷰 차단 3건 수정(예약 파기가 「자동 파기 사용」 스위치를 무시 · 모든 브랜치 배포가 같은 DB 를 마이그레이션 · 계약 문서 누락), 권장 6 중 5 수정. 운영 빌드에서 예약 경로가 정적 생성되던 결함도 함께 고침. **스테이징은 Vercel CLI 로그인 부재로 미구축** → Gate FAIL(1/5) → `GATE_FAIL` | Claude Code |
+| 2026-11-15 | 6→7 | **Phase 6 승인(사용자 지시)**, PR #7 squash 병합(`verify` CI 통과, GitGuardian 은 테스트용 가짜 값만 잡아 막는 사유로 보지 않음). Phase 7 시작, `release/phase-7` 브랜치 생성 | Claude Code |
 | 2026-11-15 | 6 | 성능: 배너 267KB→10KB, 모바일 LCP 2940~3484ms→604~636ms(기준 1/7→7/7). 보안: 보안 헤더 전무 → nonce CSP 등 추가, CSV 무제한 내보내기 상한(ASM-097), 만료 세션 테스트 50건. sitemap 신설. Gate 2/3(3번 방법 대체) → GATE_CHECK | Claude Code |
 | 2026-11-15 | 5→6 | **Phase 5 승인(사용자 지시)**, PR #6 squash 병합. `verify` CI 통과(GitGuardian 은 테스트용 가짜 값만 잡아 막는 사유로 보지 않음). Phase 6 시작 | Claude Code |
 | 2026-11-14 | 5 | 독립 리뷰(차단 1 / 권장 5 / 참고 4). 차단 1건(숨은 배너 슬라이드가 클릭·초점을 가로챔) 수정·브라우저로 확인, 권장 3건 수정. `reports/phase-5-review.md` | Claude Code |

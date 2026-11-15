@@ -237,6 +237,12 @@ export async function runPurge(options: {
   actorUserId: string | null;
   dryRun: boolean;
   now?: Date;
+  /**
+   * 누가 돌렸는지 감사기록에 남길 출처.
+   * `MANUAL` 은 관리자가 화면에서 누른 것, `SCHEDULED` 는 예약 실행이다. (ASM-100)
+   * 행위자(`actorUserId`)가 비어 있는 경우가 둘이라 이 값 없이는 구분할 수 없다.
+   */
+  source?: "MANUAL" | "SCHEDULED";
 }): Promise<PurgeResult> {
   const now = options.now ?? new Date();
   const target = { purgeEligibleAt: { lte: now }, purgedAt: null };
@@ -352,6 +358,7 @@ export async function runPurge(options: {
     action: "PII_PURGE",
     resourceType: "ApplicationPii",
     filterSummary:
+      `source=${options.source ?? "MANUAL"};` +
       `course=${courses.count};event=${events.count};` +
       `consultation=${consultations.count};instructor=${instructors.count};` +
       `sms=${subscriptions.count};files=${removedFiles}`,
