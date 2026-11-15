@@ -70,6 +70,9 @@
 
 - [ ] 운영 데이터베이스에 관리자 **1명**을 만든다.
       `BOOTSTRAP_ADMIN_ID=<아이디> BOOTSTRAP_ADMIN_EMAIL=<메일> npm run bootstrap:admin`
+- [ ] **아이디는 영문 소문자·숫자·밑줄만** 쓴다(3~20자). 하이픈(`-`)·대문자·점은 로그인
+      화면이 거부한다. 스크립트가 같은 계약으로 먼저 검사해 멈추지만, 미리 알고 정하면
+      한 번에 끝난다. (전에는 검사가 없어 로그인할 수 없는 관리자가 만들어졌다 — EV-0019 2-3)
 - [ ] 임시 비밀번호는 **터미널에 한 번만** 나온다. 바로 원장님께 전달하고 화면에서 지운다.
 - [ ] 원장님이 로그인한 뒤 **비밀번호를 바꾼다.**
 - [ ] 두 번째 직원 계정부터는 `/admin/members` 화면에서 원장님이 직접 추가한다 (D5).
@@ -171,7 +174,8 @@
 |---|---|---|
 | `DATABASE_URL`·`DATABASE_URL_UNPOOLED`·`POSTGRES_*`·`PG*` | Neon 통합에서 들어옴. production·preview·development 전부 | 없음 ✅ |
 | `DATABASE_URL_TEST` | 없음 (지워진 상태) | 없음 ✅ (운영에 필요 없다) |
-| `BLOB_READ_WRITE_TOKEN`·`BLOB_STORE_ID`·`BLOB_WEBHOOK_PUBLIC_KEY` | production·preview | 없음 ✅ (development 에는 없다 — 아래 참고) |
+| `BLOB_READ_WRITE_TOKEN`·`BLOB_STORE_ID`·`BLOB_WEBHOOK_PUBLIC_KEY` | production·preview. **private 저장소**(이력서·검사 전 원본) | 없음 ✅ (development 에는 없다 — 아래 참고) |
+| **`BLOB_PUBLIC_READ_WRITE_TOKEN`·`BLOB_PUBLIC_STORE_ID`** | production·preview. **public 저장소**(공개 사진) — 2026-11-16 신설 `munsayu-v2-public` | 없음 ✅ (스테이징) / **운영 전환 때 운영 프로젝트에도 연결** |
 | `AUTH_SECRET`·`MAIL_ADAPTER`·`MAIL_FROM`·`NOTIFY_ADAPTER`·`APP_BASE_URL`·`PRIVACY_PURGE_SECRET` | production·preview·development | 없음 ✅ |
 | **`STORAGE_ADAPTER`** | **처리됨** (2026-11-15, 사용자). production·preview 에만 둔다. development 에는 없다 | 없음 ✅ — development 에 값이 없으면 어댑터는 기본 `local` 로 간다 |
 | **`CRON_SECRET`** | **추가됨** (2026-11-15, 사용자). **Production 에만** 있다 | 없음 ✅ — Preview 에는 없다. Preview 호스트에서는 파기 예약이 항상 404 다 (막힌 것만 확인되고 성공 경로는 확인되지 않는다) |
@@ -187,6 +191,16 @@
 - [ ] **`APP_BASE_URL` 은 한 값을 preview·production 이 같이 씁니다.** Preview 배포에서
       비밀번호 재설정 메일을 보내면 링크가 **production(스테이징) 주소**로 갑니다.
       Preview 에서 메일 링크를 시험하려면 그때만 Preview 전용 값을 따로 둡니다.
+- [ ] **Blob 저장소는 두 개다.** 저장소의 공개/비공개는 **만들 때 고정**되고
+      (`vercel blob create-store <이름> --access public|private`) 한 저장소가 둘을 함께
+      담지 못합니다. private 저장소에 공개 사진을 올리면 저장소가 거부합니다
+      (스테이징에서 실제로 막혔습니다 — EV-0019, ADR-009 결정 3).
+      공개 사진 → `BLOB_PUBLIC_*` · 이력서·검사 전 원본 → `BLOB_*`(또는 `BLOB_PRIVATE_*`).
+      **이름을 섞지 마세요.** 공개 쪽에 비공개 저장소 값을 넣으면 사진이 안 뜨고,
+      반대로 넣으면 이력서가 공개 주소로 열립니다.
+- [ ] **값을 붙여넣을 때 끝의 공백·개행을 넣지 마세요.** `CRON_SECRET` 에 공백이 한 칸
+      들어가 있어 배포가 통째로 거부된 적이 있습니다(EV-0019 2-1). Vercel 이 그 값으로
+      HTTP 헤더를 만들기 때문입니다.
 - [ ] 전환 당일에는 `APP_BASE_URL` 을 `https://munsayu.com` 으로 바꿉니다 (2장 3단계).
 
 > Claude 가 이 값들을 직접 바꾸려 했으나 **자동 승인 정책이 쓰기를 막았습니다.**
@@ -291,7 +305,15 @@ VERCEL_AUTOMATION_BYPASS_SECRET=<보호 우회 열쇠> \
   npm run e2e:staging
 ```
 
-- [ ] 32건 전부 통과
+- [ ] **32건 전부 통과 / 1건 건너뜀**(사진 올리기 점검은 환경 변수를 줄 때만 돈다)
+- [ ] 사진을 실제로 올려 보는 점검은 **따로** 돈다. 이것은 **자료를 만든다**(보관함에
+      사진 한 장, 저장소에 파일 하나). 그래서 환경 변수를 줄 때만 돈다:
+      ```bash
+      STAGING_BASE_URL=<주소> VERCEL_AUTOMATION_BYPASS_SECRET=<열쇠> \
+      STAGING_ADMIN_ID=<아이디> STAGING_ADMIN_PASSWORD=<비밀번호> \
+      STAGING_UPLOAD_IMAGE=<사진 경로> \
+        npx playwright test --project=staging blob-upload
+      ```
 - [ ] **보호 우회 열쇠**는 Vercel → Project → Settings → Deployment Protection →
       「Protection Bypass for Automation」 에서 만듭니다. 없으면 모든 요청이 Vercel
       로그인 화면으로 가서 전부 실패합니다
@@ -303,9 +325,15 @@ VERCEL_AUTOMATION_BYPASS_SECRET=<보호 우회 열쇠> \
       → **막아 두었습니다.** `STAGING_BASE_URL` 을 주면 고를 수 있는 묶음이 `staging`
       하나뿐이라, `--project=e2e` 를 지정하면 Playwright 가
       `Project(s) "e2e" not found. Available projects: "staging"` 로 바로 멈춥니다.
-- [ ] **파기 예약이 실제로 도는지는 이 점검으로 알 수 없습니다.** 점검의 404 단정은 경로가
+- [ ] **파기 예약의 성공 경로는 이 점검으로 알 수 없습니다.** 점검의 404 단정은 경로가
       배포되지 않았거나 `CRON_SECRET` 이 비어 있어도 통과합니다(막혔다는 것만 봅니다).
-      성공 경로는 전환 후 **Vercel → 프로젝트 → Crons** 의 실행 기록에서 확인하세요 (4장)
+      올바른 비밀값으로 한 번 불러 확인하세요 — 「자동 파기 사용」이 꺼져 있으면
+      `200 {"skipped":true,"reason":"automatic-purge-disabled"}` 가 와야 하고 **아무것도
+      지우지 않습니다.** 스테이징에서 이렇게 확인했습니다(EV-0019 3-2):
+      ```bash
+      curl -sS -H "authorization: Bearer <CRON_SECRET>" <주소>/api/cron/privacy-purge
+      ```
+      Vercel 이 **스스로** 부르는 실행 기록은 전환 후 **Vercel → 프로젝트 → Crons** 에서 봅니다 (4장)
 
 ### 3-5. 사진과 분석 도구 — `개발`
 

@@ -223,6 +223,47 @@ class LocalStorageAdapter implements StorageAdapter {
 }
 
 /**
+ * 공개 사진과 비공개 파일은 **서로 다른 Blob 저장소**에 들어간다.
+ *
+ * 저장소의 공개/비공개는 **만들 때 고정**되고(`vercel blob create-store --access`),
+ * 한 저장소가 둘을 함께 담지 못한다. private 저장소에 공개 사진을 올리면 저장소가
+ * 「Cannot use public access on a private store」로 **거부한다.** 그래서 어댑터가
+ * 영역에 따라 저장소를 바꿔 준다. 스테이징에서 실제로 막혀 찾은 것이다
+ * (OBSERVED 2026-11-15, EV-0019).
+ *
+ * 환경 변수 이름을 **영역별로 따로** 둔다. 공개 쪽은 `BLOB_PUBLIC_*` 만 보고,
+ * 비공개 저장소의 이름(`BLOB_READ_WRITE_TOKEN`·`BLOB_STORE_ID`)으로 흘러가는 길을
+ * 아예 만들지 않는다. 그 길이 있으면 이력서가 공개 저장소로, 또는 공개 사진이
+ * 비공개 저장소로 조용히 들어갈 수 있다.
+ *
+ * `token` 과 `storeId` 를 **둘 다** 넘긴다. SDK 는 OIDC(`VERCEL_OIDC_TOKEN`)가 있으면
+ * `BLOB_STORE_ID` 를 함께 보고 저장소를 정하는 길도 갖고 있어서, 토큰만 넘기면
+ * 환경에 따라 다른 저장소로 갈 수 있다.
+ */
+export type BlobTarget = { token: string; storeId: string };
+
+export function blobTargetForScope(scope: StorageScope): BlobTarget {
+  if (scope === "public") {
+    return {
+      token: requireEnvValue("BLOB_PUBLIC_READ_WRITE_TOKEN"),
+      storeId: requireEnvValue("BLOB_PUBLIC_STORE_ID"),
+    };
+  }
+
+  /*
+   * 비공개·임시 영역. `BLOB_PRIVATE_*` 를 먼저 보고, 없으면 Vercel 통합이 기본 접두사로
+   * 붙여 준 이름을 쓴다. 통합 연결을 `BLOB_PRIVATE` 접두사로 다시 붙이면 코드를 고치지
+   * 않고 이름만 바뀐다.
+   */
+  return {
+    token:
+      envValue("BLOB_PRIVATE_READ_WRITE_TOKEN") ??
+      requireEnvValue("BLOB_READ_WRITE_TOKEN"),
+    storeId: envValue("BLOB_PRIVATE_STORE_ID") ?? requireEnvValue("BLOB_STORE_ID"),
+  };
+}
+
+/**
  * Vercel Blob 저장 구현. 운영·스테이징에서 쓴다. (ASM-008 · ADR-008 · Phase 7)
  *
  * 로컬 어댑터와 다른 점은 두 가지다.
@@ -282,6 +323,7 @@ class VercelBlobStorageAdapter implements StorageAdapter {
      */
     const buffer = Buffer.from(body.buffer, body.byteOffset, body.byteLength);
     const result = await put(this.pathnameFor(scope, key), buffer, {
+      ...blobTargetForScope(scope),
       access: this.accessFor(scope),
       contentType,
       /*
@@ -307,6 +349,7 @@ class VercelBlobStorageAdapter implements StorageAdapter {
 
   async get(scope: StorageScope, key: string): Promise<Uint8Array> {
     const result = await get(this.pathnameFor(scope, key), {
+      ...blobTargetForScope(scope),
       access: this.accessFor(scope),
       /*
        * 방금 올린 임시 원본을 바로 읽는다. CDN 캐시를 거치면 아직 없다고 나올 수
@@ -324,7 +367,7 @@ class VercelBlobStorageAdapter implements StorageAdapter {
 
   async remove(scope: StorageScope, key: string): Promise<void> {
     // 없는 파일을 지워도 오류가 아니다. 로컬 어댑터의 `rm(..., { force: true })` 와 같다.
-    await del(this.pathnameFor(scope, key));
+    await del(this.pathnameFor(scope, key), blobTargetForScope(scope));
   }
 
   urlFor(scope: StorageScope, key: string): string | null {
@@ -357,6 +400,7 @@ class VercelBlobStorageAdapter implements StorageAdapter {
      * 티켓이 새어 나가도 다른 파일을 읽거나 지우거나 큰 파일을 밀어 넣을 수 없다.
      */
     const signedToken = await issueSignedToken({
+      ...blobTargetForScope(scope),
       pathname,
       operations: ["put"],
       validUntil,

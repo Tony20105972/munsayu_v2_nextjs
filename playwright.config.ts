@@ -22,11 +22,16 @@ const stagingBaseURL = process.env.STAGING_BASE_URL?.trim() || undefined;
  */
 const bypassSecret = process.env.VERCEL_AUTOMATION_BYPASS_SECRET?.trim() || undefined;
 
+/*
+ * 열쇠는 **헤더로만** 보낸다. `x-vercel-set-bypass-cookie: true` 를 함께 보내면
+ * Vercel 이 쿠키를 심으려고 **같은 주소로 307 을 한 번 되돌린다.** 그러면
+ * `maxRedirects: 0` 으로 보는 점검(308 표본·410 표본·관리자 401·파기 예약 404)이
+ * 앱의 응답 대신 그 307 을 받아 전부 실패한다. 실제 스테이징 호스트에서 11건이
+ * 그렇게 깨졌다 (OBSERVED 2026-11-15, EV-0019). 헤더만 보내면 Vercel 이 되돌리지 않고
+ * 그 요청을 그대로 통과시킨다.
+ */
 const stagingHeaders = bypassSecret
-  ? {
-      "x-vercel-protection-bypass": bypassSecret,
-      "x-vercel-set-bypass-cookie": "true",
-    }
+  ? { "x-vercel-protection-bypass": bypassSecret }
   : undefined;
 
 /**

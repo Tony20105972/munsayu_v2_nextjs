@@ -18,6 +18,8 @@
 // 로컬에서는 `.env` 를 읽는다. 이미 process.env 에 있는 값은 덮어쓰지 않는다.
 import "dotenv/config";
 import { randomBytes } from "node:crypto";
+import type { ZodType } from "zod";
+import { emailSchema, loginIdSchema, passwordSchema } from "../src/lib/contracts/auth";
 import { db } from "../src/server/db";
 import { hashPassword } from "../src/server/auth/password";
 
@@ -27,6 +29,26 @@ function required(name: string): string {
     throw new Error(`환경 변수 ${name} 을 먼저 넣어 주세요.`);
   }
   return raw;
+}
+
+/**
+ * **로그인 화면과 같은 계약으로 검사한다.**
+ *
+ * 전에는 검사가 없었다. 그래서 `staging-admin` 처럼 하이픈이 든 아이디로 계정이
+ * 만들어졌고, 로그인 화면은 `loginIdSchema`(영문 소문자·숫자·밑줄)로 그 아이디를
+ * **거부했다.** 아무도 들어갈 수 없는 관리자가 생기고, 이 스크립트는 같은 아이디를
+ * 덮어쓰지 않으므로 고칠 길도 없었다 (OBSERVED 2026-11-15, EV-0019).
+ *
+ * 전환 때 운영 첫 관리자를 만드는 **유일한 경로**라서, 값이 틀리면 만들기 전에 멈춘다.
+ */
+function checked<T>(schema: ZodType<T>, value: unknown, name: string): T {
+  const result = schema.safeParse(value);
+  if (!result.success) {
+    // 값은 메시지에 넣지 않는다. 규칙만 알려 준다. (CLAUDE.md 4장)
+    const reason = result.error.issues.map((issue) => issue.message).join(" / ");
+    throw new Error(`${name} 이 로그인 규칙에 맞지 않습니다: ${reason}`);
+  }
+  return result.data;
 }
 
 /**
@@ -40,25 +62,44 @@ function required(name: string): string {
 function temporaryPassword(): string {
   const alphabet = "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   const limit = Math.floor(256 / alphabet.length) * alphabet.length;
-  const out: string[] = [];
 
-  while (out.length < 24) {
-    for (const byte of randomBytes(32)) {
-      if (byte >= limit) continue;
-      out.push(alphabet[byte % alphabet.length]);
-      if (out.length === 24) break;
+  /*
+   * 뽑은 값이 `passwordSchema`(영문과 숫자를 함께)를 만족할 때까지 다시 뽑는다.
+   * 알파벳 56자 중 숫자가 8자뿐이라 24자를 뽑아도 숫자가 하나도 없을 확률이
+   * (48/56)^24 ≈ 2% 다. 그 2% 는 비밀번호를 바꾸려 할 때 거부당하는 계정이 된다.
+   */
+  for (let attempt = 0; attempt < 100; attempt += 1) {
+    const out: string[] = [];
+    while (out.length < 24) {
+      for (const byte of randomBytes(32)) {
+        if (byte >= limit) continue;
+        out.push(alphabet[byte % alphabet.length]);
+        if (out.length === 24) break;
+      }
     }
+    const candidate = out.join("");
+    if (passwordSchema.safeParse(candidate).success) return candidate;
   }
 
-  return out.join("");
+  throw new Error("임시 비밀번호를 만들지 못했습니다. 다시 실행해 주세요.");
 }
 
 async function main(): Promise<void> {
-  const loginId = required("BOOTSTRAP_ADMIN_ID");
-  const email = required("BOOTSTRAP_ADMIN_EMAIL");
+  const loginId = checked(
+    loginIdSchema,
+    required("BOOTSTRAP_ADMIN_ID"),
+    "BOOTSTRAP_ADMIN_ID",
+  );
+  const email = checked(
+    emailSchema,
+    required("BOOTSTRAP_ADMIN_EMAIL"),
+    "BOOTSTRAP_ADMIN_EMAIL",
+  );
   const givenPassword = process.env.BOOTSTRAP_ADMIN_PASSWORD?.trim();
   const password =
-    givenPassword && givenPassword.length > 0 ? givenPassword : temporaryPassword();
+    givenPassword && givenPassword.length > 0
+      ? checked(passwordSchema, givenPassword, "BOOTSTRAP_ADMIN_PASSWORD")
+      : temporaryPassword();
 
   const existing = await db.user.findUnique({ where: { loginId } });
   if (existing) {
