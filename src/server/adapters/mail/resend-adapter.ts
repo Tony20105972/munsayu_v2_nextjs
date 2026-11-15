@@ -1,4 +1,5 @@
 import type { MailAdapter, MailMessage } from "@/server/adapters/mail/types";
+import { envValue } from "@/server/env";
 
 /**
  * 실제 공급사 어댑터. `MAIL_ADAPTER=resend`일 때만 선택된다.
@@ -8,8 +9,8 @@ export class ResendMailAdapter implements MailAdapter {
   readonly name = "resend" as const;
 
   async send(message: MailMessage): Promise<void> {
-    const apiKey = process.env.RESEND_API_KEY;
-    const from = process.env.MAIL_FROM;
+    const apiKey = envValue("RESEND_API_KEY");
+    const from = envValue("MAIL_FROM");
     if (!apiKey || !from) {
       throw new Error("MAIL_ADAPTER_NOT_CONFIGURED");
     }

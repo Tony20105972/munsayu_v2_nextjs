@@ -114,21 +114,30 @@ export function SiteHeader() {
                   {menu.label}
                   <span aria-hidden="true"> ▾</span>
                 </button>
-                {openMenu === menu.label ? (
-                  <ul className="absolute left-0 top-full z-50 min-w-48 rounded-md border border-line bg-surface py-2 shadow-lg">
-                    {menu.items.map((item) => (
-                      <li key={`${menu.label}-${item.label}`}>
-                        <Link
-                          href={item.href}
-                          className="block px-4 py-2 text-sm text-ink hover:bg-canvas hover:text-brand"
-                          onClick={closeAll}
-                        >
-                          {item.label}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                ) : null}
+                {/*
+                  펼치지 않았을 때도 **링크를 HTML 에 남긴다.** 예전에는 닫혀 있으면
+                  `null` 을 돌려줘서 하위 메뉴 주소가 문서에 아예 없었다. 그래서
+                  `/sub/Facility`·`/sub/abouttch2`·`/sub/Check`·`/notice` 네 화면은
+                  어느 페이지에서도 연결되지 않아 검색엔진이 찾아갈 수 없었다.
+                  레거시는 네 주소를 모두 HTML 에 두고 있었다. (EV-0015)
+                  `hidden` 으로 감추므로 보이는 모습은 그대로다.
+                */}
+                <ul
+                  hidden={openMenu !== menu.label}
+                  className="absolute left-0 top-full z-50 min-w-48 rounded-md border border-line bg-surface py-2 shadow-lg"
+                >
+                  {menu.items.map((item) => (
+                    <li key={`${menu.label}-${item.label}`}>
+                      <Link
+                        href={item.href}
+                        className="block px-4 py-2 text-sm text-ink hover:bg-canvas hover:text-brand"
+                        onClick={closeAll}
+                      >
+                        {item.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
               </li>
             ))}
           </ul>

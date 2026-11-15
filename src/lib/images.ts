@@ -102,7 +102,8 @@ export const ABOUT_INTRO_PHOTO: ImageAsset = {
 /**
  * 강사 사진 등록부.
  *
- * 키는 `Instructor.photoStorageKey` 에 넣는 값이고, 값은 커밋된 파일 경로다.
+ * 키는 레거시 강사 식별용 이름이고, 값은 커밋된 파일 경로다. 관리자가 보관함에서
+ * 사진을 지정하기 전까지 이 등록부가 기본 사진을 대신한다. (AD-015)
  * 레거시는 같은 사진을 `/sub/abouttch1`·`/sub/abouttch2` 에 다른 이름으로 중복
  * 업로드해 두었는데, 신규에서는 **한 파일을 두 화면이 함께 쓴다**.
  */
@@ -125,7 +126,7 @@ export const INSTRUCTOR_PHOTOS: Record<string, string> = {
 
 /**
  * 레거시 강사 이름 → 사진 키.
- * DB 의 `photoStorageKey` 가 비어 있어도 레거시 명단과 이름이 같으면 사진이 붙는다.
+ * DB 의 `photoMediaId` 가 비어 있어도 레거시 명단과 이름이 같으면 사진이 붙는다.
  */
 export const INSTRUCTOR_PHOTO_KEY_BY_NAME: Record<string, string> = {
   "김윤환 원장": "kim-yoonhwan",
@@ -153,22 +154,113 @@ export const INSTRUCTOR_PHOTO_FALLBACK = "/images/instructors/munsayu-class.jpg"
 
 /**
  * 강사 1명의 사진을 고른다.
- * 순서: `photoStorageKey` → 레거시 이름 → 자리표시 로고.
+ *
+ * 순서: 관리자가 보관함에서 지정한 사진 → 레거시 이름 매핑 → 자리표시 로고.
+ * 보관함이 비어 있어도(DB 를 막 만든 상태) 레거시 매핑으로 사진이 붙는다. (AD-015 복원력)
  */
 export function resolveInstructorPhoto(instructor: {
   name: string;
-  photoStorageKey: string | null;
+  /** AD-015 보관함에서 지정한 사진. 지정하지 않았으면 `null`. */
+  photo: { url: string; alt: string } | null;
 }): ImageAsset {
-  const key =
-    (instructor.photoStorageKey && INSTRUCTOR_PHOTOS[instructor.photoStorageKey]
-      ? instructor.photoStorageKey
-      : null) ?? INSTRUCTOR_PHOTO_KEY_BY_NAME[instructor.name];
+  if (instructor.photo) {
+    return { src: instructor.photo.url, alt: instructor.photo.alt };
+  }
 
+  const legacyKey = INSTRUCTOR_PHOTO_KEY_BY_NAME[instructor.name];
   return {
-    src: key ? INSTRUCTOR_PHOTOS[key] : INSTRUCTOR_PHOTO_FALLBACK,
+    src: legacyKey ? INSTRUCTOR_PHOTOS[legacyKey] : INSTRUCTOR_PHOTO_FALLBACK,
     alt: `${instructor.name} 사진`,
   };
 }
 
-/** 관리자 화면에서 고를 수 있는 사진 키 목록. */
-export const INSTRUCTOR_PHOTO_KEYS = Object.keys(INSTRUCTOR_PHOTOS);
+/* ------------------------------------------------------------------ *
+ * AD-015 기본값 — DB 를 읽지 못하거나 아직 비어 있을 때 쓰는 화면 기본 내용.
+ * 관리자가 저장한 값이 있으면 그 값이 이깁니다.
+ * ------------------------------------------------------------------ */
+
+/** 메인 배너 슬라이드 1장의 화면용 모양. DB 행과 코드 기본값이 같은 모양을 쓴다. */
+export type HomeBannerView = {
+  id: string;
+  /** 배경 사진 주소. 없으면 화면이 단색 배경으로 그린다. */
+  backgroundUrl: string | null;
+  eyebrow: string;
+  headline: string;
+  body: string;
+  primaryLabel: string;
+  primaryHref: string;
+  secondaryLabel: string;
+  secondaryHref: string;
+};
+
+/**
+ * 관리자가 배너를 하나도 만들지 않았을 때 쓰는 기본 3장.
+ *
+ * 레거시 홈 배너는 **슬라이드마다 문구·버튼이 다르다.** Phase 3 에서는 1번 슬라이드
+ * 문구를 3장에 그대로 복사해 2·3번 문구가 사라져 있었다. Phase 5 동등성 검증에서
+ * 레거시 HTML 을 다시 읽어 세 장을 각각 복원했다. (EV-0015)
+ *
+ * 2·3번 슬라이드에는 레거시에도 버튼이 하나뿐이라 보조 버튼을 비워 둔다.
+ */
+export const DEFAULT_HOME_BANNERS: readonly HomeBannerView[] = [
+  {
+    id: "default-1",
+    backgroundUrl: HOME_HERO_BACKGROUNDS[0],
+    eyebrow: "ELEMENTARY LITERACY PROGRAM",
+    headline: "읽은 것을 이해하고,\n자기 생각으로 표현하는 힘",
+    body: "어휘·독해·사고 토론·글쓰기를 하나의 흐름으로 연결합니다.\n읽은 내용을 바탕으로 생각을 나누고, 근거를 갖춘 글로 정리합니다.",
+    primaryLabel: "문해력 진단 신청",
+    // 레거시는 구글 폼으로 바로 나갔다. 신규는 진단 안내 화면을 거쳐 관리자가 설정한
+    // 폼으로 보낸다(ASM-082). 레거시 홈 버튼의 폼 주소가 `/sub/abouttch3` 의 주소와
+    // 달라 원장님 확인이 필요하다. (open-questions Q-ADM-15)
+    primaryHref: "/sub/abouttch3",
+    secondaryLabel: "교육과정 알아보기",
+    secondaryHref: "/sub/schedule.n",
+  },
+  {
+    id: "default-2",
+    backgroundUrl: HOME_HERO_BACKGROUNDS[1],
+    eyebrow: "EXPERT TEACHERS & CURRICULUM",
+    headline: "아이의 생각을 듣고,\n다음 질문을 이끄는 강사진",
+    body: "어디까지 이해했는지, 어떤 근거로 판단했는지 함께 살핍니다.\n질문과 피드백으로 아이가 스스로 설명하고 고쳐 쓰도록 돕습니다.",
+    primaryLabel: "강사진·교육 철학 보기",
+    primaryHref: "/sub/abouttch1",
+    secondaryLabel: "",
+    secondaryHref: "",
+  },
+  {
+    id: "default-3",
+    backgroundUrl: HOME_HERO_BACKGROUNDS[2],
+    eyebrow: "THINKING & WRITING CLINIC",
+    headline: "질문으로 생각을 넓히고,\n토론과 글쓰기로 다듬습니다",
+    body: "같은 글을 읽고 서로 다른 생각을 나눕니다. 근거를 들어 설명하고, 토론에서 다듬은 생각을 글로 정리합니다.\n작성한 글은 강사와 함께 읽으며 보완합니다.",
+    primaryLabel: "토론·글쓰기 과정 보기",
+    primaryHref: "/sub/about",
+    secondaryLabel: "",
+    secondaryHref: "",
+  },
+];
+
+/** 시설안내 사진 1장의 화면용 모양. */
+export type FacilityPhotoView = {
+  id: string;
+  url: string;
+  /** 설명. 비어 있으면 장식용 사진으로 보고 빈 `alt` 로 그린다(레거시와 같다). */
+  caption: string;
+};
+
+/**
+ * 관리자가 시설 사진을 하나도 등록하지 않았을 때 쓰는 기본값.
+ * 지금 커밋돼 있는 지점별 4장 그대로다. (EV-0012)
+ */
+export const DEFAULT_FACILITY_PHOTOS: Record<string, readonly FacilityPhotoView[]> =
+  Object.fromEntries(
+    Object.entries(FACILITY_SLIDE_PHOTOS).map(([campusKey, photos]) => [
+      campusKey,
+      photos.map((photo, index) => ({
+        id: `default-${campusKey}-${index + 1}`,
+        url: photo.src,
+        caption: photo.alt,
+      })),
+    ]),
+  );

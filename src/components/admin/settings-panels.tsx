@@ -50,6 +50,18 @@ export function SiteSettingsForm({ settings }: { settings: SiteSettingsInput }) 
             defaultValue={String(settings.resumeMaxBytes)}
             errors={fieldErrors.resumeMaxBytes}
           />
+
+          <AdminTextField
+            name="mediaMaxUploadBytes"
+            label="사진 한 장의 용량 상한 (바이트)"
+            hint="「이미지 관리」에서 올리는 사진에 적용됩니다. 기본값은 20MB(20971520)입니다. 저장할 때 긴 변 2000px로 줄이므로 저장된 파일은 훨씬 작습니다."
+            type="number"
+            min={1024 * 1024}
+            max={50 * 1024 * 1024}
+            required
+            defaultValue={String(settings.mediaMaxUploadBytes)}
+            errors={fieldErrors.mediaMaxUploadBytes}
+          />
         </>
       )}
     </AdminActionForm>

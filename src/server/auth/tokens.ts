@@ -1,5 +1,6 @@
 import "server-only";
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
+import { envValue } from "@/server/env";
 
 /** 세션·재설정 토큰은 32바이트 난수다. 원문은 저장하지 않는다. */
 export function createToken(): string {
@@ -15,7 +16,7 @@ export function hashToken(token: string): string {
  * AUTH_SECRET을 pepper로 섞어 사전 대조를 어렵게 한다.
  */
 export function hashIdentifier(identifier: string): string {
-  const pepper = process.env.AUTH_SECRET ?? "";
+  const pepper = envValue("AUTH_SECRET") ?? "";
   return createHash("sha256")
     .update(`${pepper}:${identifier.trim().toLowerCase()}`)
     .digest("hex");

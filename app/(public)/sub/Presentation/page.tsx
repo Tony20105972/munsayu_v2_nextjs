@@ -3,17 +3,20 @@ import { EventList } from "@/components/public/event-list";
 import { LoadingBlock } from "@/components/ui/loading-block";
 import { PageBanner } from "@/components/ui/page-banner";
 import { loadEventGroups, loadRetentionPolicies } from "@/lib/data/public-content";
-import { buildPageMetadata } from "@/lib/metadata";
-import { SITE_TITLE_SUFFIX } from "@/lib/site-config";
+import { buildPageMetadata, pageTitle } from "@/lib/metadata";
 
 /**
  * PG-010 현장설명회 예약 + FM-002 설명회 신청.
  * 근거: docs/evidence/dom/phase1-presentation.yml (EV-0005)
- * 레거시 관찰 시점에는 title 이 홈과 같았다(legacy-seo-map.md).
+ *
+ * 레거시는 이 화면의 title 이 홈과 같았다. Phase 5 전수 관찰에서 **`/sub/*` 11개가
+ * 모두 홈과 같은 title** 이라는 것이 확인됐고, 그래서 홈을 뺀 공개 화면은 모두
+ * `<페이지 이름> | 접미사` 규칙을 쓰기로 했다. 이 화면만 예전 값으로 남아 있었다. // ASM-095
+ *
  * 상태 문구와 마감 여부는 관리자가 고른 상태 옵션 값을 그대로 쓴다. (ASM-001)
  */
 export const metadata = buildPageMetadata({
-  title: SITE_TITLE_SUFFIX,
+  title: pageTitle("현장설명회 예약"),
   description: "문사유 아카데미의 명쾌한 분석과 입시 전략, 현장에서 직접 확인하세요.",
   path: "/sub/Presentation",
 });

@@ -67,7 +67,8 @@ export const instructorUpsertSchema = z.object({
   name: personNameSchema,
   profileCode: z.string().trim().min(1).max(40),
   bio: z.string().trim().max(2000).nullable().default(null),
-  photoStorageKey: z.string().trim().max(200).nullable().default(null),
+  /** AD-015 보관함의 사진 id. 비우면 공개 화면이 기본 이미지를 쓴다. */
+  photoMediaId: cuidLikeIdSchema.nullable().default(null),
 });
 export type InstructorUpsertInput = z.infer<typeof instructorUpsertSchema>;
 
@@ -219,6 +220,13 @@ export const AUDIT_ACTIONS = [
   "RESUME_DOWNLOAD",
   /** AD-014 레거시 공지 가져오기 실행. */
   "NOTICE_IMPORT",
+  /** AD-015 사진 올리기·바꾸기·지우기·숨기기. 누가 언제 했는지 남긴다. */
+  "MEDIA_UPLOAD",
+  "MEDIA_UPDATE",
+  "MEDIA_DELETE",
+  /** 기존 사이트 사진은 지울 수 없어 숨기기로 목록·사진 고르기에서 뺀다. */
+  "MEDIA_HIDE",
+  "MEDIA_UNHIDE",
 ] as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 
@@ -433,6 +441,8 @@ export const SITE_SETTING_KEYS = {
   diagnosisCtaExternalUrl: "diagnosis.cta.externalUrl",
   recruitMenuVisible: "recruit.menu.visible",
   resumeMaxBytes: "recruit.resume.maxBytes",
+  /** AD-015 사진 한 장의 용량 상한. */
+  mediaMaxUploadBytes: "media.upload.maxBytes",
 } as const;
 
 export const siteSettingsSchema = z.object({
@@ -440,6 +450,12 @@ export const siteSettingsSchema = z.object({
   diagnosisCtaExternalUrl: z.string().trim().url().max(500),
   recruitMenuVisible: z.coerce.boolean(),
   resumeMaxBytes: z.coerce
+    .number()
+    .int()
+    .min(1024 * 1024)
+    .max(50 * 1024 * 1024),
+  /** AD-015 사진 용량 상한. 기본 20MB. */
+  mediaMaxUploadBytes: z.coerce
     .number()
     .int()
     .min(1024 * 1024)

@@ -7,7 +7,6 @@ import {
   deleteNotices,
   getAdminNotice,
   listAdminNotices,
-  uploadNoticeImage,
   upsertNotice,
 } from "@/server/services/notices-admin";
 import { GET as adminNoticesGet } from "../../app/api/admin/notices/route";
@@ -145,28 +144,11 @@ describe("AD-014 XSS 방어", () => {
     expect(detail.body).not.toContain("onerror");
   });
 
-  test("AD-014 SVG 는 본문 이미지로 올릴 수 없다", async () => {
-    await expect(
-      uploadNoticeImage({
-        filename: "logo.svg",
-        bytes: new Uint8Array(
-          Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"></svg>', "utf8"),
-        ),
-      }),
-    ).rejects.toBeInstanceOf(AppError);
-  });
-
-  test("AD-014 PNG 는 올릴 수 있고 상대 주소를 돌려준다", async () => {
-    const png = new Uint8Array(
-      Buffer.concat([
-        Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
-        Buffer.alloc(64),
-      ]),
-    );
-
-    const result = await uploadNoticeImage({ filename: "shot.png", bytes: png });
-    expect(result.url.startsWith("/uploads/notice-images/")).toBe(true);
-  });
+  /*
+   * 본문 이미지 업로드는 AD-015 공통 업로드로 옮겼다.
+   * SVG 거부·형식 위장·크기 줄이기·EXIF 제거는 `tests/unit/image-pipeline.test.ts` 와
+   * `tests/integration/ad-015-media.test.ts` 에서 확인한다.
+   */
 });
 
 describe("AD-014 첨부파일", () => {

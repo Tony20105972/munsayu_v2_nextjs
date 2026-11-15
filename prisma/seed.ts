@@ -8,8 +8,15 @@ import {
   INSTRUCTOR_PRIVACY_CONSENT,
   SMS_SUBSCRIPTION_CONSENT,
 } from "@/lib/contracts";
+import {
+  DEFAULT_FACILITY_PHOTOS,
+  DEFAULT_HOME_BANNERS,
+  FACILITY_SLIDE_PHOTOS,
+} from "@/lib/images";
 import { hashPassword } from "@/server/auth/password";
 import { db } from "@/server/db";
+import { envValue } from "@/server/env";
+import { registerLegacyMediaAssets } from "@/server/services/media";
 import { fixturePassword } from "../tests/fixtures/passwords";
 
 /**
@@ -222,10 +229,11 @@ const NOTICES = [
 
 async function seedAccounts(): Promise<void> {
   // 분명히 가짜인 기본값을 쓴다. 운영에서는 환경 변수로 넣고 첫 로그인 후 바꾼다.
+  // 빈 문자열(`SEED_ADMIN_PASSWORD=`)은 "값 없음"으로 본다. 빈 비밀번호를 해시하지 않는다.
   const adminPassword =
-    process.env.SEED_ADMIN_PASSWORD ?? fixturePassword("admin-0000");
+    envValue("SEED_ADMIN_PASSWORD") ?? fixturePassword("admin-0000");
   const memberPassword =
-    process.env.SEED_MEMBER_PASSWORD ?? fixturePassword("member-0000");
+    envValue("SEED_MEMBER_PASSWORD") ?? fixturePassword("member-0000");
 
   // 비밀번호도 다시 맞춘다. 기본값이 바뀌었는데 기존 행을 그대로 두면 아래에 찍히는
   // 자격 증명으로 로그인할 수 없다. 가짜 데이터 seed 에서만 하는 처리다.
@@ -332,6 +340,10 @@ async function main(): Promise<void> {
       name: instructor.name,
       profileCode: instructor.profileCode,
       bio: instructor.bio,
+      // AD-015 로 붙인 사진은 떼어낸다. seed 는 "늘 같은 상태"를 만들어야 하는데,
+      // 사진이 남아 있으면 강사 카드가 로고 대체(ASM-080) 대신 그 사진을 보여 줘서
+      // PG-005 시각 회귀 기준 이미지와 달라진다. 비밀번호를 다시 맞추는 것과 같은 이유다.
+      photoMediaId: null,
     };
     await db.instructor.upsert({
       where: { id: instructor.id },
@@ -339,6 +351,8 @@ async function main(): Promise<void> {
       create: { id: instructor.id, ...data },
     });
   }
+
+  await seedSiteImages();
 
   for (const membership of MEMBERSHIPS) {
     await db.instructorTeamMembership.upsert({
@@ -409,6 +423,88 @@ async function main(): Promise<void> {
   await seedAccounts();
 
   console.info("[seed] 완료");
+}
+
+/**
+ * AD-015 이미지 보관함과 화면 연결의 초기 데이터.
+ *
+ * 1. `public/images/` 에 커밋된 레거시 사진을 보관함에 등록한다.
+ * 2. 지금 코드에 박혀 있던 메인 배너 3장과 지점별 시설 사진 4장씩을 행으로 만든다.
+ *    그래서 관리자 화면에서 바로 한 장씩 바꿀 수 있고, 공개 화면 모양은 그대로다.
+ * 3. 시드 강사 1명에게 보관함 사진을 붙여 사진 연결이 도는지 눈으로 확인할 수 있게 한다.
+ *
+ * 모두 주소(url)로 찾아 upsert 하므로 여러 번 실행해도 늘어나지 않는다.
+ */
+async function seedSiteImages(): Promise<void> {
+  const registered = await registerLegacyMediaAssets();
+  console.info(
+    `[seed] 기존 사이트 사진 ${registered.created}장 등록 (이미 있던 것 ${registered.existing}장)`,
+  );
+
+  async function mediaIdFor(url: string): Promise<string | null> {
+    const row = await db.mediaAsset.findUnique({
+      where: { url },
+      select: { id: true },
+    });
+    return row?.id ?? null;
+  }
+
+  // 메인 배너 3장. 문구·버튼은 Phase 3 화면과 같은 값이다.
+  for (const [index, banner] of DEFAULT_HOME_BANNERS.entries()) {
+    const id = `seed-home-banner-${String(index + 1).padStart(2, "0")}`;
+    const mediaId = banner.backgroundUrl
+      ? await mediaIdFor(banner.backgroundUrl)
+      : null;
+    const data = {
+      mediaId,
+      eyebrow: banner.eyebrow,
+      headline: banner.headline,
+      body: banner.body,
+      primaryLabel: banner.primaryLabel || null,
+      primaryHref: banner.primaryHref || null,
+      secondaryLabel: banner.secondaryLabel || null,
+      secondaryHref: banner.secondaryHref || null,
+      displayOrder: index + 1,
+      isVisible: true,
+    };
+    await db.homeBanner.upsert({
+      where: { id },
+      update: data,
+      create: { id, ...data },
+    });
+  }
+
+  // 지점별 시설 사진. 설명은 레거시처럼 비워 둔다(장식용).
+  for (const campusKey of Object.keys(FACILITY_SLIDE_PHOTOS)) {
+    const photos = DEFAULT_FACILITY_PHOTOS[campusKey] ?? [];
+    for (const [index, photo] of photos.entries()) {
+      const mediaId = await mediaIdFor(photo.url);
+      if (!mediaId) continue;
+
+      const id = `seed-facility-${campusKey}-${String(index + 1).padStart(2, "0")}`;
+      const data = {
+        campusKey,
+        mediaId,
+        caption: photo.caption,
+        displayOrder: index + 1,
+        isVisible: true,
+      };
+      await db.facilityPhoto.upsert({
+        where: { id },
+        update: data,
+        create: { id, ...data },
+      });
+    }
+  }
+
+  // 시드 강사 1명에게 보관함 사진을 붙인다. 가짜 데이터이고 실제 인물이 아니다.
+  const samplePhotoId = await mediaIdFor("/images/instructors/munsayu-class.jpg");
+  if (samplePhotoId) {
+    await db.instructor.update({
+      where: { id: "seed-instructor-01" },
+      data: { photoMediaId: samplePhotoId },
+    });
+  }
 }
 
 main()

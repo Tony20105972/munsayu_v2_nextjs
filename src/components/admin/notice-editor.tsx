@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import { uploadNoticeImageAction } from "@/lib/actions/admin-intake";
+import { uploadImageToLibrary } from "@/components/admin/media-upload";
+import { MEDIA_FILE_INPUT_ACCEPT } from "@/lib/contracts";
 
 /**
  * AD-014 공지 본문 편집기.
@@ -9,6 +10,9 @@ import { uploadNoticeImageAction } from "@/lib/actions/admin-intake";
  * 새 편집기 라이브러리를 넣지 않고 `contenteditable` 로 최소 기능만 만든다. (ADR-006)
  * 여기서 만든 HTML 은 믿지 않는다. 저장 전에 서버가 허용 목록으로 다시 정리한다.
  * (`sanitizeNoticeHtml`)
+ *
+ * 본문 이미지도 「이미지 관리」 보관함과 **같은 업로드 기능**을 쓴다. (AD-015)
+ * 그래서 공지 사진에도 형식 검사·크기 줄이기·EXIF 제거·대체 텍스트가 똑같이 적용된다.
  */
 
 /** 도구 단추 목록. 실행은 누를 때 하고, 그리는 동안에는 편집기를 건드리지 않는다. */
@@ -19,6 +23,15 @@ type Command = {
   command: string;
   value?: string;
 };
+
+/** 속성값에 들어가면 안 되는 글자를 엔티티로 바꾼다. 서버 정리기와 별개로 한 번 더 막는다. */
+function escapeAttribute(value: string): string {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+}
 
 const COMMANDS: readonly Command[] = [
   { label: "굵게", title: "굵게", command: "bold" },
@@ -80,22 +93,32 @@ export function NoticeEditor({
   }
 
   async function uploadImage(file: File) {
+    // 대체 텍스트는 필수다. 사진을 볼 수 없는 분께 읽어 주는 설명이다.
+    const alt = window.prompt(
+      "사진 설명(대체 텍스트)을 적어 주세요. 사진을 볼 수 없는 분께 읽어 줍니다.",
+    );
+    if (alt === null) return;
+
     setUploading(true);
     setUploadError(null);
 
-    const formData = new FormData();
-    formData.set("image", file);
-
-    const result = await uploadNoticeImageAction(formData);
+    const result = await uploadImageToLibrary(file, alt);
     setUploading(false);
 
     if (!result.ok) {
-      setUploadError(result.message);
+      const fieldMessages = Object.values(result.fieldErrors ?? {})
+        .flat()
+        .join(" ");
+      setUploadError(fieldMessages || result.message);
       return;
     }
 
-    // 올린 이미지는 우리 저장소 주소다. 본문에는 상대 경로만 들어간다.
-    exec("insertHTML", `<img src="${result.data.url}" alt="" loading="lazy" />`);
+    // 올린 이미지는 우리 저장소 주소다. `<` `>` `&` `"` 는 넣을 수 없게 막는다.
+    const media = result.data;
+    exec(
+      "insertHTML",
+      `<img src="${escapeAttribute(media.url)}" alt="${escapeAttribute(media.alt)}" loading="lazy" />`,
+    );
   }
 
   return (
@@ -126,7 +149,7 @@ export function NoticeEditor({
           {uploading ? "올리는 중…" : "이미지"}
           <input
             type="file"
-            accept="image/png,image/jpeg,image/gif,image/webp"
+            accept={MEDIA_FILE_INPUT_ACCEPT}
             className="sr-only"
             disabled={uploading}
             onChange={(event) => {
@@ -160,7 +183,7 @@ export function NoticeEditor({
       ) : null}
       <p className="mt-1 text-xs text-muted">
         저장할 때 서버가 허용하지 않는 태그·속성을 지웁니다. SVG 이미지는 올릴 수
-        없습니다.
+        없습니다. 올린 사진은 「이미지 관리」 보관함에도 함께 담깁니다.
       </p>
     </div>
   );

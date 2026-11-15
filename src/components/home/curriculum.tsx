@@ -99,6 +99,29 @@ const LEARNING_STEPS = [
   },
 ] as const;
 
+/**
+ * 레거시 홈 「문사유만의 4대 차별화 시스템」. Phase 3 구현에서 통째로 빠져 있었고
+ * Phase 5 동등성 검증에서 찾아 넣었다. 문구는 레거시 관찰값 그대로다. (EV-0015)
+ */
+const DIFFERENTIATORS = [
+  {
+    title: "01. 1:1 대면 맞춤 첨삭",
+    body: "전문 강사진이 학생 개개인의 글을 함께 정독하며 세밀하고 구체적인 맞춤 피드백을 제공합니다.",
+  },
+  {
+    title: "02. 데이터 기반 리포트",
+    body: "어휘·독해·표현력 발달 정량 데이터를 정기적으로 측정하고 정밀 리포트를 제공합니다.",
+  },
+  {
+    title: "03. 수준별 큐레이션 도서",
+    body: "학생의 이해 수준에 맞추어 엄선된 고품질 문학 및 비문학 도서 라인업을 제공합니다.",
+  },
+  {
+    title: "04. 밀착 학습 피드백",
+    body: "수업 후 보호자와 성취도를 주기적으로 공유하고 올바른 홈케어 독서 가이드를 제안합니다.",
+  },
+] as const;
+
 export function HomeQuestion() {
   return (
     <section className="bg-canvas">
@@ -192,6 +215,26 @@ export function HomeLearningSystem() {
           </li>
         ))}
       </ol>
+    </Section>
+  );
+}
+
+export function HomeDifferentiators() {
+  return (
+    <Section
+      eyebrow="WHY MUNSAYU"
+      title="문사유만의 4대 차별화 시스템"
+      description="완벽한 성장을 이끄는 문사유의 독보적인 관리 체계"
+      tone="surface"
+    >
+      <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        {DIFFERENTIATORS.map((item) => (
+          <li key={item.title} className="rounded-xl border border-line bg-canvas p-6">
+            <h3 className="text-base font-bold text-ink">{item.title}</h3>
+            <p className="mt-3 text-sm leading-relaxed text-muted">{item.body}</p>
+          </li>
+        ))}
+      </ul>
     </Section>
   );
 }

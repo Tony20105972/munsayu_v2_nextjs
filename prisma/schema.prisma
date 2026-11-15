@@ -67,6 +67,13 @@ enum AuditAction {
   RETENTION_SETTING_CHANGE
   RESUME_DOWNLOAD
   NOTICE_IMPORT
+  /// AD-015 이미지 올리기 · 바꾸기 · 지우기.
+  MEDIA_UPLOAD
+  MEDIA_UPDATE
+  MEDIA_DELETE
+  /// AD-015 기존 사이트 사진 숨기기·다시 보이기. 파일을 지울 수 없어 숨김으로 처리한다.
+  MEDIA_HIDE
+  MEDIA_UNHIDE
 }
 
 model User {
@@ -296,11 +303,14 @@ model EventReservation {
 }
 
 model Instructor {
-  id              String  @id @default(cuid())
-  name            String
-  profileCode     String  @unique
-  photoStorageKey String?
-  bio             String?
+  id          String  @id @default(cuid())
+  name        String
+  profileCode String  @unique
+  bio         String?
+
+  /// AD-015 강사 사진. 보관함의 이미지를 가리킨다. 비면 공개 화면이 기본 이미지를 쓴다.
+  photoMediaId String?
+  photoMedia   MediaAsset? @relation("InstructorPhoto", fields: [photoMediaId], references: [id], onDelete: Restrict)
 
   memberships InstructorTeamMembership[]
 
@@ -538,4 +548,123 @@ model AppSetting {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+/* ------------------------------------------------------------------ *
+ * AD-015 이미지 관리 (관리자 업로드 · 이미지 보관함 · 화면 연결)
+ * 설계 근거: docs/decisions/ADR-008-admin-media-upload.md
+ * ------------------------------------------------------------------ */
+
+/// 보관함에 들어온 경로.
+enum MediaSource {
+  /// 관리자가 올린 파일. StorageAdapter 공개 영역에 있다.
+  UPLOAD
+  /// 레거시에서 받아 `public/images/` 에 커밋한 파일. 저장소에는 없다.
+  LEGACY
+}
+
+/// 이미지 보관함 1건. 공개 화면이 쓰는 이미지는 모두 여기에 등록된다.
+/// 개인정보는 담지 않는다. 신청 서류(이력서)는 비공개 영역이라 여기에 들어오지 않는다.
+model MediaAsset {
+  id String @id @default(cuid())
+
+  source MediaSource @default(UPLOAD)
+
+  /// `UPLOAD` 는 StorageAdapter 공개 영역 키. `LEGACY` 는 저장소에 없으므로 null 이다.
+  storageKey String? @unique
+
+  /// 화면이 쓰는 주소. `LEGACY` 는 `/images/...`, `UPLOAD` 는 어댑터가 준 주소다.
+  url String @unique
+
+  /// 올린 사람이 고른 원래 파일 이름. 표시용이고 저장 키에는 쓰지 않는다.
+  filename String
+
+  /// 대체 텍스트. 비워 둘 수 없다. 장식용 이미지는 화면 쪽에서 빈 alt 로 바꿔 쓴다.
+  alt String
+
+  contentType String
+  sizeBytes   Int
+  width       Int
+  height      Int
+
+  /// 같은 파일을 두 번 올렸는지 알려 주는 용도. 내용 자체는 저장하지 않는다.
+  contentHash String?
+
+  /// 레거시 자산의 권리 표시(`docs/legacy/legacy-assets.json`).
+  rightsNote String?
+
+  /// 권리 출처가 레거시 학원 자산이 아니어서 교체를 권하는 사진(Unsplash 표시).
+  replaceRecommended Boolean @default(false)
+
+  /// 올린 관리자. 레거시 등록본은 null 이다.
+  uploadedByUserId String?
+
+  /// 보관함에서 숨긴 시각. 숨긴 사진은 목록·고르기 상자에서 빠지고 새로 붙일 수 없다.
+  /// 기존 사이트 사진(`LEGACY`)은 파일이 저장소 바깥(`public/`)에 커밋돼 있어
+  /// 실행 중에 지울 수 없으므로 숨기기로 처리한다. (AD-015)
+  hiddenAt DateTime?
+
+  /// 숨긴 관리자.
+  hiddenByUserId String?
+
+  instructorPhotos Instructor[]    @relation("InstructorPhoto")
+  homeBanners      HomeBanner[]
+  facilityPhotos   FacilityPhoto[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([source, createdAt])
+  @@index([createdAt])
+  @@index([hiddenAt])
+}
+
+/// PG-001 메인 배너 슬라이드. 지금 코드에 박혀 있던 3장을 초기 데이터로 넣는다.
+/// 행이 하나도 없거나 DB를 읽지 못하면 화면은 코드 기본값으로 그린다. (AD-015 복원력)
+model HomeBanner {
+  id String @id @default(cuid())
+
+  /// 배경 사진. 비어 있으면 화면이 단색 배경으로 그린다.
+  mediaId String?
+  media   MediaAsset? @relation(fields: [mediaId], references: [id], onDelete: Restrict)
+
+  eyebrow  String @default("")
+  headline String
+  body     String @default("")
+
+  /// 버튼 문구와 링크. 둘 중 하나가 비면 버튼을 그리지 않는다.
+  primaryLabel String?
+  primaryHref  String?
+  secondaryLabel String?
+  secondaryHref  String?
+
+  displayOrder Int     @default(0)
+  isVisible    Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isVisible, displayOrder])
+}
+
+/// PG-004 시설안내 지점별 사진. 지금 커밋돼 있는 8장을 초기 데이터로 넣는다.
+model FacilityPhoto {
+  id String @id @default(cuid())
+
+  /// `src/lib/site-config.ts` 의 지점 식별자(`daechi` | `bundang`).
+  campusKey String
+
+  mediaId String
+  media   MediaAsset @relation(fields: [mediaId], references: [id], onDelete: Restrict)
+
+  /// 사진 설명. 레거시처럼 비어 있으면 장식용으로 본다.
+  caption String @default("")
+
+  displayOrder Int     @default(0)
+  isVisible    Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([campusKey, isVisible, displayOrder])
 }

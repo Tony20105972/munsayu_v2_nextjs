@@ -62,7 +62,7 @@ export function isAllowedResumeFormat(
 }
 
 const IMAGE_MAGICS: ReadonlyArray<{
-  format: "png" | "jpeg" | "gif" | "webp";
+  format: RasterImageFormat;
   magic: number[];
   contentType: string;
 }> = [
@@ -71,10 +71,12 @@ const IMAGE_MAGICS: ReadonlyArray<{
   { format: "gif", magic: [0x47, 0x49, 0x46, 0x38], contentType: "image/gif" },
 ];
 
+export type RasterImageFormat = "png" | "jpeg" | "gif" | "webp";
+
 /** 공지 본문 이미지도 내용으로 확인한다. SVG 는 스크립트를 담을 수 있어 받지 않는다. (AD-014) */
 export function detectImageFormat(
   bytes: Uint8Array,
-): { format: string; contentType: string } | null {
+): { format: RasterImageFormat; contentType: string } | null {
   for (const candidate of IMAGE_MAGICS) {
     if (startsWith(bytes, candidate.magic)) {
       return { format: candidate.format, contentType: candidate.contentType };
@@ -88,6 +90,89 @@ export function detectImageFormat(
     String.fromCharCode(bytes[8], bytes[9], bytes[10], bytes[11]) === "WEBP"
   ) {
     return { format: "webp", contentType: "image/webp" };
+  }
+
+  return null;
+}
+
+/* ------------------------------------------------------------------ *
+ * AD-015 관리자 사진 업로드 판별
+ * ------------------------------------------------------------------ */
+
+/**
+ * 올린 사진을 **내용으로** 가려낸다. 확장자와 `Content-Type` 은 믿지 않는다.
+ *
+ * - `image`: 그대로 쓸 수 있는 형식 (JPG·PNG·WebP·GIF)
+ * - `svg`: 받지 않는다. 안에 스크립트를 넣을 수 있다.
+ * - `heif`: 아이폰 사진 묶음(HEIC·AVIF). 서버에서 JPG 변환을 시도한다. // ASM-091
+ * - `null`: 그 밖의 모든 것. 이름만 `.jpg` 로 바꾼 파일이 여기로 떨어진다.
+ */
+export type UploadImageKind =
+  | { kind: "image"; format: RasterImageFormat; contentType: string }
+  | { kind: "svg" }
+  | { kind: "heif"; brand: string };
+
+/** ISO/IEC 14496-12 `ftyp` 박스의 브랜드 중 HEIF 묶음에 해당하는 것들. */
+const HEIF_BRANDS = new Set([
+  "heic",
+  "heix",
+  "heim",
+  "heis",
+  "hevc",
+  "hevx",
+  "hevm",
+  "hevs",
+  "mif1",
+  "msf1",
+  "avif",
+  "avis",
+]);
+
+function asciiAt(bytes: Uint8Array, start: number, length: number): string {
+  if (bytes.length < start + length) return "";
+  let out = "";
+  for (let index = start; index < start + length; index += 1) {
+    out += String.fromCharCode(bytes[index]);
+  }
+  return out;
+}
+
+/**
+ * SVG 는 텍스트 파일이라 시그니처가 없다. 앞부분에서 `<svg` 또는 `<?xml` 를 찾는다.
+ * 공백·BOM·주석·DOCTYPE 이 앞에 올 수 있어 넉넉히 1KB 를 본다.
+ */
+function looksLikeSvg(bytes: Uint8Array): boolean {
+  const head = Buffer.from(
+    bytes.buffer,
+    bytes.byteOffset,
+    Math.min(bytes.byteLength, 1024),
+  )
+    .toString("utf8")
+    .toLowerCase();
+  return head.includes("<svg") || (head.includes("<?xml") && head.includes("svg"));
+}
+
+export function detectUploadImage(bytes: Uint8Array): UploadImageKind | null {
+  const detected = detectImageFormat(bytes);
+  if (detected) {
+    return {
+      kind: "image",
+      format: detected.format,
+      contentType: detected.contentType,
+    };
+  }
+
+  // HEIF 묶음은 `....ftyp<brand>` 로 시작한다. 길이 칸 4바이트 뒤에 `ftyp` 가 온다.
+  if (asciiAt(bytes, 4, 4) === "ftyp") {
+    const brand = asciiAt(bytes, 8, 4).toLowerCase();
+    if (HEIF_BRANDS.has(brand)) {
+      return { kind: "heif", brand };
+    }
+    return null;
+  }
+
+  if (looksLikeSvg(bytes)) {
+    return { kind: "svg" };
   }
 
   return null;

@@ -220,6 +220,39 @@ export function AdminInlineSelect({
   );
 }
 
+/** 줄 안에서 쓰는 작은 글자 입력. 레이블은 눈에 보이지 않게 두되 반드시 연결한다. */
+export function AdminInlineText({
+  name,
+  label,
+  defaultValue,
+  maxLength,
+  widthClass = "w-56",
+}: {
+  name: string;
+  label: string;
+  defaultValue?: string;
+  maxLength?: number;
+  widthClass?: string;
+}) {
+  const id = useId();
+
+  return (
+    <>
+      <label htmlFor={id} className="sr-only">
+        {label}
+      </label>
+      <input
+        id={id}
+        name={name}
+        type="text"
+        defaultValue={defaultValue}
+        maxLength={maxLength}
+        className={`${widthClass} rounded-md border border-line bg-surface px-1.5 py-1 text-xs text-ink`}
+      />
+    </>
+  );
+}
+
 /** 줄 안에서 쓰는 작은 숫자 입력. */
 export function AdminInlineNumber({
   name,

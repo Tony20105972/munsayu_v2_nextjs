@@ -224,3 +224,74 @@ D1 확정: 원본 사진·서버 백업과 기존 DB를 확보할 수 없어 신
 2. [Claude 작성] 칸을 채울 때는 근거 증거 ID나 기능 ID를 붙입니다. 근거가 없으면 `UNKNOWN`으로 두고 `PHASE.md` 질문표에 질문을 올립니다.
 3. 세부 내용은 `docs/contracts/`에 쓰고 여기서는 링크와 요약만 적습니다.
 4. 갱신 후 `PHASE.md` 변경 이력에 한 줄 남깁니다.
+
+---
+
+## 14. 기술 스택 · 코드 규칙 · 디렉터리 구조 (2026-11-14 `CLAUDE.md`에서 이동)
+
+### 6. 기술 스택
+
+| 영역 | 선택 |
+|---|---|
+| 프레임워크 | Next.js 16 이상 (App Router), React, TypeScript `strict` — Next.js DevTools MCP가 16 이상을 요구 |
+| 스타일 | Tailwind CSS |
+| 검증 | Zod (모든 서버 입력 경계) |
+| DB | PostgreSQL + Prisma — **단, Phase 2에서 MySQL 유지 여부를 확정** |
+| 테스트 | Vitest(단위·통합), Playwright Test(E2E·시각 회귀·레거시 비교) |
+| 레거시 분석 | REA MCP (최우선), Playwright MCP |
+| 보조 MCP | `TOOLING.md` 2·3장 (Chrome DevTools, Next.js DevTools, Context7 등) |
+| CI | GitHub Actions |
+| 패키지 매니저 | Phase 0에서 하나로 고정하고 lockfile 커밋 |
+
+- 새 의존성을 추가하려면 보고서에 이유를 적습니다. 같은 일을 하는 라이브러리를 두 개 넣지 않습니다.
+- 마이크로서비스로 쪼개지 않습니다. 모듈형 모놀리스 하나로 갑니다.
+
+---
+
+### 7. 코드 규칙
+
+### 프론트엔드
+- 기본은 Server Component. 상호작용이 필요한 부분만 `'use client'`.
+- 공통 헤더·푸터는 `app/layout.tsx`와 `src/components/layout/`에.
+- 레거시 URL은 같은 경로로 제공하거나 `next.config` / `middleware`에서 308(영구) 리다이렉트. 매핑의 원본은 `docs/contracts/route-compatibility-map.json` 하나뿐입니다.
+- 페이지마다 레거시의 `title`, `description`, `canonical`, OG 태그를 `generateMetadata`로 이식합니다.
+- 이미지는 `next/image`로. 권리 확인된 이미지만 사용합니다.
+
+### 백엔드
+- 비즈니스 로직은 `src/server/services/`에. Route Handler와 Server Action은 입력 검증 → 서비스 호출 → 응답만 합니다.
+- Prisma 클라이언트는 `src/server/db.ts`에서만 만들고, 클라이언트 번들에 들어가지 않게 `server-only`를 import합니다.
+- 예약 정원 확인과 저장은 **하나의 DB 트랜잭션** 안에서 처리합니다. 동시 신청 테스트가 반드시 있어야 합니다.
+- 신청·예약 API는 idempotency key를 받아 중복 제출을 막습니다.
+- 관리자 기능은 서버에서 매 요청 권한(RBAC)을 확인합니다. 화면에서 버튼을 숨기는 것만으로는 권한 처리가 아닙니다.
+- 개인정보(이름, 연락처 등)는 로그에 남기지 않습니다. 관리자 목록 화면에서는 기본적으로 일부를 가립니다.
+- 문자·메일 발송은 `src/server/adapters/notify/` 인터페이스 뒤에 둡니다. 개발·테스트 환경에서는 실제 발송하지 않는 어댑터를 씁니다.
+- 비밀값은 `.env`에만 두고 `.env.example`에 키 이름만 적습니다.
+
+---
+
+### 8. 디렉터리 구조
+
+```
+munsayu-v2/
+├─ CLAUDE.md / AGENTS.md
+├─ docs/
+│  ├─ MIGRATION_PLAN.md
+│  ├─ HARNESS_PROMPT.md
+│  ├─ TOOLING.md
+│  ├─ photo/           사용자 제공 화면(관리자 등)
+│  ├─ evidence/        ledger.md, rea/, screenshots/, har/, dom/
+│  ├─ legacy/          Phase 1 산출물
+│  ├─ contracts/       Phase 2 산출물 (migration-matrix.md, route-compatibility-map.json, openapi.yaml …)
+│  ├─ decisions/       ADR-001-*.md (되돌리기 어려운 결정 기록)
+│  └─ reports/         phase-N-report.md, 각종 검증 리포트
+├─ app/                App Router (공개 페이지, /admin, /api)
+├─ src/
+│  ├─ components/
+│  ├─ server/          services/, adapters/, auth/, db.ts
+│  └─ lib/             공용 유틸, zod 스키마
+├─ prisma/             schema.prisma, migrations/, seed.ts (가짜 데이터만)
+├─ public/
+├─ tests/              unit/, integration/, e2e/, visual/, parity/
+└─ .github/workflows/
+```
+

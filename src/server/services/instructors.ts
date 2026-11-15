@@ -6,13 +6,16 @@ import type {
 } from "@/lib/contracts";
 import { db } from "@/server/db";
 import { conflict, notFound, validationFailed } from "@/server/errors";
+import { assertMediaExists, logMediaAttachment } from "@/server/services/media";
 
 export type InstructorWithTeams = {
   id: string;
   name: string;
   profileCode: string;
   bio: string | null;
-  photoStorageKey: string | null;
+  /** AD-015 보관함에서 지정한 사진. 지정하지 않았으면 `null`. */
+  photoMediaId: string | null;
+  photo: { url: string; alt: string } | null;
   teams: { teamId: string; teamName: string; displayOrder: number }[];
 };
 
@@ -21,6 +24,7 @@ export async function listInstructors(): Promise<InstructorWithTeams[]> {
   const instructors = await db.instructor.findMany({
     orderBy: { name: "asc" },
     include: {
+      photoMedia: { select: { url: true, alt: true } },
       memberships: {
         orderBy: { displayOrder: "asc" },
         include: { team: { select: { id: true, name: true } } },
@@ -33,7 +37,8 @@ export async function listInstructors(): Promise<InstructorWithTeams[]> {
     name: instructor.name,
     profileCode: instructor.profileCode,
     bio: instructor.bio,
-    photoStorageKey: instructor.photoStorageKey,
+    photoMediaId: instructor.photoMediaId,
+    photo: instructor.photoMedia,
     teams: instructor.memberships.map((membership) => ({
       teamId: membership.team.id,
       teamName: membership.team.name,
@@ -84,6 +89,7 @@ export async function createTeam(name: string): Promise<InstructorTeam> {
 }
 
 export async function createInstructor(
+  actorUserId: string,
   input: InstructorUpsertInput,
 ): Promise<Instructor> {
   const existing = await db.instructor.findUnique({
@@ -91,24 +97,37 @@ export async function createInstructor(
     select: { id: true },
   });
   if (existing) throw conflict("같은 프로필 코드의 강사가 이미 있습니다.");
+  if (input.photoMediaId) await assertMediaExists(input.photoMediaId);
 
-  return db.instructor.create({
+  const created = await db.instructor.create({
     data: {
       name: input.name,
       profileCode: input.profileCode,
       bio: input.bio,
-      photoStorageKey: input.photoStorageKey,
+      photoMediaId: input.photoMediaId,
     },
   });
+
+  // 사진을 붙인 것도 누가 언제 했는지 남긴다. (AD-015)
+  if (input.photoMediaId) {
+    await logMediaAttachment(actorUserId, {
+      resourceType: "Instructor",
+      resourceId: created.id,
+      mediaId: input.photoMediaId,
+    });
+  }
+
+  return created;
 }
 
 export async function updateInstructor(
+  actorUserId: string,
   instructorId: string,
   input: InstructorUpsertInput,
 ): Promise<Instructor> {
   const existing = await db.instructor.findUnique({
     where: { id: instructorId },
-    select: { id: true },
+    select: { id: true, photoMediaId: true },
   });
   if (!existing) throw notFound();
 
@@ -117,16 +136,28 @@ export async function updateInstructor(
     select: { id: true },
   });
   if (duplicate) throw conflict("같은 프로필 코드의 강사가 이미 있습니다.");
+  if (input.photoMediaId) await assertMediaExists(input.photoMediaId);
 
-  return db.instructor.update({
+  const updated = await db.instructor.update({
     where: { id: instructorId },
     data: {
       name: input.name,
       profileCode: input.profileCode,
       bio: input.bio,
-      photoStorageKey: input.photoStorageKey,
+      photoMediaId: input.photoMediaId,
     },
   });
+
+  // 사진을 바꾸거나 뺀 것만 기록한다. 이름·약력만 고친 저장은 남기지 않는다. (AD-015)
+  if (existing.photoMediaId !== input.photoMediaId) {
+    await logMediaAttachment(actorUserId, {
+      resourceType: "Instructor",
+      resourceId: instructorId,
+      mediaId: input.photoMediaId,
+    });
+  }
+
+  return updated;
 }
 
 export async function deleteInstructor(instructorId: string): Promise<void> {

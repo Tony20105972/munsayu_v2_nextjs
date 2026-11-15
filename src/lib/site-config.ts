@@ -66,24 +66,33 @@ export const EXTERNAL_LINKS = {
 } as const;
 
 /**
- * 주 메뉴. 레거시는 `javascript:;` 드롭다운이라 하위 항목을 관찰할 수 없었다.
- * 메뉴 이름과 순서는 관찰값이고, 하위 항목은 관찰된 공개 경로로 채웠다. // ASM-040
+ * 주 메뉴.
+ *
+ * Phase 5 동등성 검증에서 레거시 HTML 의 드롭다운 마크업을 그대로 읽어 **관찰값으로
+ * 교체**했다. 이름·순서·주소가 모두 레거시와 같다. (EV-0015, ASM-040 해소)
+ *
+ * 레거시에서 주석으로 꺼 둔 항목은 넣지 않는다:
+ * - 강사진안내 「컨설팅팀」(`/sub/abouttch3`) — 주석 처리돼 메뉴에 없었다.
+ *   신규는 그 주소에 문해력 진단 안내 화면을 두었다(ASM-043). 메뉴에는 레거시처럼
+ *   넣지 않고 홈 배너·교육과정 카드에서 연결한다. 원장님 확인 대상이다.
+ * - 시간표 「전체보기」, 설명회 「설명회 다시보기」 — 둘 다 주석 처리돼 있었다.
  */
 export const MAIN_NAV = [
   {
     label: "학원안내",
     items: [
-      { label: "학원 소개", href: "/sub/about" },
+      { label: "학원소개", href: "/sub/about" },
+      { label: "오시는길", href: "/sub/Location" },
       { label: "시설안내", href: "/sub/Facility" },
-      { label: "오시는 길", href: "/sub/Location" },
+      // 레거시는 `/bbs/board.php?bo_table=notice`. 신규 canonical 주소로 바꾼다. (RT-001)
+      { label: "공지사항", href: "/notice" },
     ],
   },
   {
     label: "강사진안내",
     items: [
-      { label: "강사진 안내", href: "/sub/abouttch1" },
-      { label: "분당점 강사진", href: "/sub/abouttch2" },
-      { label: "문해력 진단 안내", href: "/sub/abouttch3" },
+      { label: "대치팀", href: "/sub/abouttch1" },
+      { label: "분당팀", href: "/sub/abouttch2" },
     ],
   },
   {
@@ -95,16 +104,13 @@ export const MAIN_NAV = [
   },
   {
     label: "설명회",
-    items: [
-      { label: "설명회 예약", href: "/sub/Presentation" },
-      { label: "공지사항", href: "/notice" },
-    ],
+    items: [{ label: "현장 설명회 예약", href: "/sub/Presentation" }],
   },
   {
     label: "예약확인/신청",
     items: [
-      { label: "예약 확인 / 취소", href: "/sub/Check" },
-      { label: "대치본원 수강 예약", href: "/sub/schedule.n" },
+      { label: "수강신청", href: "/sub/schedule.n" },
+      { label: "예약확인/취소", href: "/sub/Check" },
     ],
   },
 ] as const;

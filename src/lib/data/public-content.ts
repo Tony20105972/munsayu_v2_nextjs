@@ -1,8 +1,14 @@
 import "server-only";
 import { listCampuses, listPublicCourses } from "@/server/services/courses";
+import {
+  loadFacilityPhotoViews,
+  loadHomeBannerViews,
+} from "@/server/services/site-images";
 import { listPublicEvents } from "@/server/services/events";
 import { listInstructors } from "@/server/services/instructors";
 import { getRetentionSetting } from "@/server/services/privacy";
+import type { FacilityCampusKey } from "@/lib/contracts";
+import type { FacilityPhotoView, HomeBannerView } from "@/lib/images";
 import type { Campus } from "@/lib/site-config";
 import {
   groupCoursesByGrade,
@@ -50,6 +56,24 @@ export async function loadEventGroups(): Promise<EventGroupView[]> {
     events,
     campuses.map((campus) => campus.name),
   );
+}
+
+/**
+ * PG-001 메인 배너. 관리자가 등록한 슬라이드를 순서대로 돌려준다. (AD-015)
+ * 등록된 배너가 없거나 DB 를 읽지 못하면 코드 기본값 3장을 쓴다.
+ */
+export async function loadHomeBanners(): Promise<readonly HomeBannerView[]> {
+  return loadHomeBannerViews();
+}
+
+/**
+ * PG-004 시설안내 지점별 사진. 등록된 사진이 없거나 DB 를 읽지 못하면
+ * 지금 커밋돼 있는 사진을 쓴다. (AD-015)
+ */
+export async function loadFacilityPhotos(
+  campusKey: FacilityCampusKey,
+): Promise<readonly FacilityPhotoView[]> {
+  return loadFacilityPhotoViews(campusKey);
 }
 
 /** PG-005 전체 강사진. */

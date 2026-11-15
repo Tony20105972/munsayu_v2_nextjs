@@ -2,13 +2,15 @@ import { HomeConsult, HomeEventNotice } from "@/components/home/contact";
 import { HomeCosmo } from "@/components/home/cosmo";
 import {
   HomeCharacteristics,
+  HomeDifferentiators,
   HomeCurriculum,
   HomeLearningSystem,
   HomeQuestion,
 } from "@/components/home/curriculum";
 import { HomeHero, HomeQuickLinks } from "@/components/home/hero";
 import { LoadingBlock } from "@/components/ui/loading-block";
-import { loadRetentionPolicies } from "@/lib/data/public-content";
+import { loadHomeBanners, loadRetentionPolicies } from "@/lib/data/public-content";
+import { DEFAULT_HOME_BANNERS } from "@/lib/images";
 import { buildPageMetadata } from "@/lib/metadata";
 import { SITE_TITLE_SUFFIX } from "@/lib/site-config";
 import { connection } from "next/server";
@@ -26,6 +28,15 @@ export const metadata = buildPageMetadata({
  * AD-010 알림 신청의 동의 안내는 관리자 보존 설정 문구를 그대로 보여 준다. (BZ-002)
  * 그 값은 DB 에서 읽으므로 Suspense 경계 안에서만 기다린다.
  */
+/**
+ * AD-015 메인 배너는 관리자가 고치므로 DB 에서 읽는다.
+ * 기다리는 동안에는 코드 기본값으로 같은 자리를 그려 둬서 화면이 비거나 흔들리지 않게 한다.
+ */
+async function HeroSection() {
+  await connection();
+  return <HomeHero banners={await loadHomeBanners()} />;
+}
+
 async function EventNoticeSection() {
   // 보존 문구는 관리자가 바꿀 수 있다. 바뀌면 바로 반영돼야 한다. (BZ-002)
   await connection();
@@ -36,12 +47,15 @@ async function EventNoticeSection() {
 export default function HomePage() {
   return (
     <>
-      <HomeHero />
+      <Suspense fallback={<HomeHero banners={DEFAULT_HOME_BANNERS} />}>
+        <HeroSection />
+      </Suspense>
       <HomeQuickLinks />
       <HomeQuestion />
       <HomeCharacteristics />
       <HomeCurriculum />
       <HomeLearningSystem />
+      <HomeDifferentiators />
       <HomeCosmo />
       <HomeConsult />
       <Suspense fallback={<LoadingBlock label="설명회 안내를 불러오는 중입니다." />}>

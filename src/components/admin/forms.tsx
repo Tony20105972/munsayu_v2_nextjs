@@ -156,8 +156,12 @@ export function AdminInlineForm({
 /**
  * 되돌릴 수 없는 동작을 확인 대화상자로 한 번 더 묻는다.
  * 대화상자는 Escape 로 닫히고 포커스가 안쪽에 갇힌다. (`ModalDialog`)
+ *
+ * 같은 이름으로 여러 값을 보내야 하는 선택 동작은 `hiddenFields` 값에 배열을 넣는다.
+ * 성공했지만 **일부만** 처리된 경우(선택 삭제에서 몇 장이 막힌 경우)는 `onSuccess` 로
+ * 결과를 받아 부르는 쪽이 그대로 보여 준다. (AD-015)
  */
-export function AdminConfirmButton({
+export function AdminConfirmButton<TData>({
   action,
   hiddenFields,
   buttonLabel,
@@ -165,14 +169,18 @@ export function AdminConfirmButton({
   dialogBody,
   confirmLabel,
   tone = "danger",
+  disabled = false,
+  onSuccess,
 }: {
-  action: FormAction;
-  hiddenFields: Record<string, string>;
+  action: (formData: FormData) => Promise<ActionResult<TData>>;
+  hiddenFields: Record<string, string | readonly string[]>;
   buttonLabel: string;
   dialogTitle: string;
   dialogBody: ReactNode;
   confirmLabel: string;
   tone?: "danger" | "normal";
+  disabled?: boolean;
+  onSuccess?: (data: TData) => void;
 }) {
   const router = useRouter();
   const titleId = useId();
@@ -180,15 +188,18 @@ export function AdminConfirmButton({
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const disabledClass = "disabled:cursor-not-allowed disabled:opacity-60";
   const buttonClass =
     tone === "danger"
-      ? "whitespace-nowrap rounded-md border border-red-300 bg-red-50 px-2 py-1 text-xs font-bold text-red-800 hover:bg-red-100"
-      : "whitespace-nowrap rounded-md border border-line bg-canvas px-2 py-1 text-xs font-bold text-ink hover:bg-line/40";
+      ? `whitespace-nowrap rounded-md border border-red-300 bg-red-50 px-2 py-1 text-xs font-bold text-red-800 hover:bg-red-100 ${disabledClass}`
+      : `whitespace-nowrap rounded-md border border-line bg-canvas px-2 py-1 text-xs font-bold text-ink hover:bg-line/40 ${disabledClass}`;
 
   async function confirm() {
     const formData = new FormData();
     for (const [key, value] of Object.entries(hiddenFields)) {
-      formData.append(key, value);
+      for (const one of Array.isArray(value) ? value : [value as string]) {
+        formData.append(key, one);
+      }
     }
 
     setPending(true);
@@ -202,13 +213,19 @@ export function AdminConfirmButton({
       return;
     }
 
+    onSuccess?.(result.data);
     setOpen(false);
     router.refresh();
   }
 
   return (
     <>
-      <button type="button" className={buttonClass} onClick={() => setOpen(true)}>
+      <button
+        type="button"
+        className={buttonClass}
+        disabled={disabled}
+        onClick={() => setOpen(true)}
+      >
         {buttonLabel}
       </button>
 

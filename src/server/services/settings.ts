@@ -1,5 +1,6 @@
 import "server-only";
 import {
+  MEDIA_UPLOAD_MAX_BYTES_DEFAULT,
   RESUME_MAX_BYTES_DEFAULT,
   SITE_SETTING_KEYS,
   type SiteSettingsInput,
@@ -14,6 +15,10 @@ import { writeAuditLog } from "@/server/services/audit";
  * - 진단 신청 버튼이 열 구글 폼 주소 // ASM-082
  * - `/sub/Recruit` 메뉴 노출 // ASM-088
  * - 제출 서류 용량 상한 // ASM-085
+ * - 사진 용량 상한 (AD-015)
+ *
+ * `getSiteSettings()` 는 DB 를 읽지 못해도 던지지 않는다. 설정 하나 때문에
+ * 공개 화면 전체가 멈추지 않게 하려는 것이다. (AD-015 복원력)
  */
 
 /** 레거시가 쓰던 구글 폼 주소. 관리자가 바꾸기 전까지 이 값을 쓴다. (EV-0013, RT-003) */
@@ -24,6 +29,7 @@ export const SITE_SETTINGS_DEFAULTS: SiteSettingsInput = {
   // 레거시처럼 메뉴에서는 기본으로 숨긴다. 주소로는 들어갈 수 있다.
   recruitMenuVisible: false,
   resumeMaxBytes: RESUME_MAX_BYTES_DEFAULT,
+  mediaMaxUploadBytes: MEDIA_UPLOAD_MAX_BYTES_DEFAULT,
 };
 
 function parseBoolean(value: string | undefined, fallback: boolean): boolean {
@@ -32,18 +38,26 @@ function parseBoolean(value: string | undefined, fallback: boolean): boolean {
   return fallback;
 }
 
-function parseBytes(value: string | undefined): number {
+function parseBytes(value: string | undefined, fallback: number): number {
   const parsed = Number.parseInt(value ?? "", 10);
-  return Number.isFinite(parsed) && parsed > 0
-    ? parsed
-    : SITE_SETTINGS_DEFAULTS.resumeMaxBytes;
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }
 
 export async function getSiteSettings(): Promise<SiteSettingsInput> {
-  const rows = await db.appSetting.findMany({
-    where: { key: { in: Object.values(SITE_SETTING_KEYS) } },
-  });
-  const byKey = new Map(rows.map((row) => [row.key, row.value]));
+  let byKey = new Map<string, string>();
+
+  try {
+    const rows = await db.appSetting.findMany({
+      where: { key: { in: Object.values(SITE_SETTING_KEYS) } },
+    });
+    byKey = new Map(rows.map((row) => [row.key, row.value]));
+  } catch (error) {
+    // 설정을 못 읽으면 기본값으로 간다. 화면이 멈추는 것보다 낫다. (AD-015 복원력)
+    console.error("site_settings_load_failed", {
+      name: error instanceof Error ? error.name : "Unknown",
+    });
+    return SITE_SETTINGS_DEFAULTS;
+  }
 
   return {
     diagnosisCtaExternalUrl:
@@ -53,7 +67,14 @@ export async function getSiteSettings(): Promise<SiteSettingsInput> {
       byKey.get(SITE_SETTING_KEYS.recruitMenuVisible),
       SITE_SETTINGS_DEFAULTS.recruitMenuVisible,
     ),
-    resumeMaxBytes: parseBytes(byKey.get(SITE_SETTING_KEYS.resumeMaxBytes)),
+    resumeMaxBytes: parseBytes(
+      byKey.get(SITE_SETTING_KEYS.resumeMaxBytes),
+      SITE_SETTINGS_DEFAULTS.resumeMaxBytes,
+    ),
+    mediaMaxUploadBytes: parseBytes(
+      byKey.get(SITE_SETTING_KEYS.mediaMaxUploadBytes),
+      SITE_SETTINGS_DEFAULTS.mediaMaxUploadBytes,
+    ),
   };
 }
 
@@ -65,6 +86,7 @@ export async function updateSiteSettings(
     [SITE_SETTING_KEYS.diagnosisCtaExternalUrl, input.diagnosisCtaExternalUrl],
     [SITE_SETTING_KEYS.recruitMenuVisible, String(input.recruitMenuVisible)],
     [SITE_SETTING_KEYS.resumeMaxBytes, String(input.resumeMaxBytes)],
+    [SITE_SETTING_KEYS.mediaMaxUploadBytes, String(input.mediaMaxUploadBytes)],
   ];
 
   await db.$transaction(
