@@ -1,5 +1,6 @@
 import "server-only";
 import {
+  CSV_EXPORT_MAX_ROWS,
   CONSULTATION_STATUS_LABELS,
   DEFAULT_CONSULTATION_TYPES,
   maskName,
@@ -15,7 +16,7 @@ import {
   type ConsultationTypeUpsertInput,
 } from "@/lib/contracts";
 import { db, isUniqueViolation } from "@/server/db";
-import { notFound, validationFailed } from "@/server/errors";
+import { notFound, validationFailed, exportTooLarge } from "@/server/errors";
 import { notifyQuietly } from "@/server/adapters/notify";
 import { csvRows } from "@/server/lib/csv";
 import { summarizeFilter, writeAuditLog } from "@/server/services/audit";
@@ -333,10 +334,25 @@ export async function deleteConsultationApplications(
 }
 
 /** AD-013 현재 필터 결과 전체 CSV. 내보내기를 기록에 남긴다. (ASM-006) */
+/**
+ * 내보내기 전에 줄 수를 먼저 센다. 상한을 넘으면 **거절한다.** (ASM-097)
+ * 세는 비용은 색인이 받쳐 주어 작고, 표 전체를 메모리에 올리는 일을 막는다.
+ */
+async function assertExportSize(count: () => Promise<number>): Promise<void> {
+  const total = await count();
+  if (total > CSV_EXPORT_MAX_ROWS) {
+    throw exportTooLarge(total, CSV_EXPORT_MAX_ROWS);
+  }
+}
+
 export async function exportConsultationsCsv(
   actorUserId: string,
   filter: ConsultationExportInput,
 ): Promise<{ csv: string; rowCount: number; auditId: string }> {
+  await assertExportSize(() =>
+    db.consultationApplication.count({ where: consultationWhere(filter) }),
+  );
+
   const rows = await db.consultationApplication.findMany({
     where: consultationWhere(filter),
     orderBy: { createdAt: "desc" },

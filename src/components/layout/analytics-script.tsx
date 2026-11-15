@@ -1,3 +1,4 @@
+import { headers } from "next/headers";
 /**
  * AD-012 방문 통계 도구 연동 자리.
  *
@@ -12,20 +13,28 @@ export function readAnalyticsProviderId(): string | null {
   return id ? id : null;
 }
 
-export function AnalyticsScript() {
+export async function AnalyticsScript() {
   const providerId = readAnalyticsProviderId();
   if (!providerId) {
     return null;
   }
 
+  /*
+    CSP 가 nonce 를 요구한다. `proxy.ts` 가 요청마다 만들어 `x-nonce` 헤더로 넘긴다.
+    nonce 가 없으면 이 스크립트는 브라우저가 막는다. (Phase 6 보안)
+  */
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
+
   return (
     <>
       <script
         async
+        nonce={nonce}
         data-analytics="provider"
         src={`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(providerId)}`}
       />
       <script
+        nonce={nonce}
         data-analytics="init"
         // 방문 통계 초기화 코드. 개인정보는 보내지 않는다. (BLUEPRINT 10장)
         dangerouslySetInnerHTML={{

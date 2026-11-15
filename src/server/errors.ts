@@ -65,3 +65,16 @@ export function tokenInvalid(): AppError {
     "링크가 만료되었거나 이미 사용되었습니다.",
   );
 }
+
+/**
+ * 내보낼 줄이 너무 많다. 잘라내지 않고 범위를 좁히라고 알려 준다. (ASM-097)
+ * 메시지에 담는 것은 **건수뿐**이고 개인정보는 넣지 않는다.
+ */
+export function exportTooLarge(total: number, max: number): AppError {
+  return new AppError(
+    ERROR_CODES.CONFLICT,
+    409,
+    `내보낼 내역이 ${total.toLocaleString("ko-KR")}건입니다. ` +
+      `한 번에 ${max.toLocaleString("ko-KR")}건까지 받을 수 있으니 기간이나 조건을 좁혀 주세요.`,
+  );
+}

@@ -1,5 +1,6 @@
 import "server-only";
 import {
+  CSV_EXPORT_MAX_ROWS,
   DEFAULT_INSTRUCTOR_APPLICATION_STATUSES,
   RESUME_CONTENT_TYPES,
   RESUME_FORMAT_LABEL,
@@ -20,7 +21,7 @@ import {
 import { createStorageKey, getStorageAdapter } from "@/server/adapters/storage";
 import { notifyQuietly } from "@/server/adapters/notify";
 import { db, isUniqueViolation } from "@/server/db";
-import { notFound, validationFailed } from "@/server/errors";
+import { notFound, validationFailed, exportTooLarge } from "@/server/errors";
 import { csvRows } from "@/server/lib/csv";
 import { detectResumeFormat, isAllowedResumeFormat } from "@/server/lib/file-format";
 import { summarizeFilter, writeAuditLog } from "@/server/services/audit";
@@ -476,10 +477,25 @@ export async function deleteInstructorApplications(
 }
 
 /** AD-013 현재 필터 결과 전체 CSV. 제출 서류 파일 자체는 넣지 않는다. */
+/**
+ * 내보내기 전에 줄 수를 먼저 센다. 상한을 넘으면 **거절한다.** (ASM-097)
+ * 세는 비용은 색인이 받쳐 주어 작고, 표 전체를 메모리에 올리는 일을 막는다.
+ */
+async function assertExportSize(count: () => Promise<number>): Promise<void> {
+  const total = await count();
+  if (total > CSV_EXPORT_MAX_ROWS) {
+    throw exportTooLarge(total, CSV_EXPORT_MAX_ROWS);
+  }
+}
+
 export async function exportInstructorApplicationsCsv(
   actorUserId: string,
   filter: InstructorApplicationExportInput,
 ): Promise<{ csv: string; rowCount: number; auditId: string }> {
+  await assertExportSize(() =>
+    db.instructorApplication.count({ where: instructorWhere(filter) }),
+  );
+
   const rows = await db.instructorApplication.findMany({
     where: instructorWhere(filter),
     orderBy: { createdAt: "desc" },

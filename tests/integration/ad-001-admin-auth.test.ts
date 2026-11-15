@@ -11,6 +11,20 @@ import {
   resetDatabase,
 } from "./helpers";
 
+
+/**
+ * 관리자로 로그인한 뒤 세션의 유효기간을 과거로 돌린다.
+ * 쿠키 값은 그대로라 「값은 맞지만 기간이 지난」 상태를 만든다.
+ */
+async function expiredAdminCookie(): Promise<string> {
+  const cookie = await adminCookie();
+  await db.authSession.updateMany({
+    where: { scope: "ADMIN" },
+    data: { expiresAt: new Date(Date.now() - 1000) },
+  });
+  return cookie;
+}
+
 beforeEach(async () => {
   await resetDatabase();
 });
@@ -71,6 +85,17 @@ describe("AD-001 관리자 로그인과 권한", () => {
         const response = await routeCase.invoke(cookie);
         expect(response.status).toBe(403);
         expect((await response.json()).code).toBe("FORBIDDEN");
+      });
+
+      /*
+        만료된 관리자 쿠키는 **비로그인과 똑같이** 막혀야 한다. 쿠키 값 자체는 올바르고
+        세션 행도 남아 있으므로, 유효기간을 보지 않으면 그대로 통과한다. (Phase 6 보안)
+      */
+      test(`AD-001 ${routeCase.name}: 만료된 관리자 세션은 401`, async () => {
+        const cookie = await expiredAdminCookie();
+        const response = await routeCase.invoke(cookie);
+        expect(response.status).toBe(401);
+        expect((await response.json()).code).toBe("UNAUTHENTICATED");
       });
     }
   });
