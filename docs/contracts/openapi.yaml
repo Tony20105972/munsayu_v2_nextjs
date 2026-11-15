@@ -418,6 +418,10 @@ paths:
         "200": { description: text/csv }
         "401": { description: 비로그인 (UNAUTHENTICATED) }
         "403": { description: 관리자 아님 (FORBIDDEN) }
+        "409":
+          {
+            description: 내보낼 줄이 상한(20,000)을 넘었다 (CONFLICT). 잘라내지 않고 거절하며 기간·조건을 좁히라고 안내한다 — ASM-097,
+          }
   /api/admin/instructor-applications:
     get:
       summary: AD-011 강사 지원 목록 (마스킹)
@@ -443,6 +447,10 @@ paths:
         "200": { description: text/csv }
         "401": { description: 비로그인 (UNAUTHENTICATED) }
         "403": { description: 관리자 아님 (FORBIDDEN) }
+        "409":
+          {
+            description: 내보낼 줄이 상한(20,000)을 넘었다 (CONFLICT). 잘라내지 않고 거절하며 기간·조건을 좁히라고 안내한다 — ASM-097,
+          }
   /api/admin/instructor-applications/document:
     get:
       summary: >-
@@ -485,6 +493,10 @@ paths:
         "200": { description: text/csv }
         "401": { description: 비로그인 (UNAUTHENTICATED) }
         "403": { description: 관리자 아님 (FORBIDDEN) }
+        "409":
+          {
+            description: 내보낼 줄이 상한(20,000)을 넘었다 (CONFLICT). 잘라내지 않고 거절하며 기간·조건을 좁히라고 안내한다 — ASM-097,
+          }
   /api/admin/notices:
     get:
       summary: AD-014 공지 목록 (임시 저장 글 포함)
@@ -577,6 +589,10 @@ paths:
             Cache-Control: { schema: { type: string, example: no-store } }
         "401": { description: 비로그인 (UNAUTHENTICATED) }
         "403": { description: 관리자 아님 (FORBIDDEN) }
+        "409":
+          {
+            description: 내보낼 줄이 상한(20,000)을 넘었다 (CONFLICT). 잘라내지 않고 거절하며 기간·조건을 좁히라고 안내한다 — ASM-097,
+          }
         "422": { description: 검증 실패 (VALIDATION_FAILED) }
   /api/admin/privacy/retention:
     get:

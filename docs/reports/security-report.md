@@ -28,12 +28,13 @@
 - 다른 사이트가 우리 관리자 화면을 iframe 으로 끼워 클릭을 가로챌 수 있다
 - 첫 접속이 http 로 가도 막히지 않는다
 
-**고친 방법** — `proxy.ts` 에서 요청마다 nonce 를 만들어 붙인다. CSP 는 요청마다
-값이 달라 정적 설정에 둘 수 없어 matcher 를 전 경로로 넓혔다. 레거시 주소 처리
-(RT-001/002/004)는 **먼저** 끝나므로 동작이 바뀌지 않는다(308·410 확인).
+**고친 방법** — `proxy.ts` 에서 모든 응답에 붙인다. matcher 를 전 경로로 넓혔고
+레거시 주소 처리(RT-001/002/004)는 **먼저** 끝나므로 동작이 바뀌지 않는다(308·410 확인).
+리다이렉트·410 응답에도 헤더를 붙이고, 사용자가 올린 파일 경로(`/uploads`)도 포함했다 —
+`nosniff` 가 가장 필요한 자리다.
 
 ```
-content-security-policy: default-src 'self'; script-src 'self' 'nonce-…' 'strict-dynamic'
+content-security-policy: default-src 'self'; script-src 'self' 'unsafe-inline'
   https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: …;
   font-src 'self'; connect-src 'self' …; frame-ancestors 'none'; base-uri 'self';
   form-action 'self'; object-src 'none'; upgrade-insecure-requests
@@ -44,14 +45,29 @@ x-frame-options: DENY
 permissions-policy: camera=(), microphone=(), geolocation=(), payment=()
 ```
 
-남겨 둔 것과 이유:
-- `style-src 'unsafe-inline'` — Tailwind 와 React 가 style 속성을 쓴다. 스타일은 코드
-  실행이 아니라 위험도가 낮다.
-- `'unsafe-eval'` 은 **개발 모드에만** 넣었다. 개발 React 가 디버깅에 쓴다. 운영 CSP
-  에는 들어가지 않는다.
-- `X-Powered-By` 는 `poweredByHeader: false` 로 껐다.
+#### nonce 를 쓰려다 되돌린 경위 (중요)
 
-확인: E2E 52건이 CSP 를 켠 채로 전부 통과했다(하이드레이션·Server Action 정상).
+처음에는 요청마다 nonce 를 만들어 `'strict-dynamic'` 과 함께 썼다. 개발 서버 기준
+E2E 가 전부 통과해 괜찮아 보였지만, **운영 빌드에서 직접 확인하니 화면당 11~13건씩
+모두 62건의 스크립트가 막혔다.**
+
+이유는 두 가지가 겹쳤다.
+1. 이 앱은 `cacheComponents` 로 화면을 **미리 만들어 둔다.** 미리 만든 HTML 에는
+   요청마다 달라지는 nonce 를 넣을 수 없다.
+2. `'strict-dynamic'` 이 있으면 CSP3 브라우저는 `'self'` 를 **무시한다.** 그래서
+   nonce 가 없는 그 스크립트들이 전부 막혔다.
+
+미리 만들기를 끄면 이번에 얻은 LCP 개선(2.9초 → 0.6초)이 날아간다. 그래서 nonce 를
+버리고 `script-src 'self' 'unsafe-inline'` 으로 갔다.
+
+**이 선택의 한계를 분명히 적는다.** 바깥 주소에서 스크립트를 불러오는 일(가장 흔한
+주입 경로)과 `object-src`·`base-uri`·`form-action`·`frame-ancestors` 는 여전히 막지만,
+**본문에 끼워 넣은 스크립트는 CSP 가 막지 못한다.** 그 자리는 공지 본문 정리기
+(ADR-006, 저장·읽기·가져오기 세 곳)가 맡는다.
+
+운영 빌드에서 공개 화면 5개를 열어 **CSP 위반 0건·수화 정상**을 확인했다.
+더 조이려면 미리 만들기를 포기해야 하므로 Phase 7 에서 `Report-Only` 로 지켜본 뒤
+결정한다.
 
 ### S2. CSV 내보내기에 건수 상한이 없었다
 
@@ -59,9 +75,13 @@ permissions-policy: camera=(), microphone=(), geolocation=(), payment=()
 필터 없이 한 번 누르면 개인정보가 담긴 표 전체가 한 파일로 빠져나가고, 함수 메모리
 한계에 걸릴 수도 있다.
 
-조용히 잘라내면 「현재 필터 결과 전체」라는 약속(ASM-006)이 거짓이 된다. 그래서 먼저
-세어 보고 2만 줄을 넘으면 **거절하면서 범위를 좁히라고 알려 준다.** // ASM-097
-거절 문구에는 건수만 담고 개인정보는 넣지 않는다.
+조용히 잘라내면 「현재 필터 결과 전체」라는 약속(ASM-006)이 거짓이 된다. 그래서 2만 줄을
+넘으면 **거절하면서 범위를 좁히라고 알려 준다.** // ASM-097
+
+세어 보고 다시 읽는 두 번 질의 대신 **한 번에 상한+1 만큼 읽는다**(`src/server/lib/csv-export.ts`).
+질의 사이에 줄이 늘어나는 경합이 없고, 메모리에 올라오는 양이 실제로 묶인다.
+거절 문구에는 상한만 담고 실제 건수도 개인정보도 넣지 않는다. 단위 테스트 5건으로
+경계값(상한=통과 / 상한+1=거절)과 문구를 확인한다.
 
 ---
 

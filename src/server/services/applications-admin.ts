@@ -1,7 +1,6 @@
 import "server-only";
 import type { Prisma } from "@prisma/client";
 import {
-  CSV_EXPORT_MAX_ROWS,
   maskName,
   maskPhone,
   maskSchoolName,
@@ -13,7 +12,8 @@ import {
   type EventReservationTotals,
 } from "@/lib/contracts";
 import { db } from "@/server/db";
-import { notFound, exportTooLarge } from "@/server/errors";
+import { takeForExport } from "@/server/lib/csv-export";
+import { notFound } from "@/server/errors";
 import { csvRows } from "@/server/lib/csv";
 import { summarizeFilter, writeAuditLog } from "@/server/services/audit";
 
@@ -230,17 +230,6 @@ export type CsvExportResult = {
  * AD-013 현재 필터 결과 **전체**를 CSV로 내보낸다. 페이지 범위가 아니다. (ASM-006)
  * 내보내기도 기록에 남기며, 기록에는 필터 이름과 건수만 담는다.
  */
-/**
- * 내보내기 전에 줄 수를 먼저 센다. 상한을 넘으면 **거절한다.** (ASM-097)
- * 세는 비용은 색인이 받쳐 주어 작고, 표 전체를 메모리에 올리는 일을 막는다.
- */
-async function assertExportSize(count: () => Promise<number>): Promise<void> {
-  const total = await count();
-  if (total > CSV_EXPORT_MAX_ROWS) {
-    throw exportTooLarge(total, CSV_EXPORT_MAX_ROWS);
-  }
-}
-
 export async function exportApplicationsCsv(
   actorUserId: string,
   filter: ApplicationExportInput,
@@ -249,16 +238,16 @@ export async function exportApplicationsCsv(
   let rowCount: number;
 
   if (filter.kind === "course") {
-    await assertExportSize(() =>
-      db.courseApplication.count({ where: courseWhere(filter) }),
+    const rows = await takeForExport((take) =>
+      db.courseApplication.findMany({
+        where: courseWhere(filter),
+        orderBy: { createdAt: "desc" },
+        take,
+        include: {
+          course: { select: { title: true, campus: { select: { name: true } } } },
+        },
+      }),
     );
-    const rows = await db.courseApplication.findMany({
-      where: courseWhere(filter),
-      orderBy: { createdAt: "desc" },
-      include: {
-        course: { select: { title: true, campus: { select: { name: true } } } },
-      },
-    });
     rowCount = rows.length;
     csv = csvRows(
       [
@@ -289,16 +278,16 @@ export async function exportApplicationsCsv(
       ]),
     );
   } else {
-    await assertExportSize(() =>
-      db.eventReservation.count({ where: eventWhere(filter) }),
+    const rows = await takeForExport((take) =>
+      db.eventReservation.findMany({
+        where: eventWhere(filter),
+        orderBy: { createdAt: "desc" },
+        take,
+        include: {
+          event: { select: { title: true, campus: { select: { name: true } } } },
+        },
+      }),
     );
-    const rows = await db.eventReservation.findMany({
-      where: eventWhere(filter),
-      orderBy: { createdAt: "desc" },
-      include: {
-        event: { select: { title: true, campus: { select: { name: true } } } },
-      },
-    });
     rowCount = rows.length;
     csv = csvRows(
       [

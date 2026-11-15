@@ -1,6 +1,5 @@
 import "server-only";
 import {
-  CSV_EXPORT_MAX_ROWS,
   maskName,
   maskPhone,
   maskSchoolName,
@@ -14,7 +13,8 @@ import {
 } from "@/lib/contracts";
 import { notifyQuietly } from "@/server/adapters/notify";
 import { db, isUniqueViolation } from "@/server/db";
-import { notFound, exportTooLarge } from "@/server/errors";
+import { takeForExport } from "@/server/lib/csv-export";
+import { notFound } from "@/server/errors";
 import { csvRows } from "@/server/lib/csv";
 import { summarizeFilter, writeAuditLog } from "@/server/services/audit";
 import {
@@ -202,27 +202,17 @@ export async function deleteSmsSubscriptions(
   return { deleted: result.count };
 }
 
-/**
- * 내보내기 전에 줄 수를 먼저 센다. 상한을 넘으면 **거절한다.** (ASM-097)
- * 세는 비용은 색인이 받쳐 주어 작고, 표 전체를 메모리에 올리는 일을 막는다.
- */
-async function assertExportSize(count: () => Promise<number>): Promise<void> {
-  const total = await count();
-  if (total > CSV_EXPORT_MAX_ROWS) {
-    throw exportTooLarge(total, CSV_EXPORT_MAX_ROWS);
-  }
-}
-
 export async function exportSmsSubscriptionsCsv(
   actorUserId: string,
   filter: SmsSubscriptionExportInput,
 ): Promise<{ csv: string; rowCount: number; auditId: string }> {
-  await assertExportSize(() => db.smsSubscription.count({ where: smsWhere(filter) }));
-
-  const rows = await db.smsSubscription.findMany({
-    where: smsWhere(filter),
-    orderBy: { createdAt: "desc" },
-  });
+  const rows = await takeForExport((take) =>
+    db.smsSubscription.findMany({
+      where: smsWhere(filter),
+      orderBy: { createdAt: "desc" },
+      take,
+    }),
+  );
 
   const csv = csvRows(
     ["신청ID", "학년", "학생 이름", "학교명", "보호자 연락처", "신청일시"],

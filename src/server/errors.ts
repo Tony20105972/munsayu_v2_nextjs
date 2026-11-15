@@ -67,14 +67,14 @@ export function tokenInvalid(): AppError {
 }
 
 /**
- * 내보낼 줄이 너무 많다. 잘라내지 않고 범위를 좁히라고 알려 준다. (ASM-097)
- * 메시지에 담는 것은 **건수뿐**이고 개인정보는 넣지 않는다.
+ * 내보낼 줄이 상한을 넘었다. 잘라내지 않고 범위를 좁히라고 알려 준다. (ASM-097)
+ * 메시지에 담는 것은 **상한뿐**이고 개인정보도, 실제 건수도 넣지 않는다.
  */
-export function exportTooLarge(total: number, max: number): AppError {
+export function exportTooLarge(max: number): AppError {
   return new AppError(
     ERROR_CODES.CONFLICT,
     409,
-    `내보낼 내역이 ${total.toLocaleString("ko-KR")}건입니다. ` +
-      `한 번에 ${max.toLocaleString("ko-KR")}건까지 받을 수 있으니 기간이나 조건을 좁혀 주세요.`,
+    `한 번에 ${max.toLocaleString("ko-KR")}건까지 받을 수 있습니다. ` +
+      `기간이나 조건을 좁혀 주세요.`,
   );
 }
