@@ -1,7 +1,7 @@
 import "server-only";
 import type { SessionScope } from "@prisma/client";
 import type { SessionUser } from "@/lib/contracts";
-import { forbidden, unauthenticated } from "@/server/errors";
+import { forbidden, passwordChangeRequired, unauthenticated } from "@/server/errors";
 import { SESSION_COOKIE_NAMES } from "@/server/auth/cookies";
 import { resolveSessionByToken, toSessionUser } from "@/server/auth/session";
 
@@ -65,9 +65,25 @@ export async function getMemberUserFromCookies(): Promise<SessionUser | null> {
  * 관리자가 아니면 AppError를 던진다. 아무 세션도 없으면 401, 회원 세션만 있으면 403이다.
  * 오류 경계 없이 로그인 화면으로 보내려면 `getAdminUserFromCookies()` + `redirect()`를 쓴다.
  */
-export async function requireAdminFromCookies(): Promise<SessionUser> {
+/**
+ * AD-016 임시 비밀번호로 들어온 관리자는 **비밀번호를 바꾸기 전까지 아무 일도 못 한다.**
+ *
+ * 화면은 레이아웃이 비밀번호 변경 화면만 보여 주지만, 그것만으로는 Server Action 과
+ * Route Handler 를 직접 부르는 길이 열려 있다. 그래서 권한 확인 자리에서 막는다.
+ * 비밀번호를 바꾸는 Action 자신만 `allowPasswordChangePending` 으로 지나간다.
+ */
+export type AdminGuardOptions = { allowPasswordChangePending?: boolean };
+
+export async function requireAdminFromCookies(
+  options: AdminGuardOptions = {},
+): Promise<SessionUser> {
   const admin = await getAdminUserFromCookies();
-  if (admin) return admin;
+  if (admin) {
+    if (admin.mustChangePassword && !options.allowPasswordChangePending) {
+      throw passwordChangeRequired();
+    }
+    return admin;
+  }
 
   const member = await getMemberUserFromCookies();
   if (member) throw forbidden();

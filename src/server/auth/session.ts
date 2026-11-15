@@ -24,6 +24,7 @@ export function toSessionUser(user: User): SessionUser {
     loginId: user.loginId,
     name: user.name,
     role: user.role,
+    mustChangePassword: user.mustChangePassword,
   };
 }
 

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import { LogoutButton } from "@/components/account/logout-button";
+import { AdminChangePasswordForm } from "@/components/admin/account-panels";
 import { AdminNav } from "@/components/admin/admin-nav";
 import { getAdminUserFromCookies } from "@/server/auth/server-component-session";
 
@@ -15,6 +16,11 @@ import { getAdminUserFromCookies } from "@/server/auth/server-component-session"
  * - 회원 세션 쿠키로는 절대 통과하지 않는다. 쿠키 이름이 다르고 범위도 다르다.
  * - 레이아웃 가드만 믿지 않는다. 관리자 Server Action 은 각자 다시 권한을 확인한다.
  * - 로그인 화면(`/admin/login`)은 이 그룹 바깥에 있어 가드에 걸리지 않는다.
+ * - **AD-016** 임시 비밀번호로 들어온 관리자에게는 `children` 대신 비밀번호 변경 폼만
+ *   보여 준다. 경로마다 막는 대신 레이아웃에서 한 번 막으면 관리자 화면 **전체**가
+ *   덮인다(모든 관리자 경로가 이 레이아웃 아래에 있다). 화면만 막는 것은 권한 처리가
+ *   아니므로, Server Action·Route Handler 는 `requireAdminFromCookies`·`requireAdmin`
+ *   가 같은 깃발을 보고 403 으로 막는다.
  */
 export const metadata: Metadata = {
   title: "관리자",
@@ -59,10 +65,26 @@ export default async function AdminAuthedLayout({ children }: { children: ReactN
         </div>
       </header>
 
-      <AdminNav />
+      {admin.mustChangePassword ? null : <AdminNav />}
 
       <main id="admin-content" className="flex-1">
-        <div className="mx-auto max-w-7xl space-y-6 px-4 py-6">{children}</div>
+        <div className="mx-auto max-w-7xl space-y-6 px-4 py-6">
+          {admin.mustChangePassword ? (
+            <>
+              <div>
+                <p className="text-xs font-bold text-accent">AD-016</p>
+                <h1 className="mt-1 text-xl font-bold text-ink">비밀번호를 바꿔 주세요</h1>
+                <p className="mt-1 text-sm leading-relaxed text-muted">
+                  임시 비밀번호로 들어왔습니다. 새 비밀번호를 정하면 관리자 화면을 쓸 수
+                  있습니다. 바꾸면 이 계정의 로그인이 모두 끊기고 다시 로그인합니다.
+                </p>
+              </div>
+              <AdminChangePasswordForm forced />
+            </>
+          ) : (
+            children
+          )}
+        </div>
       </main>
 
       <footer className="border-t border-line bg-surface">

@@ -2,6 +2,7 @@ import Link from "next/link";
 import {
   AdminAccountCreateForm,
   AdminAccountDeleteButton,
+  AdminPasswordResetButton,
   MemberStatusForm,
   STATUS_LABEL,
 } from "@/components/admin/members-panels";
@@ -77,7 +78,7 @@ export default async function AdminMembersPage({ searchParams }: MembersPageProp
       <AdminPageHeading
         featureId="AD-002"
         title="회원 관리"
-        description="회원을 검색하고 상태를 바꿉니다. 관리자 계정도 여기서 추가·삭제합니다."
+        description="회원을 검색하고 상태를 바꿉니다. 관리자 계정은 여기서 추가·삭제하고, 비밀번호를 잊은 관리자도 여기서 풀어 줍니다."
       />
 
       <AdminPanel title="회원 수" headingId="member-counts">
@@ -236,8 +237,10 @@ export default async function AdminMembersPage({ searchParams }: MembersPageProp
         description="역할 구분은 없습니다. 관리자는 모두 같은 권한을 가집니다. (D5)"
       >
         <AuditNotice>
-          관리자 계정 추가·삭제는 누가 언제 했는지 기록에 남습니다. 관리자가 한 명만
-          남았을 때는 삭제할 수 없고, 자기 계정도 삭제할 수 없습니다.
+          관리자 계정 추가·삭제와 비밀번호 초기화는 누가 언제 했는지 기록에 남습니다
+          (비밀번호 값은 남지 않습니다). 관리자가 한 명만 남았을 때는 삭제할 수 없고,
+          자기 계정은 삭제도 초기화도 할 수 없습니다. 자기 비밀번호는 「내 계정」에서
+          바꿉니다. (AD-016)
         </AuditNotice>
 
         <AdminTableScroll>
@@ -275,11 +278,18 @@ export default async function AdminMembersPage({ searchParams }: MembersPageProp
                     <td className={ADMIN_TD_CLASS}>{account.maskedEmail}</td>
                     <td className={ADMIN_TD_CLASS}>{STATUS_LABEL[account.status]}</td>
                     <td className={ADMIN_TD_CLASS}>
-                      <AdminAccountDeleteButton
-                        userId={account.id}
-                        loginId={account.loginId}
-                        isSelf={currentAdmin?.id === account.id}
-                      />
+                      <div className="flex flex-col gap-2">
+                        <AdminPasswordResetButton
+                          userId={account.id}
+                          loginId={account.loginId}
+                          isSelf={currentAdmin?.id === account.id}
+                        />
+                        <AdminAccountDeleteButton
+                          userId={account.id}
+                          loginId={account.loginId}
+                          isSelf={currentAdmin?.id === account.id}
+                        />
+                      </div>
                     </td>
                   </tr>
                 ))

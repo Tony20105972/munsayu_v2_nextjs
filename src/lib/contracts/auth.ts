@@ -121,6 +121,8 @@ export type SessionUser = {
   loginId: string;
   name: string;
   role: UserRole;
+  /** AD-016 임시 비밀번호로 들어온 계정. 켜져 있으면 비밀번호를 먼저 바꿔야 한다. */
+  mustChangePassword: boolean;
 };
 
 /** 로그인 시도 제한 기준. (BLUEPRINT 7장) */

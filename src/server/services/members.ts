@@ -5,12 +5,13 @@ import {
   maskPhone,
   type AdminAccountCreateInput,
   type AdminAccountDeleteInput,
+  type AdminPasswordResetInput,
   type MemberSearchInput,
   type MemberStatusChangeInput,
 } from "@/lib/contracts";
 import { db } from "@/server/db";
 import { conflict, forbidden, notFound } from "@/server/errors";
-import { hashPassword } from "@/server/auth/password";
+import { generateTemporaryPassword, hashPassword } from "@/server/auth/password";
 import { invalidateUserSessions } from "@/server/auth/session";
 import { writeAuditLog } from "@/server/services/audit";
 
@@ -182,6 +183,58 @@ export async function deleteAdminAccount(
     resourceType: "User",
     resourceId: input.userId,
   });
+}
+
+/**
+ * AD-016 다른 관리자의 비밀번호 초기화.
+ *
+ * 비밀번호를 잊은 관리자를 되살리는 길이다. 메일 재설정 경로(FM-003)는 메일 업체가
+ * 정해지기 전까지 동작하지 않으므로(D4), 관리자가 손으로 풀어 줄 수 있어야 한다.
+ *
+ * 규칙
+ * - **새 비밀번호를 받지 않는다.** 서버가 임시 비밀번호를 만들어 **한 번만** 돌려준다.
+ *   저장하지도, 기록에 남기지도 않는다.
+ * - 대상 계정의 **모든 세션을 끊는다.** 이미 누가 그 계정으로 들어와 있을 수 있다.
+ * - 대상 계정에 **변경 강제 깃발을 켠다.** 다음 로그인 때 비밀번호를 바꿔야 한다.
+ * - **자기 계정은 막는다**(403). 자기 비밀번호는 「비밀번호 바꾸기」로 바꾼다. 여기서
+ *   하면 지금 쓰는 세션이 끊기면서 임시 비밀번호만 남아 혼란스럽다.
+ * - 관리자가 아닌 계정은 404. 회원 계정은 이 화면에서 다루지 않는다.
+ */
+export async function resetAdminPassword(
+  actorUserId: string,
+  input: AdminPasswordResetInput,
+): Promise<{ loginId: string; temporaryPassword: string }> {
+  const target = await db.user.findUnique({
+    where: { id: input.userId },
+    select: { id: true, loginId: true, role: true },
+  });
+  if (!target || target.role !== "ADMIN") throw notFound();
+
+  if (actorUserId === input.userId) {
+    throw forbidden();
+  }
+
+  const temporaryPassword = generateTemporaryPassword();
+  const passwordHash = await hashPassword(temporaryPassword);
+
+  await db.$transaction(async (tx) => {
+    await tx.user.update({
+      where: { id: target.id },
+      data: { passwordHash, mustChangePassword: true },
+    });
+    await invalidateUserSessions(target.id, tx);
+    await writeAuditLog(
+      {
+        actorUserId,
+        action: "ADMIN_PASSWORD_RESET",
+        resourceType: "User",
+        resourceId: target.id,
+      },
+      tx,
+    );
+  });
+
+  return { loginId: target.loginId, temporaryPassword };
 }
 
 /** 관리자 화면의 회원 요약 숫자. 개인정보는 담지 않는다. */

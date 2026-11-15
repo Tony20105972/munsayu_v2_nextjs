@@ -27,6 +27,8 @@ const ADMIN_MENU = [
   { href: "/admin/privacy", label: "개인정보 관리" },
   { href: "/admin/analytics", label: "분석 도구" },
   { href: "/admin/settings", label: "사이트 설정" },
+  // AD-016 본인 비밀번호 바꾸기. 메뉴 맨 끝에 둔다.
+  { href: "/admin/account", label: "내 계정" },
 ] as const;
 
 export function AdminNav() {
