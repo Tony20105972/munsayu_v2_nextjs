@@ -42,35 +42,52 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   use: {
     baseURL: stagingBaseURL ?? "http://127.0.0.1:3000",
-    trace: "on-first-retry",
+    /*
+     * 스테이징 모드에서는 추적을 **끈다.** 추적 파일은 요청 헤더를 그대로 담는데,
+     * 그 헤더에 보호 우회 열쇠(`x-vercel-protection-bypass`)가 들어 있다.
+     * `CI=1` 로 돌리면 재시도가 생겨 추적이 남으므로, 비밀값이 파일로 떨어질 수 있다.
+     */
+    trace: stagingBaseURL ? "off" : "on-first-retry",
     ...(stagingHeaders ? { extraHTTPHeaders: stagingHeaders } : {}),
   },
-  projects: [
-    {
-      name: "e2e",
-      testDir: "./tests/e2e",
-      use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 } },
-    },
-    {
-      name: "visual-1440",
-      testDir: "./tests/visual",
-      use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 } },
-    },
-    {
-      name: "staging",
-      testDir: "./tests/staging",
-      use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 } },
-    },
-    {
-      name: "visual-390",
-      testDir: "./tests/visual",
-      use: {
-        ...devices["Desktop Chrome"],
-        viewport: { width: 390, height: 844 },
-        isMobile: false,
-      },
-    },
-  ],
+  /*
+   * 스테이징 모드에서는 **`staging` 묶음 하나만** 둔다.
+   *
+   * 묶음을 남겨 두면 `STAGING_BASE_URL=... --project=e2e` 같은 실행이 가능해진다.
+   * 그 묶음은 seed 가 넣은 가짜 데이터를 전제로 하고, 회원·신청을 만들고 사이트 설정을
+   * 바꾼다. 스테이징을 가리킨 채 돌면 세워 둔 데이터가 흐트러진다. 준비 단계를 건너뛰는
+   * 것만으로는 부족해서, 고를 수 있는 묶음 자체를 없앤다.
+   * (없는 묶음을 지정하면 Playwright 가 바로 「찾을 수 없다」고 멈춘다)
+   */
+  projects: stagingBaseURL
+    ? [
+        {
+          name: "staging",
+          testDir: "./tests/staging",
+          use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 } },
+        },
+      ]
+    : [
+        {
+          name: "e2e",
+          testDir: "./tests/e2e",
+          use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 } },
+        },
+        {
+          name: "visual-1440",
+          testDir: "./tests/visual",
+          use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 } },
+        },
+        {
+          name: "visual-390",
+          testDir: "./tests/visual",
+          use: {
+            ...devices["Desktop Chrome"],
+            viewport: { width: 390, height: 844 },
+            isMobile: false,
+          },
+        },
+      ],
   // 스테이징 모드에서는 로컬 서버를 띄우지 않는다. 바깥 주소를 그대로 두드린다.
   ...(stagingBaseURL
     ? {}
