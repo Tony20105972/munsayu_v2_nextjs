@@ -208,7 +208,16 @@ Phase 7 을 `GATE_CHECK` 로 올리지 않고 `GATE_FAIL` 로 두는 것이 사�
 - 수정: `scripts/migrate-deploy.mjs` 에 `VERCEL_ENV !== "production"` 이면 **건너뛰고 종료**하는
   가드를 넣었습니다. 로컬·CI 에는 `VERCEL_ENV` 가 없어 영향이 없습니다.
 - 함께 수정: 로컬에서 `npm run db:deploy:direct` 가 되도록 `dotenv/config` 를 읽습니다.
-- 확인: `VERCEL_ENV=preview` → 건너뜀(exit 0) · 주소 없음 → 중단(exit 1) · 로컬 → 적용(exit 0).
+- 확인(로컬): `VERCEL_ENV=preview` → 건너뜀(exit 0) · 주소 없음 → 중단(exit 1) · 로컬 → 적용(exit 0).
+- 확인(`OBSERVED`, 실제 Vercel 빌드 기록 — PR #8 의 Preview 배포 `dpl_Gc1ej3Ba...`):
+
+  ```
+  Running "node scripts/migrate-deploy.mjs && next build"
+  [migrate-deploy] VERCEL_ENV=preview 이라 마이그레이션을 건너뜁니다. Production 배포에서만 적용합니다.
+  ```
+
+  Preview 배포가 데이터베이스를 건드리지 않고 빌드를 마쳤습니다(`state: READY`).
+  **새 빌드 명령이 Vercel 에서 실제로 동작하는 것까지 확인된 유일한 항목입니다.**
 
 **차단 3 — 계약·기능 문서에 새 엔드포인트가 없었습니다.**
 
