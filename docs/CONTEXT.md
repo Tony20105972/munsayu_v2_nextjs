@@ -1,14 +1,15 @@
 # MUNSAYU V2 — 작업 컨텍스트 (세션 시작 시 이 파일만 읽는다)
 
 > 갱신 규칙: 작업이 끝날 때마다 **이 파일만** 갱신한다. 상세는 각 보고서·ADR에 남긴다.
-> 마지막 갱신 2026-11-16 · 규약은 `CLAUDE.md`, 설계는 `docs/BLUEPRINT.md`, 계획·Gate는 `docs/MIGRATION_PLAN.md`.
+> 마지막 갱신 2026-11-16 (Phase 7 병합 반영) · 규약은 `CLAUDE.md`, 설계는 `docs/BLUEPRINT.md`, 계획·Gate는 `docs/MIGRATION_PLAN.md`.
 
 ## 1. 프로젝트와 현재 상태
 
 - 원본 `https://munsayu.com` (PHP) → 목표 Next.js 16 App Router + TS strict + Prisma/PostgreSQL. PHP 소스·DB 접근 불가, **블랙박스 마이그레이션**(관찰된 HTML·JS·HTTP·흐름 근거로 재구현).
 - 현재 Phase **7 — Cutover 준비 / `GATE_CHECK`**(Gate **5/5 통과**, 방법 대체 2건은 사용자 인정 — ADR-009). 보고서 `docs/reports/phase-7-report.md`. **실제 전환은 하지 않았다.** 남은 것은 사람이 눌러 보는 점검과 결정 D7·D8·D4.
-- Phase 6 **승인·병합 완료**(2026-11-15, PR #7). 보고서 `docs/reports/phase-6-report.md`. Phase 0~6 전부 승인·병합.
-- 브랜치 `release/phase-7` — 전환 준비. Phase 6 결과(모바일 LCP 604~636ms, 보안 헤더·CSV 상한)는 `phase-6-report.md`.
+- **Phase 7 은 사용자 지시로 `main` 에 병합했다** (2026-11-15, PR #8 squash → `d64b931`). CI `verify`·GitGuardian 통과 상태였다. 병합 뒤 `main` 자동 배포도 Ready 이고 스테이징 점검 32건을 다시 통과했다. **다만 `docs/PHASE.md` 의 Phase 7 사람 승인 칸은 아직 ☐ 다** — 승인 기록은 사람만 채운다. 그래서 상태는 `APPROVED` 가 아니라 `GATE_CHECK` 로 둔다.
+- Phase 0~6 **전부 승인·병합 완료**. Phase 6 은 PR #7(2026-11-15), 보고서 `docs/reports/phase-6-report.md`.
+- 작업 브랜치는 `main` 에서 새로 딴다. `release/phase-7` 은 병합됐고 지우지 않았다. Phase 6 결과(모바일 LCP 604~636ms, 보안 헤더·CSV 상한)는 `phase-6-report.md`.
 - **스테이징 구축·검증 완료 (2026-11-16)** — Vercel **production 환경**이 스테이징이다(`https://munsayu-v2-nextjs.vercel.app`, 커스텀 도메인 없음, 로그인 보호 `all`). 마이그레이션 4건 적용 → 시드 → 관리자 `stagingadmin` → 레거시 공지 2건. **점검 32건 통과 · 사진 올리기 통과 · 되돌리기 8초/14초**. 전문은 증거 `EV-0019`.
 - **스테이징에서 처음 드러난 결함 7건 전부 수정** — `CRON_SECRET` 공백으로 배포 거부 · 보호 우회 쿠키 헤더 때문에 점검 11건 거짓 실패 · `bootstrap:admin` 이 **로그인할 수 없는 아이디**를 만들던 것 · **CSP `connect-src` 가 업로드를 막던 것** · 보호 우회 헤더의 CORS 충돌 · **Blob 저장소 하나로는 공개·비공개를 함께 담을 수 없던 것(ADR-008 가정 오류)** · 운영 오류 기록에 이름만 남던 것. 자세한 것은 보고서 8장.
 - **Blob 저장소는 두 개다** (ADR-009 결정 3) — 공개 사진 `BLOB_PUBLIC_READ_WRITE_TOKEN`·`BLOB_PUBLIC_STORE_ID`(저장소 `munsayu-v2-public`), 이력서·검사 전 원본 `BLOB_*`(또는 `BLOB_PRIVATE_*`). **이름을 섞으면 이력서가 공개 주소로 열린다.** `tests/unit/storage-blob-store-split.test.ts` 8건이 고정.

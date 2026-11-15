@@ -14,6 +14,7 @@
 | 현재 Phase | **7 — Cutover 준비** |
 | 상태 | `GATE_CHECK` (Gate 5/5 통과, 사람 승인 대기) |
 | 마지막 갱신 | 2026-11-16 |
+| 병합 | Phase 7 은 **사용자 지시로 `main` 에 병합**(PR #8 squash → `d64b931`, 2026-11-15). **승인 칸은 아직 ☐** — 병합과 승인은 별개로 적는다 |
 | 다음 행동 | 사람이 스테이징에서 **눌러 보는 점검**(신청·상태 변경·CSV·공지·휴대폰) 후 Phase 7 승인 여부 결정. **실제 전환은 하지 않았다** |
 | 막힌 것 | **전환을 막는 결정 3건 — D7(DNS 권한)·D8(일정)·D4(메일 업체).** 그 밖에 원장님 답 7건(`Q-ADM-15`~`21`), 감시 결정 M1·M2, 사람이 눌러 보는 점검. 스테이징은 구축·검증을 마쳤다(EV-0019) |
 
@@ -33,7 +34,7 @@
 | 4 | Backend Replacement | APPROVED | PASS (9/9 적용) | 차단 1 수정 / 권장 12 기록 | ☑ | `reports/phase-4-report.md` |
 | 5 | Legacy Parity Testing | APPROVED | PASS (4/5, 1건 방법 대체) | 차단 1 수정 / 권장 5 중 3 수정 | ☑ | `reports/phase-5-report.md` |
 | 6 | Performance & Security | APPROVED | PASS (2/3, 1건 방법 대체) | 차단 3 수정 / 권장 6 중 4 수정 | ☑ | `reports/phase-6-report.md` |
-| 7 | Cutover 준비 | GATE_CHECK | PASS (5/5, 방법 대체 2건 인정) | 1차 차단 3 수정 / 권장 6 중 5 · 2차 차단 1 수정 / 권장 6 전부 · 스테이징 실행에서 결함 7 수정 | ☐ | `reports/phase-7-report.md` |
+| 7 | Cutover 준비 | GATE_CHECK (병합됨) | PASS (5/5, 방법 대체 2건 인정) | 1차 차단 3 수정 / 권장 6 중 5 · 2차 차단 1 수정 / 권장 6 전부 · 스테이징 실행에서 결함 7 수정 | ☐ | `reports/phase-7-report.md` |
 
 - Gate 칸: `PASS (n/n)` 또는 `FAIL (통과 수/전체)`
 - 독립 리뷰 칸: `차단 0 / 권장 n` 형식
