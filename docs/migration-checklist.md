@@ -90,13 +90,19 @@
 | 안 | 내용 | 좋은 점 | 걱정되는 점 | 비용 |
 |---|---|---|---|---|
 | A (추천) | 운영용 Neon 프로젝트를 **따로** 만든다 | 연습 중 실수가 실제 신청 기록을 건드릴 수 없다. 가짜 시드 데이터가 운영에 섞이지 않는다 | 환경 변수를 두 벌 관리한다 | Neon 무료 한도 안에서 가능 |
-| B | 지금 DB 하나를 그대로 운영에 쓴다 | 설정이 한 벌 | **스테이징 시드의 가짜 데이터가 운영에 남는다.** Preview 배포가 운영 DB 로 마이그레이션한다 | 추가 없음 |
+| B | 지금 DB 하나를 그대로 운영에 쓴다 | 설정이 한 벌 | **스테이징 시드의 가짜 데이터가 운영에 남는다.** 연습하다 지운 기록이 실제 기록이다 | 추가 없음 |
 
 - [ ] 결정: ______  결정한 사람: ______  날짜: ______
 - [ ] A 를 고르면: 운영 Neon 프로젝트 생성 → Vercel 의 **Production 환경 변수만** 운영 DB 로 교체
       → Preview·Development 는 스테이징 DB 유지 → 운영에 마이그레이션 적용 → 기본 데이터만 넣고
       **가짜 시드는 넣지 않는다.**
 - [ ] A 를 고르면 운영에도 관리자 계정을 1-5 와 같이 **따로** 만든다.
+
+> Preview 배포가 데이터베이스 구조를 건드리는 문제는 **코드에서 막아 두었습니다.**
+> 마이그레이션은 `VERCEL_ENV=production` 일 때만 돌고, Preview 배포는 건너뜁니다
+> (`scripts/migrate-deploy.mjs`, 실제 빌드 기록으로 확인). 그래서 B 를 골라도
+> 브랜치를 푸시하는 것만으로 구조가 바뀌지는 않습니다. 남는 걱정은 **데이터**(가짜 시드,
+> 연습 중 지운 기록)뿐입니다.
 
 ### 1-8. 운영에서 이미지 다시 올리기 — `직원` (D1, AD-015)
 
@@ -109,7 +115,66 @@
 - [ ] 다 올린 뒤 공개 화면을 휴대폰으로 한 번 훑어 깨진 사진이 없는지 본다.
 - [ ] 코드에 들어 있는 레거시 사진 57개는 다시 올릴 필요가 없다 (저장소가 아니라 코드에 있다).
 
-### 1-9. 전환 전 마지막 점검 — `개발`
+### 1-9. 새 데이터베이스에 한 번만 하는 설정 — `개발`
+
+데이터베이스를 새로 만들 때(스테이징 처음, 그리고 1-7에서 A 를 골랐으면 운영에서 한 번 더)
+**아래 순서대로 한 번씩만** 합니다. 순서를 바꾸면 안 됩니다.
+
+> 명령은 그 데이터베이스를 가리키는 환경에서 돌립니다. 주소는 `vercel env pull` 로 받은
+> **별도 파일**에 두고, 로컬 `.env` 를 덮어쓰지 않습니다. 받은 파일은 `.gitignore` 가
+> 막는 자리(`.env*`)에 두고, 일이 끝나면 지웁니다.
+
+| 순서 | 할 일 | 명령 | 스테이징 | 운영 |
+|---|---|---|---|---|
+| 1 | 표 만들기(마이그레이션) | `npm run db:deploy:direct` | ✅ | ✅ (배포가 자동으로 함) |
+| 2 | 기본 데이터 | `npm run db:seed` | ✅ | ⚠️ 아래 참고 |
+| 3 | 첫 관리자 1명 | `npm run bootstrap:admin` (1-5) | ✅ | ✅ |
+| 4 | 옛 공지 가져오기 | `npm run import:notices -- --dry-run` → `npm run import:notices` | ✅ | ✅ |
+
+- [ ] **2번 주의** — `db:seed` 는 **가짜 신청·가짜 회원**까지 넣습니다. 연습용입니다.
+      운영에서는 **넣지 마세요.** 운영에 필요한 기본 데이터(지점·보유기간 문구·설정 기본값)만
+      넣어야 하며, 지금 시드는 그 둘이 한 파일에 섞여 있습니다.
+      → 운영에서는 2번을 건너뛰고, 필요한 기본값을 관리자 화면에서 직접 넣는 쪽을 권합니다
+      (「사이트 설정」·「개인정보 관리」). 어느 쪽으로 할지 전환 전에 정합니다: ______
+- [ ] **4번은 반드시 `--dry-run` 을 먼저** 돌립니다. 몇 건을 가져오고 몇 건을 건너뛰는지
+      숫자로 보여 줍니다. 건너뛴 글은 **개인정보가 보이는 글**이고, 글 번호만 알려 줍니다.
+      그 글은 사람이 직접 보고 옮길지 정합니다 (ASM-090).
+- [ ] 4번은 **여러 번 돌려도 안전합니다.** 같은 글(`wr_id`)은 새로 만들지 않고 갱신합니다.
+- [ ] 4번은 옛 사이트를 **읽기만** 합니다(GET, 요청 간격 1초 이상). 옛 사이트를 바꾸지 않습니다.
+- [ ] 4번을 돌린 뒤 공개 화면 `/notice` 에서 글이 보이는지, 본문 사진이 깨지지 않았는지 봅니다.
+- [ ] **옛 사이트를 닫은 뒤에는 4번을 돌릴 수 없습니다.** 전환 전에 끝내세요.
+- [ ] 1~4를 끝낸 뒤 `STORAGE_ADAPTER` 가 `vercel-blob` 인지 다시 확인합니다 (1-10).
+
+### 1-10. 환경 변수 최종 확인 — `사용자`
+
+이름만 확인했습니다(2026-11-15). **값은 보지 않았습니다.** 아래 표의 「해야 할 일」만 하면 됩니다.
+
+| 변수 | 지금 상태 | 해야 할 일 |
+|---|---|---|
+| `DATABASE_URL`·`DATABASE_URL_UNPOOLED`·`POSTGRES_*`·`PG*` | Neon 통합에서 들어옴. production·preview·development 전부 | 없음 ✅ |
+| `DATABASE_URL_TEST` | 없음 (지워진 상태) | 없음 ✅ (운영에 필요 없다) |
+| `BLOB_READ_WRITE_TOKEN`·`BLOB_STORE_ID`·`BLOB_WEBHOOK_PUBLIC_KEY` | production·preview | 없음 ✅ (development 에는 없다 — 아래 참고) |
+| `AUTH_SECRET`·`MAIL_ADAPTER`·`MAIL_FROM`·`NOTIFY_ADAPTER`·`APP_BASE_URL`·`PRIVACY_PURGE_SECRET` | production·preview·development | 없음 ✅ |
+| **`STORAGE_ADAPTER`** | 있음. 값은 확인하지 않았다 | **production·preview 를 `vercel-blob` 으로.** `local` 이면 올린 사진이 배포마다 사라진다 |
+| **`CRON_SECRET`** | **없음** | **추가.** 무작위 32자 이상. 없으면 자동 파기 예약이 돌지 않는다 (404) |
+| `RESEND_API_KEY` | 없음 | 메일을 실제로 보내기로 하면 추가 (1-4) |
+| `ANALYTICS_PROVIDER_ID` | 없음 | 방문 통계를 쓰기로 하면 추가. 비워 두어도 정상 |
+| `BLOB_PUBLIC_BASE_URL` | 없음 | 없음 ✅ (비워 두는 것이 정상) |
+
+- [ ] **`STORAGE_ADAPTER` 는 development 를 `vercel-blob` 으로 두지 마세요.**
+      `vercel env pull` 은 기본으로 **development** 를 받아 오는데, `BLOB_*` 토큰은
+      production·preview 에만 있습니다. development 가 `vercel-blob` 이면 받아 온 설정으로는
+      사진 기능이 토큰 없이 동작하려다 실패합니다. → production·preview 만 `vercel-blob`,
+      development 는 `local` (또는 development 에서 아예 지움).
+- [ ] **`APP_BASE_URL` 은 한 값을 preview·production 이 같이 씁니다.** Preview 배포에서
+      비밀번호 재설정 메일을 보내면 링크가 **production(스테이징) 주소**로 갑니다.
+      Preview 에서 메일 링크를 시험하려면 그때만 Preview 전용 값을 따로 둡니다.
+- [ ] 전환 당일에는 `APP_BASE_URL` 을 `https://munsayu.com` 으로 바꿉니다 (2장 3단계).
+
+> Claude 가 이 값들을 직접 바꾸려 했으나 **자동 승인 정책이 쓰기를 막았습니다.**
+> 사람이 Vercel 화면(Project → Settings → Environment Variables)에서 바꿔 주세요.
+
+### 1-11. 전환 전 마지막 점검 — `개발`
 
 - [ ] `npm run verify:all` 통과
 - [ ] 스테이징에서 E2E 전 항목 통과 (3장 표와 같은 항목)
@@ -188,9 +253,35 @@
 - [ ] `https://munsayu.com/bbs/login.php` → **308** → `/login`
 - [ ] `https://munsayu.com/bbs/register.php` → **308** → `/register`
 - [ ] `https://munsayu.com/bbs/password_lost.php` → **308** → `/account/recovery`
-- [ ] `https://munsayu.com/uAdmin/` → **410** (응답에 `/admin` 이 나오지 않는다)
-- [ ] `https://munsayu.com/adm/` → **410**
+- [ ] `https://munsayu.com/uAdmin` → **410** (응답에 `/admin` 이 나오지 않는다)
+- [ ] `https://munsayu.com/adm` → **410**
+- [ ] 끝에 `/` 가 붙은 `/uAdmin/`·`/adm/` 은 **308 을 한 번 거친 뒤 410** 이다. 레거시
+      robots.txt 에 적혀 있던 모양이 이것이라(EV-0002) 따라가서 410 으로 끝나는지 본다.
+      중간에 308 이 끼는 것은 Next 가 끝의 `/` 를 떼는 정상 동작이다
 - [ ] 확인 명령 예: `curl -sS -o /dev/null -w '%{http_code} %{redirect_url}\n' '<주소>'`
+      (따라가서 보려면 `-L` 을 붙이고 마지막 코드를 본다)
+
+### 3-4-1. 위 3-1·3-4 를 명령 한 줄로 — `개발`
+
+사람이 눈으로 도는 것 말고, **자동으로 돌려 확인할 수 있는 부분**만 묶어 둔 점검입니다.
+공개 화면 16개 200 · 보안 헤더 · robots·sitemap · 308/410 표본 · 관리자 경로 401 ·
+파기 예약 경로 404 를 한 번에 봅니다 (30건).
+
+```bash
+STAGING_BASE_URL=https://<스테이징 주소> \
+VERCEL_AUTOMATION_BYPASS_SECRET=<보호 우회 열쇠> \
+  npm run e2e:staging
+```
+
+- [ ] 30건 전부 통과
+- [ ] **보호 우회 열쇠**는 Vercel → Project → Settings → Deployment Protection →
+      「Protection Bypass for Automation」 에서 만듭니다. 없으면 모든 요청이 Vercel
+      로그인 화면으로 가서 전부 실패합니다
+- [ ] 이 점검은 **아무것도 만들지 않고 아무것도 지우지 않습니다.** 신청·공지·사진을
+      실제로 넣어 보는 것은 3-2·3-3 에서 사람이 합니다
+- [ ] `tests/e2e` 묶음을 스테이징에 그대로 돌리지 **마세요.** 그 묶음의 준비 단계가
+      **행을 지웁니다.** (`STAGING_BASE_URL` 을 주면 설정이 자동으로 갈라져 준비 단계를
+      건너뛰지만, `--project=e2e` 를 직접 지정하면 seed 가짜 데이터를 전제로 해 깨집니다)
 
 ### 3-5. 사진과 분석 도구 — `개발`
 
@@ -219,7 +310,8 @@
 - [ ] 자동 파기 예약이 하루 한 번 돌았는지 본다 (Vercel → Crons)
 - [ ] 옛 관리자 화면을 언제 닫을지 결정한다 (`docs/legacy-records-handling.md` 3장)
 - [ ] DNS TTL 을 원래대로 되돌린다 (1-3)
-- [ ] **재검토 항목**: 지금은 배포할 때마다 `prisma migrate deploy` 가 자동으로 돈다
-      (`vercel.json` 의 `buildCommand`). Preview 배포도 같은 DB 에 적용하므로, 1-7에서 A 안을
-      고르지 않았다면 **운영 전환 후 이 설정을 다시 볼 것.** 운영 DB 를 분리하거나 자동 실행을
-      끄고 사람이 실행하는 쪽으로 바꾼다
+- [ ] **재검토 항목**: 지금은 **Production 배포**할 때마다 `prisma migrate deploy` 가 자동으로 돈다
+      (`vercel.json` 의 `buildCommand`. Preview 배포는 건너뛴다). 실제 사람 손이 닿지 않는
+      자동 적용이므로, 전환 뒤 운영에 실제 신청 기록이 쌓인 다음에는 **이 설정을 다시 볼 것.**
+      되돌릴 수 없는 마이그레이션(컬럼 삭제·이름 변경)을 넣을 때는 자동 실행을 끄고
+      사람이 백업을 받은 뒤 직접 적용하는 쪽이 안전하다

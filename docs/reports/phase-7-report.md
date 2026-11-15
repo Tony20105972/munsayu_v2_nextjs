@@ -35,6 +35,23 @@ Vercel 프로젝트 `munsayu-v2-nextjs` 의 환경 변수를 **이름만** 확�
 > 비밀값을 보지 않기 위해 MCP 로 환경 변수를 복호화하는 길은 **쓰지 않았습니다.**
 > 복호화하면 그 값이 작업 기록에 남습니다 (`CLAUDE.md` 4장, 지시 「값은 보지 않음」).
 
+**Preview 환경 변수 확인** (지시 항목, 이름만 확인) — Preview 에는 **실행에 필요한 것이 다
+들어 있습니다.** Neon 주소 묶음과 `AUTH_SECRET`·`APP_BASE_URL`·`MAIL_*`·`NOTIFY_ADAPTER`·
+`STORAGE_ADAPTER`·`PRIVACY_PURGE_SECRET` 은 production·preview·development 셋 다,
+`BLOB_*` 은 production·preview 에 있습니다. **빠진 것은 `CRON_SECRET` 하나**입니다.
+전체 표와 해야 할 일은 `docs/migration-checklist.md` 1-10 에 있습니다.
+
+그 과정에서 함정 두 개를 찾아 적어 두었습니다.
+
+- `vercel env pull` 은 기본으로 **development** 를 받아 오는데 `BLOB_*` 토큰은 그 환경에
+  없습니다. 그래서 `STORAGE_ADAPTER` 를 development 까지 `vercel-blob` 으로 두면 받아 온
+  설정이 토큰 없이 Blob 을 쓰려다 실패합니다. → production·preview 만 `vercel-blob`.
+- `APP_BASE_URL` 은 한 값을 preview·production 이 같이 씁니다. Preview 배포에서 보낸
+  비밀번호 재설정 메일의 링크는 **production(스테이징) 주소**로 갑니다.
+
+`STORAGE_ADAPTER` 를 `vercel-blob` 으로 직접 바꾸려 했으나 **자동 승인 정책이 Vercel 설정
+쓰기를 막았습니다.** 우회하지 않고 사람이 할 일로 남겼습니다(4장 3번).
+
 ### 1-3. 전환에 필요한 코드 3건 (새로 만든 것)
 
 Gate 가 요구하는 것 중 **로그인 없이도 만들 수 있는 것**을 먼저 구현했습니다.
@@ -79,7 +96,45 @@ Gate 가 요구하는 것 중 **로그인 없이도 만들 수 있는 것**을 �
   **키 이름만** 더했습니다.
 - `tests/unit/storage-adapter-selection.test.ts` 신설 (5건).
 
-### 1-5. 문서
+### 1-5. 스테이징 점검 묶음 준비 (로그인 없이 할 수 있는 부분)
+
+스테이징 주소가 생기는 순간 **명령 한 줄로** 돌릴 수 있게 점검을 미리 만들어 두었습니다.
+
+```bash
+STAGING_BASE_URL=https://<스테이징 주소> \
+VERCEL_AUTOMATION_BYPASS_SECRET=<보호 우회 열쇠> \
+  npm run e2e:staging
+```
+
+- `playwright.config.ts` 를 **모드로 갈랐습니다.** `STAGING_BASE_URL` 이 있으면 로컬 개발
+  서버를 띄우지 않고, **준비 단계(`globalSetup`)도 돌리지 않습니다.** 그 준비 단계는
+  **행을 지웁니다** — 스테이징 주소를 가리킨 채 돌면 넣어 둔 기본 데이터·공지·관리자
+  계정이 사라집니다. 사고가 날 수 있는 자리라 설정 자체를 갈라 막았습니다.
+- Vercel 로그인 보호를 지나가도록 `x-vercel-protection-bypass` 헤더를 붙입니다.
+  이것이 없으면 모든 요청이 Vercel 로그인 화면으로 가서 점검이 전부 실패합니다.
+- `tests/staging/smoke.spec.ts` **30건**: 공개 화면 16개 200 · 운영 보안 헤더 ·
+  robots·sitemap 연결 · 308 표본 5건 · 410 표본 4건 · 관리자 경로 비로그인 401 ·
+  파기 예약 경로 비밀값 없이 404.
+- **아무것도 만들지 않고 아무것도 지우지 않습니다.** 신청 각 1건·상태 변경·CSV·사진
+  올리기·공지 작성은 사람이 도는 순서로 `migration-checklist.md` 3-2·3-3 에 있습니다.
+
+**로컬 운영 빌드로 돌려 30건 전부 통과했습니다** (`next build` → `next start` →
+`STAGING_BASE_URL=http://127.0.0.1:3100`). 스테이징 호스트가 아니므로 Gate 1번을
+채우지는 못하지만, 다음은 **운영 빌드에서 실제로 확인(`OBSERVED`)** 되었습니다.
+
+| 확인된 것 | 내용 |
+|---|---|
+| 운영 보안 헤더 | HSTS 있음 · CSP 에 `unsafe-eval` **없음**(개발에서만 열림) · `img-src` 에 Blob 호스트 포함 · `x-powered-by` 없음 |
+| RT-001~004 | 308 표본 5건, `/uAdmin`·`/adm` 410, 응답에 `/admin` 이 드러나지 않음 |
+| 파기 예약 인증 | 비밀값 없이·틀린 값으로 부르면 **404** (ASM-100 경계가 실제 서버에서 동작) |
+| 관리자 경로 | 비로그인 요청에 401/403 |
+
+점검을 실제로 돌려 **제 문서의 틀린 서술 1건을 찾았습니다.** 체크리스트 3-4 에
+`/uAdmin/` → 410 이라고 적었는데, 끝에 `/` 가 붙으면 Next 가 그것을 떼는 **308 을 한 번
+거친 뒤** 410 입니다. 레거시 robots.txt 에 적혀 있던 모양이 바로 끝에 `/` 가 붙은
+것이어서(EV-0002) 실제로 밟게 되는 경로입니다. 문서와 점검을 사실에 맞게 고쳤습니다.
+
+### 1-6. 문서
 
 | 문서 | 내용 |
 |---|---|
@@ -107,6 +162,8 @@ Gate 가 요구하는 것 중 **로그인 없이도 만들 수 있는 것**을 �
 | `npx next build` (운영 빌드) | **통과.** 예약 경로가 `ƒ (Dynamic)` 로 잡히는 것 확인 (5-4 참고) |
 | `tsc --noEmit` · `eslint` | 오류 0 |
 | 신규 테스트 | 11건 — 저장소 어댑터 선택·경로 경계 5+2, 예약 실행 인증 6 |
+| 스테이징 점검 묶음 | **30건 통과** (로컬 운영 빌드 기준. 스테이징 호스트는 아직 없다) |
+| 설정 분기 확인 | `STAGING_BASE_URL` 을 넣지 않은 **평소 모드도 그대로** — 431·52·104 가 분기 전과 같다 |
 
 > 이 수치는 **로컬**에서 로컬 PostgreSQL·로컬 파일 저장소로 돌린 것입니다.
 > **스테이징·Blob 저장소에서는 아직 한 번도 돌리지 않았습니다.**
@@ -119,7 +176,7 @@ Gate 가 요구하는 것 중 **로그인 없이도 만들 수 있는 것**을 �
 
 | # | 기준 | 판정 | 근거 |
 |---|---|---|---|
-| 1 | 스테이징 전체 E2E 통과 | **FAIL** | 스테이징을 세우지 못했습니다 (1-2). 로컬 E2E 52건·시각 104건은 통과 |
+| 1 | 스테이징 전체 E2E 통과 | **FAIL** | 스테이징을 세우지 못했습니다 (1-2). 로컬 E2E 52건·시각 104건 통과, 스테이징 점검 묶음 30건은 **로컬 운영 빌드**로 통과(1-5). 스테이징 호스트에서 돌린 것이 아니므로 미충족 |
 | 2 | AD-015 이미지 저장소를 Vercel Blob 으로 전환 | **부분** | 아래 3-1 |
 | 3 | 이관 불가 기록 처리 방안 확정 | **PASS** | `docs/legacy-records-handling.md`. 보관 기한은 기본안(ASM-101)이고 원장님 확인 대기(`Q-ADM-21`) |
 | 4 | 롤백 절차를 스테이징에서 **한 번 실제로 실행** | **FAIL** | 스테이징이 없어 실행하지 못했습니다. 절차는 문서로 확정 |
@@ -166,8 +223,9 @@ Phase 7 을 `GATE_CHECK` 로 올리지 않고 `GATE_FAIL` 로 두는 것이 사�
 | # | 할 일 | 누가 |
 |---|---|---|
 | **1** | 터미널에 `npx vercel login` → `npx vercel link` (각 1회). 그러면 2~5를 이어서 진행합니다 | 사용자 |
-| **2** | Vercel 환경 변수에 **`CRON_SECRET` 추가** (자동 파기 예약이 없으면 동작하지 않습니다). 값은 무작위 32자 이상 | 사용자 |
-| **3** | `STORAGE_ADAPTER` 값을 **`vercel-blob`** 으로 바꾸기 (지금 값은 확인하지 않았습니다. `local` 이면 운영에서 사진이 사라집니다) | 사용자 |
+| 1-1 | 스테이징이 서면 바로: `STAGING_BASE_URL=<주소> VERCEL_AUTOMATION_BYPASS_SECRET=<열쇠> npm run e2e:staging` (30건). 열쇠는 Vercel → Settings → Deployment Protection → Protection Bypass for Automation | 개발 |
+| **2** | Vercel 환경 변수에 **`CRON_SECRET` 추가** (없으면 자동 파기 예약이 404 로 막혀 동작하지 않습니다). 값은 무작위 32자 이상 | 사용자 |
+| **3** | `STORAGE_ADAPTER` 의 **production·preview** 를 `vercel-blob` 으로, **development** 는 `local` 로. 지금 값은 확인하지 않았습니다. `local` 이면 운영에서 올린 사진이 배포마다 사라집니다. 전체 표는 `migration-checklist.md` 1-10 | 사용자 |
 | **4** | 운영 DB 를 스테이징과 **따로 둘지 결정** (`migration-checklist.md` 1-7, 추천: 따로) | 원장님·사용자 |
 | **5** | 전환을 막는 결정 3건 답: **D7 DNS 관리 권한** · **D8 전환 일정** · **D4 메일 업체** | 원장님 |
 | 6 | `Q-ADM-15`~`21` 답 (`final-status.md` 5장, 중요도 순) | 원장님 |

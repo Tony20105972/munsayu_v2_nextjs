@@ -34,7 +34,8 @@
     "import:notices": "node scripts/import-legacy-notices.mjs",
     "build:media-registry": "tsx scripts/build-legacy-media-registry.ts",
     "bootstrap:admin": "tsx --conditions=react-server scripts/bootstrap-admin.ts",
-    "db:deploy:direct": "node scripts/migrate-deploy.mjs"
+    "db:deploy:direct": "node scripts/migrate-deploy.mjs",
+    "e2e:staging": "playwright test --project=staging"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.1",
