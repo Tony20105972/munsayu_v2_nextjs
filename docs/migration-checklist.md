@@ -16,7 +16,7 @@
 | 0-2 | **D8 전환 일정** 미정 | 원장님 | 1-6 참고 |
 | 0-3 | 원장님 답 6건 `Q-ADM-15`~`20` | 원장님 | 문구·주소 확정. `docs/PHASE.md` 운영자 질문 표 |
 | 0-4 | 메일 업체 결정 (D4) | 원장님 | 1-4 참고. 안 정하면 비밀번호 재설정 메일이 나가지 않음 |
-| 0-5 | 운영 DB 를 스테이징과 분리할지 결정 | 원장님·개발 | 1-7 참고 |
+| ~~0-5~~ | ~~운영 DB 를 스테이징과 분리할지 결정~~ **해소** | — | **A(따로 둔다)로 확정** 2026-11-15, D10·ADR-009. 할 일은 1-7 로 옮겼다 |
 
 ---
 
@@ -92,11 +92,14 @@
 | A (추천) | 운영용 Neon 프로젝트를 **따로** 만든다 | 연습 중 실수가 실제 신청 기록을 건드릴 수 없다. 가짜 시드 데이터가 운영에 섞이지 않는다 | 환경 변수를 두 벌 관리한다 | Neon 무료 한도 안에서 가능 |
 | B | 지금 DB 하나를 그대로 운영에 쓴다 | 설정이 한 벌 | **스테이징 시드의 가짜 데이터가 운영에 남는다.** 연습하다 지운 기록이 실제 기록이다 | 추가 없음 |
 
-- [ ] 결정: ______  결정한 사람: ______  날짜: ______
+- [x] 결정: **A (따로 둔다)**  결정한 사람: **사용자**  날짜: **2026-11-15** — 근거 `ADR-009`
 - [ ] A 를 고르면: 운영 Neon 프로젝트 생성 → Vercel 의 **Production 환경 변수만** 운영 DB 로 교체
       → Preview·Development 는 스테이징 DB 유지 → 운영에 마이그레이션 적용 → 기본 데이터만 넣고
       **가짜 시드는 넣지 않는다.**
 - [ ] A 를 고르면 운영에도 관리자 계정을 1-5 와 같이 **따로** 만든다.
+- [ ] **한계(ADR-009)**: 운영 DB 는 전환 당일에 처음 만들어진다. 그래서 「운영에서 마이그레이션이
+      실제로 도는 것」은 전환 전에 확인할 수 없다. 스테이징에서 **같은 명령·같은 빌드**로 확인한
+      것이 근거의 전부다. T-0 단계에서 마이그레이션 로그를 반드시 눈으로 본다.
 
 > Preview 배포가 데이터베이스 구조를 건드리는 문제는 **코드에서 막아 두었습니다.**
 > 마이그레이션은 `VERCEL_ENV=production` 일 때만 돌고, Preview 배포는 건너뜁니다
@@ -123,6 +126,20 @@
 > 명령은 그 데이터베이스를 가리키는 환경에서 돌립니다. 주소는 `vercel env pull` 로 받은
 > **별도 파일**에 두고, 로컬 `.env` 를 덮어쓰지 않습니다. 받은 파일은 `.gitignore` 가
 > 막는 자리(`.env*`)에 두고, 일이 끝나면 지웁니다.
+>
+> ```bash
+> npx vercel env pull --environment=production --yes .env.staging   # 별도 파일로 받는다
+> DOTENV_CONFIG_PATH=.env.staging node scripts/migrate-deploy.mjs   # 1 표 만들기
+> DOTENV_CONFIG_PATH=.env.staging npm run db:seed                   # 2 기본·연습 데이터 (운영에서는 건너뛴다)
+> DOTENV_CONFIG_PATH=.env.staging BOOTSTRAP_ADMIN_ID=<아이디> \
+>   BOOTSTRAP_ADMIN_EMAIL=<메일> npm run bootstrap:admin             # 3 첫 관리자 1명
+> DOTENV_CONFIG_PATH=.env.staging npm run import:notices -- --dry-run  # 4 먼저 숫자만 본다
+> rm .env.staging                                                   # 끝나면 지운다
+> ```
+>
+> `DOTENV_CONFIG_PATH` 는 네 명령 모두에 필요합니다. 빼면 로컬 `.env`(로컬 PostgreSQL)를
+> 읽어 **엉뚱한 데이터베이스에** 적용됩니다. 적용 전에 `prisma migrate status` 로 어느
+> 주소에 붙는지 한 번 확인하세요 (호스트 이름이 출력에 나옵니다).
 
 | 순서 | 할 일 | 명령 | 스테이징 | 운영 |
 |---|---|---|---|---|
@@ -147,7 +164,8 @@
 
 ### 1-10. 환경 변수 최종 확인 — `사용자`
 
-이름만 확인했습니다(2026-11-15). **값은 보지 않았습니다.** 아래 표의 「해야 할 일」만 하면 됩니다.
+이름만 확인했습니다(2026-11-15 재확인, `vercel env ls`). **값은 보지 않았습니다.**
+`STORAGE_ADAPTER`·`CRON_SECRET` 은 사용자가 처리했습니다. 남은 것은 메일·분석 두 줄뿐입니다.
 
 | 변수 | 지금 상태 | 해야 할 일 |
 |---|---|---|
@@ -155,8 +173,8 @@
 | `DATABASE_URL_TEST` | 없음 (지워진 상태) | 없음 ✅ (운영에 필요 없다) |
 | `BLOB_READ_WRITE_TOKEN`·`BLOB_STORE_ID`·`BLOB_WEBHOOK_PUBLIC_KEY` | production·preview | 없음 ✅ (development 에는 없다 — 아래 참고) |
 | `AUTH_SECRET`·`MAIL_ADAPTER`·`MAIL_FROM`·`NOTIFY_ADAPTER`·`APP_BASE_URL`·`PRIVACY_PURGE_SECRET` | production·preview·development | 없음 ✅ |
-| **`STORAGE_ADAPTER`** | 있음. 값은 확인하지 않았다 | **production·preview 를 `vercel-blob` 으로.** `local` 이면 올린 사진이 배포마다 사라진다 |
-| **`CRON_SECRET`** | **없음** | **추가.** 무작위 32자 이상. 없으면 자동 파기 예약이 돌지 않는다 (404) |
+| **`STORAGE_ADAPTER`** | **처리됨** (2026-11-15, 사용자). production·preview 에만 둔다. development 에는 없다 | 없음 ✅ — development 에 값이 없으면 어댑터는 기본 `local` 로 간다 |
+| **`CRON_SECRET`** | **추가됨** (2026-11-15, 사용자). **Production 에만** 있다 | 없음 ✅ — Preview 에는 없다. Preview 호스트에서는 파기 예약이 항상 404 다 (막힌 것만 확인되고 성공 경로는 확인되지 않는다) |
 | `RESEND_API_KEY` | 없음 | 메일을 실제로 보내기로 하면 추가 (1-4) |
 | `ANALYTICS_PROVIDER_ID` | 없음 | 방문 통계를 쓰기로 하면 추가. 비워 두어도 정상 |
 | `BLOB_PUBLIC_BASE_URL` | 없음 | 없음 ✅ (비워 두는 것이 정상) |

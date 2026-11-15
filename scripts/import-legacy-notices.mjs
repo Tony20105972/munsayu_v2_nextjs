@@ -88,8 +88,27 @@ function sanitizeBody(raw) {
   }).trim();
 }
 
+/**
+ * `sanitize-html` 은 태그를 지우면서 본문을 **다시 escape** 한다. 그래서 제목에
+ * `&gt;`·`&amp;` 가 글자 그대로 남는다. 사람이 읽는 값(제목)에 들어가므로 되돌린다.
+ * `&amp;` 는 **맨 마지막에** 푼다. 먼저 풀면 `&amp;lt;` 가 `<` 로 바뀐다.
+ */
+function decodeEntities(text) {
+  return text
+    .replace(/&nbsp;/g, " ")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&#(\d+);/g, (_, code) => String.fromCodePoint(Number(code)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, code) => String.fromCodePoint(parseInt(code, 16)))
+    .replace(/&amp;/g, "&");
+}
+
 function plainText(html) {
-  return sanitizeHtml(html, { allowedTags: [], allowedAttributes: {} })
+  return decodeEntities(
+    sanitizeHtml(html, { allowedTags: [], allowedAttributes: {} }),
+  )
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -134,11 +153,16 @@ async function collectWriteIds(maxPages) {
 }
 
 function matchFirst(html, patterns) {
-  for (const pattern of patterns) {
+  return matchFirstTagged(html, patterns).value;
+}
+
+/** 어느 패턴이 맞았는지도 돌려준다. 마지막 수단으로 떨어졌는지 구분해야 할 때 쓴다. */
+function matchFirstTagged(html, patterns) {
+  for (const [index, pattern] of patterns.entries()) {
     const match = html.match(pattern);
-    if (match) return match[1];
+    if (match) return { value: match[1], index };
   }
-  return null;
+  return { value: null, index: -1 };
 }
 
 /**
@@ -146,15 +170,34 @@ function matchFirst(html, patterns) {
  * 그누보드 기본 스킨 구조를 전제로 하되, 맞지 않으면 `null` 을 돌려 보고만 한다.
  */
 function parseDetail(html) {
-  const title = matchFirst(html, [
+  /*
+   * 운영 사이트의 공지 상세는 **그누보드 기본 스킨이 아니다** (OBSERVED 2026-11-15, EV-0018).
+   * 글 제목은 `<article id="kairos-bo">` 안의 첫 `<h1>` 이고, 쪽 위쪽의
+   * `<h1 data-aos="fade-up">공지사항</h1>` 은 구역 제목이라 집어서는 안 된다.
+   * 마지막 수단인 `<title>` 은 "글 제목 > 공지사항 | 문해와 사유(…)" 꼴이라 그대로 쓰면
+   * 제목에 쪽 제목이 따라 들어간다. 그래서 그때만 첫 `>` 앞까지 자른다.
+   */
+  const titleFromPageTitle = 3;
+  const titleMatch = matchFirstTagged(html, [
     /<h1[^>]*id=["']bo_v_title["'][^>]*>([\s\S]*?)<\/h1>/i,
     /<[^>]*class=["'][^"']*bo_v_tit[^"']*["'][^>]*>([\s\S]*?)<\//i,
+    /<article[^>]*id=["']kairos-bo["'][\s\S]{0,400}?<h1[^>]*>([\s\S]*?)<\/h1>/i,
     /<title>([\s\S]*?)<\/title>/i,
   ]);
+  const title =
+    titleMatch.index === titleFromPageTitle && titleMatch.value
+      ? plainText(titleMatch.value).split(/\s*>\s*/)[0]
+      : titleMatch.value;
 
+  /*
+   * 작성일은 `<i class="fa-regular fa-clock"></i>2026.10.29 13:54` 꼴로 붙어 있고
+   * **점으로 구분한다.** 전에는 `-` 만 보고 있어서 모든 글의 작성일이 비어 있었다.
+   * 쪽 안에는 이전글·다음글 줄에도 날짜가 섞일 수 있으므로 시계 아이콘 쪽을 먼저 본다.
+   */
   const dateText = matchFirst(html, [
     /<strong[^>]*class=["'][^"']*if_date[^"']*["'][^>]*>([\s\S]*?)<\/strong>/i,
-    /(\d{4}-\d{2}-\d{2}(?:\s+\d{2}:\d{2}(?::\d{2})?)?)/,
+    /fa-clock[\s\S]{0,60}?(\d{4}[.\-/]\d{1,2}[.\-/]\d{1,2}(?:\s+\d{1,2}:\d{2})?)/i,
+    /(\d{4}[.\-/]\d{2}[.\-/]\d{2}(?:\s+\d{2}:\d{2}(?::\d{2})?)?)/,
   ]);
 
   const body = matchFirst(html, [
@@ -174,10 +217,13 @@ function parseDetail(html) {
 
 /** 레거시 날짜 표기는 한국 시간이다. 시각이 없으면 그 날 0시로 본다. */
 function parseKstDate(text) {
-  const match = text.match(/(\d{4})-(\d{2})-(\d{2})(?:\s+(\d{2}):(\d{2}))?/);
+  const match = text.match(
+    /(\d{4})[.\-/](\d{1,2})[.\-/](\d{1,2})(?:\s+(\d{1,2}):(\d{2}))?/,
+  );
   if (!match) return null;
   const [, y, m, d, hh = "00", mm = "00"] = match;
-  return new Date(`${y}-${m}-${d}T${hh}:${mm}:00+09:00`);
+  const pad = (value) => String(value).padStart(2, "0");
+  return new Date(`${y}-${pad(m)}-${pad(d)}T${pad(hh)}:${mm}:00+09:00`);
 }
 
 /** 본문에 남은 레거시 이미지 주소를 우리 저장소로 옮기고 주소를 바꾼다. */

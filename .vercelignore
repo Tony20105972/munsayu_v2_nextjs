@@ -1,0 +1,11 @@
+# Vercel 배포에 올리지 않는 것.
+# 이 파일이 없으면 `vercel deploy` 가 로컬 폴더를 그대로 올려 .env(로컬 DB 주소)까지
+# 함께 올라간다. 그러면 빌드가 로컬 주소로 마이그레이션을 시도해 실패한다.
+.env
+.env.*
+.storage
+.tmp
+test-results
+.playwright-mcp
+legacy-assets-raw
+legacy-assets-clean

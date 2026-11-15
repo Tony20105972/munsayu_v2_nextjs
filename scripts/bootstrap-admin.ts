@@ -12,6 +12,11 @@
  * `BOOTSTRAP_ADMIN_PASSWORD` 를 주지 않으면 임시 비밀번호를 만들어 **터미널에 한 번만**
  * 찍는다. 그 값은 파일·로그·기록에 남지 않으므로 바로 옮겨 적고, 로그인한 뒤 바꾼다.
  */
+// 스테이징·운영에서는 `vercel env pull` 로 받은 **별도 파일**을 가리켜 돌린다
+// (`docs/migration-checklist.md` 1-9). 그 파일을 읽으려면 dotenv 가 필요하다.
+//   DOTENV_CONFIG_PATH=.env.staging BOOTSTRAP_ADMIN_ID=... npm run bootstrap:admin
+// 로컬에서는 `.env` 를 읽는다. 이미 process.env 에 있는 값은 덮어쓰지 않는다.
+import "dotenv/config";
 import { randomBytes } from "node:crypto";
 import { db } from "../src/server/db";
 import { hashPassword } from "../src/server/auth/password";
