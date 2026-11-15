@@ -48,6 +48,18 @@ export function forbidden(): AppError {
   return new AppError(ERROR_CODES.FORBIDDEN, 403, "권한이 없습니다.");
 }
 
+/**
+ * AD-016 임시 비밀번호로 들어온 계정이 비밀번호를 바꾸기 전에 다른 일을 하려 할 때.
+ * 새 오류 코드를 만들지 않고 403 을 쓴다 — 바깥 계약(`ERROR_CODES`)을 늘리지 않는다.
+ */
+export function passwordChangeRequired(): AppError {
+  return new AppError(
+    ERROR_CODES.FORBIDDEN,
+    403,
+    "임시 비밀번호로 들어왔습니다. 비밀번호를 먼저 바꿔 주세요.",
+  );
+}
+
 export function conflict(message = "이미 사용 중인 값입니다."): AppError {
   return new AppError(ERROR_CODES.CONFLICT, 409, message);
 }

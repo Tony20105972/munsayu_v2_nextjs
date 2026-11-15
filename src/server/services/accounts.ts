@@ -13,12 +13,18 @@ import {
 } from "@/lib/contracts";
 import { db } from "@/server/db";
 import { envValue } from "@/server/env";
-import { conflict, tokenInvalid, unauthenticated } from "@/server/errors";
+import {
+  conflict,
+  tokenInvalid,
+  unauthenticated,
+  validationFailed,
+} from "@/server/errors";
 import { hashPassword, verifyPassword } from "@/server/auth/password";
 import { invalidateUserSessions } from "@/server/auth/session";
 import { assertLoginAllowed, recordLoginAttempt } from "@/server/auth/throttle";
 import { createToken, hashToken } from "@/server/auth/tokens";
 import { getMailAdapter } from "@/server/adapters/mail";
+import { writeAuditLog } from "@/server/services/audit";
 
 function appBaseUrl(): string {
   // 배포 주소는 환경 변수로 받는다. 없으면 로컬 기본값을 쓴다. // ASM-023
@@ -181,6 +187,16 @@ export async function updateProfile(
   });
 }
 
+/**
+ * FM-003 · AD-016 본인 비밀번호 변경. 회원과 관리자가 같은 서비스를 쓴다.
+ *
+ * - 현재 비밀번호가 맞아야 한다. 틀리면 401 이고 **왜 틀렸는지 구분해 알려 주지 않는다.**
+ * - 바꾸면 **그 계정의 모든 세션을 끊는다.** 비밀번호를 바꾸는 이유가 「다른 사람이
+ *   들어왔을지도 모른다」일 수 있어서, 남은 세션을 살려 두면 바꾼 의미가 없다.
+ *   지금 쓰는 창까지 끊기므로 부르는 쪽에서 다시 로그인하게 만든다.
+ * - 임시 비밀번호 깃발(`mustChangePassword`)을 **끈다.** 강제 변경이 끝나는 자리다.
+ * - 감사 기록을 남긴다. 값은 담지 않고 누가 언제 바꿨는지만 남긴다. (AD-013)
+ */
 export async function changePassword(
   userId: string,
   input: ChangePasswordInput,
@@ -192,12 +208,32 @@ export async function changePassword(
   if (!user) throw unauthenticated();
 
   const matches = await verifyPassword(user.passwordHash, input.currentPassword);
-  if (!matches) throw unauthenticated();
+  if (!matches) {
+    /*
+     * 401 「로그인이 필요합니다」가 아니라 **칸 오류**로 돌려준다. 이미 로그인한
+     * 사람이고 틀린 것은 입력이다. 401 로 주면 화면이 「로그인이 필요합니다」를
+     * 띄워 사람이 세션이 끊긴 줄 알고 다시 로그인하러 간다.
+     * 자기 비밀번호를 확인해 주는 것이라 알려 주는 범위가 넓어지지 않는다.
+     */
+    throw validationFailed({ currentPassword: ["현재 비밀번호가 맞지 않습니다."] });
+  }
 
   const passwordHash = await hashPassword(input.password);
   await db.$transaction(async (tx) => {
-    await tx.user.update({ where: { id: userId }, data: { passwordHash } });
+    await tx.user.update({
+      where: { id: userId },
+      data: { passwordHash, mustChangePassword: false },
+    });
     await invalidateUserSessions(userId, tx);
+    await writeAuditLog(
+      {
+        actorUserId: userId,
+        action: "PASSWORD_CHANGE",
+        resourceType: "User",
+        resourceId: userId,
+      },
+      tx,
+    );
   });
 }
 

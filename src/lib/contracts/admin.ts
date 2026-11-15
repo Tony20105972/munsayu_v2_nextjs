@@ -133,6 +133,16 @@ export type AdminAccountCreateInput = z.infer<typeof adminAccountCreateSchema>;
 export const adminAccountDeleteSchema = z.object({ userId: cuidLikeIdSchema });
 export type AdminAccountDeleteInput = z.infer<typeof adminAccountDeleteSchema>;
 
+/**
+ * AD-016 다른 관리자의 비밀번호 초기화.
+ *
+ * 새 비밀번호를 **받지 않는다.** 서버가 임시 비밀번호를 만들어 한 번만 보여 주고,
+ * 대상 계정은 다음 로그인 때 변경을 강제받는다. 누르는 사람이 값을 고르면 그 값이
+ * 폼·기록·화면에 남고, 사람이 고른 값은 대개 약하다.
+ */
+export const adminPasswordResetSchema = z.object({ userId: cuidLikeIdSchema });
+export type AdminPasswordResetInput = z.infer<typeof adminPasswordResetSchema>;
+
 export const APPLICATION_STATUSES = ["PENDING", "CONFIRMED", "CANCELLED"] as const;
 
 /** 신청 목록 필터. CSV는 이 필터 결과 전체를 내보낸다. (ASM-006) */
@@ -227,6 +237,10 @@ export const AUDIT_ACTIONS = [
   /** 기존 사이트 사진은 지울 수 없어 숨기기로 목록·사진 고르기에서 뺀다. */
   "MEDIA_HIDE",
   "MEDIA_UNHIDE",
+  /** AD-016 본인이 자기 비밀번호를 바꿨다. */
+  "PASSWORD_CHANGE",
+  /** AD-016 관리자가 다른 관리자의 비밀번호를 초기화했다. */
+  "ADMIN_PASSWORD_RESET",
 ] as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 

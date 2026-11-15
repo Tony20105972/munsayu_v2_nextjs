@@ -17,11 +17,10 @@
 //   DOTENV_CONFIG_PATH=.env.staging BOOTSTRAP_ADMIN_ID=... npm run bootstrap:admin
 // 로컬에서는 `.env` 를 읽는다. 이미 process.env 에 있는 값은 덮어쓰지 않는다.
 import "dotenv/config";
-import { randomBytes } from "node:crypto";
 import type { ZodType } from "zod";
 import { emailSchema, loginIdSchema, passwordSchema } from "../src/lib/contracts/auth";
 import { db } from "../src/server/db";
-import { hashPassword } from "../src/server/auth/password";
+import { generateTemporaryPassword, hashPassword } from "../src/server/auth/password";
 
 function required(name: string): string {
   const raw = process.env[name]?.trim();
@@ -51,39 +50,6 @@ function checked<T>(schema: ZodType<T>, value: unknown, name: string): T {
   return result.data;
 }
 
-/**
- * 사람이 받아 적을 임시 비밀번호. 헷갈리는 글자(0·O·1·l·I)를 뺀다.
- * 24자면 받아 적기 번거롭지 않으면서 추측으로는 뚫리지 않는다.
- *
- * `byte % alphabet.length` 로 고르면 앞쪽 글자가 조금 더 자주 나온다(256 이 56 의 배수가
- * 아니다). 임시 비밀번호라 실질 위험은 작지만, 치우치지 않게 뽑는 비용도 작으므로
- * 남는 범위에 걸린 바이트는 버리고 다시 뽑는다.
- */
-function temporaryPassword(): string {
-  const alphabet = "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  const limit = Math.floor(256 / alphabet.length) * alphabet.length;
-
-  /*
-   * 뽑은 값이 `passwordSchema`(영문과 숫자를 함께)를 만족할 때까지 다시 뽑는다.
-   * 알파벳 56자 중 숫자가 8자뿐이라 24자를 뽑아도 숫자가 하나도 없을 확률이
-   * (48/56)^24 ≈ 2% 다. 그 2% 는 비밀번호를 바꾸려 할 때 거부당하는 계정이 된다.
-   */
-  for (let attempt = 0; attempt < 100; attempt += 1) {
-    const out: string[] = [];
-    while (out.length < 24) {
-      for (const byte of randomBytes(32)) {
-        if (byte >= limit) continue;
-        out.push(alphabet[byte % alphabet.length]);
-        if (out.length === 24) break;
-      }
-    }
-    const candidate = out.join("");
-    if (passwordSchema.safeParse(candidate).success) return candidate;
-  }
-
-  throw new Error("임시 비밀번호를 만들지 못했습니다. 다시 실행해 주세요.");
-}
-
 async function main(): Promise<void> {
   const loginId = checked(
     loginIdSchema,
@@ -99,7 +65,7 @@ async function main(): Promise<void> {
   const password =
     givenPassword && givenPassword.length > 0
       ? checked(passwordSchema, givenPassword, "BOOTSTRAP_ADMIN_PASSWORD")
-      : temporaryPassword();
+      : generateTemporaryPassword();
 
   const existing = await db.user.findUnique({ where: { loginId } });
   if (existing) {
@@ -117,10 +83,19 @@ async function main(): Promise<void> {
       email,
       phone: "010-0000-0000",
       role: "ADMIN",
+      /*
+       * AD-016 첫 로그인 때 비밀번호를 바꾸게 한다.
+       *
+       * 이 비밀번호는 터미널에 찍혀 사람 손을 거쳐 전달된다(또는 명령 줄에 적힌다).
+       * 그 경로에 남은 값이 계정의 영구 비밀번호가 되면 안 된다. 깃발이 켜져 있으면
+       * 관리자 화면이 비밀번호 변경 외의 어떤 일도 받지 않는다.
+       */
+      mustChangePassword: true,
     },
   });
 
   console.log(`관리자 계정을 만들었습니다: ${loginId}`);
+  console.log("첫 로그인 때 비밀번호를 바꿔야 합니다. 바꾸기 전에는 다른 화면을 쓸 수 없습니다.");
   if (!givenPassword) {
     console.log("");
     console.log(

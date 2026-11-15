@@ -5,6 +5,8 @@ import type { ActionResult } from "@/lib/action-result";
 import {
   adminAccountCreateSchema,
   adminAccountDeleteSchema,
+  adminPasswordResetSchema,
+  changePasswordSchema,
   applicationRevealSchema,
   courseIntakeChangeSchema,
   courseUpsertSchema,
@@ -22,6 +24,7 @@ import {
   purgeRunSchema,
 } from "@/lib/contracts";
 import {
+  destroySessionAndCookie,
   failure,
   formEntries,
   parseInput,
@@ -54,10 +57,12 @@ import {
   setTeamMembership,
   updateInstructor,
 } from "@/server/services/instructors";
+import { changePassword } from "@/server/services/accounts";
 import {
   changeMemberStatus,
   createAdminAccount,
   deleteAdminAccount,
+  resetAdminPassword,
 } from "@/server/services/members";
 import {
   runPurge,
@@ -150,6 +155,57 @@ export async function deleteAdminAccountAction(
     await deleteAdminAccount(admin.id, parsed.value);
     revalidateAdmin("/admin/members", "/admin");
     return success();
+  } catch (error) {
+    return toFailure(error);
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* AD-016 관리자 비밀번호                                               */
+/* ------------------------------------------------------------------ */
+
+/**
+ * AD-016 관리자가 **자기** 비밀번호를 바꾼다.
+ *
+ * 바꾸면 그 계정의 세션이 모두 끊기므로(서비스가 끊는다) 지금 창의 쿠키도 지운다.
+ * 그러지 않으면 쿠키는 남고 세션 행은 없어 다음 요청마다 로그인 화면으로 튕긴다.
+ *
+ * 임시 비밀번호 상태(`mustChangePassword`)에서도 **이 Action 만은 통과한다.**
+ * 그러지 않으면 바꿀 방법이 없어 계정이 잠긴다.
+ */
+export async function changeAdminPasswordAction(
+  formData: FormData,
+): Promise<ActionResult> {
+  try {
+    const admin = await requireAdminFromCookies({ allowPasswordChangePending: true });
+    const parsed = parseInput(changePasswordSchema, formEntries(formData));
+    if (!parsed.ok) return parsed.failure;
+
+    await changePassword(admin.id, parsed.value);
+    await destroySessionAndCookie("ADMIN");
+    return success();
+  } catch (error) {
+    return toFailure(error);
+  }
+}
+
+/**
+ * AD-016 다른 관리자의 비밀번호 초기화. 임시 비밀번호를 **한 번만** 돌려준다.
+ *
+ * 돌려준 값은 화면이 한 번 보여 주고 버린다. 다시 볼 길은 없고, 잃어버리면 다시
+ * 초기화한다. 저장하거나 기록에 남기지 않는다.
+ */
+export async function resetAdminPasswordAction(
+  formData: FormData,
+): Promise<ActionResult<{ loginId: string; temporaryPassword: string }>> {
+  try {
+    const admin = await requireAdminFromCookies();
+    const parsed = parseInput(adminPasswordResetSchema, formEntries(formData));
+    if (!parsed.ok) return parsed.failure;
+
+    const issued = await resetAdminPassword(admin.id, parsed.value);
+    revalidateAdmin("/admin/members", "/admin");
+    return success(issued);
   } catch (error) {
     return toFailure(error);
   }
