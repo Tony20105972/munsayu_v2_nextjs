@@ -12,7 +12,7 @@
 - **스테이징 미구축 — 사람이 할 일로 막혀 있다.** Neon·Blob 은 Vercel 프로젝트에 연결되어 있으나(이름만 확인, 값은 보지 않음), 로컬에 Vercel CLI 로그인이 없어 `vercel env pull`·`migrate deploy`·스테이징 E2E 를 실행하지 못했다. 사람이 `npx vercel login` → `npx vercel link` 를 1회 실행하면 이어서 진행할 수 있다.
 - 독립 리뷰 차단 3건 수정: **예약 파기가 「자동 파기 사용」 스위치를 무시**(꺼져 있어도 지웠다) · **모든 브랜치 배포가 같은 DB 를 마이그레이션**(`VERCEL_ENV=production` 가드 추가) · 계약 문서 누락(openapi·migration-matrix). 운영 빌드에서 예약 경로가 정적 생성되던 결함도 수정(`connection()`).
 - Phase 7 코드 변경 3건: **Vercel Blob 저장 어댑터 신설**(`STORAGE_ADAPTER=vercel-blob`, 공개는 public·이력서/임시는 private, 서명된 PUT 티켓으로 바이트가 함수를 지나가지 않음) · **배포 시 마이그레이션 자동 실행**(`vercel.json` `buildCommand` + `scripts/migrate-deploy.mjs`, 직접 접속 주소 사용) · **자동 파기 예약 경로**(`GET /api/cron/privacy-purge`, `CRON_SECRET` Bearer, 하루 1회 03:00 KST).
-- **스테이징 점검 묶음 준비** — `tests/staging/smoke.spec.ts` 30건(공개 16개 200·운영 보안 헤더·robots/sitemap·308 5건·410 4건·관리자 401·파기 예약 404). `playwright.config.ts` 를 `STAGING_BASE_URL` 유무로 갈라, 스테이징 모드에서는 로컬 서버와 **행을 지우는 `globalSetup` 을 돌리지 않는다.** 로컬 운영 빌드(`next start`)로 30건 전부 통과 — 운영 보안 헤더·RT-001~004·파기 예약 인증 404 를 실제 서버에서 확인(`OBSERVED`). 스테이징 호스트는 아니므로 Gate 1번은 여전히 미충족.
+- **스테이징 점검 묶음 준비** — `tests/staging/smoke.spec.ts` 32건(공개 16개 200·운영 보안 헤더·robots/sitemap·308 5건·410 4건·관리자 401·파기 예약 404). `playwright.config.ts` 를 `STAGING_BASE_URL` 유무로 갈라, 스테이징 모드에서는 로컬 서버와 **행을 지우는 `globalSetup` 을 돌리지 않는다.** 로컬 운영 빌드(`next start`)로 32건 전부 통과 — 운영 보안 헤더·RT-001~004·파기 예약 인증 404 를 실제 서버에서 확인(`OBSERVED` — 증거 `EV-0016`, Preview 마이그레이션 가드는 `EV-0017`). 스테이징 호스트는 아니므로 Gate 1번은 여전히 미충족.
 - 그 밖에 `scripts/bootstrap-admin.ts`(첫 관리자 1명, 임시 비밀번호는 터미널에 한 번만) 신설, Preview 배포 재활성(`vercel.json`), `.env.example` 에 `BLOB_*`·`CRON_SECRET`·`BOOTSTRAP_ADMIN_*`·`DATABASE_URL_UNPOOLED` 추가.
 - Phase 7 신규 문서 5종: `docs/migration-checklist.md`(사전 준비·전환 순서·직후 확인) · `docs/rollback-plan.md`(조건·절차·소요 시간·전환 중 유입 신청) · `docs/legacy-records-handling.md`(이관 불가 기록 처리) · `docs/monitoring-plan.md`(선택지·비용만, 연결은 사람 승인 후) · `docs/reports/final-status.md`. `docs/ADMIN_GUIDE.md` 는 사진 외 전 메뉴(10~21장)까지 완성.
 - 신규 ASM-098~102. 신규 질문 `Q-ADM-21`(보관 CSV 파기 기한). **전환을 막는 결정은 D7(DNS 권한)·D8(일정)·D4(메일 업체)** — 중요도 순 질문은 `final-status.md` 5장.
@@ -139,6 +139,6 @@ tests/{unit,integration,e2e,visual}/      docs/{contracts,decisions,reports,evid
 | 보조 | `npm run check:assets` · `npm run build:media-registry` · `npm run import:notices -- --dry-run` |
 | 첫 관리자 1명 만들기 | `BOOTSTRAP_ADMIN_ID=<아이디> BOOTSTRAP_ADMIN_EMAIL=<메일> npm run bootstrap:admin` (임시 비밀번호는 터미널에 한 번만) |
 | 직접 접속 주소로 마이그레이션 | `npm run db:deploy:direct` (`DATABASE_URL_UNPOOLED` 우선) |
-| 스테이징 점검 30건 | `STAGING_BASE_URL=<주소> VERCEL_AUTOMATION_BYPASS_SECRET=<열쇠> npm run e2e:staging` (로컬 서버·DB 비우기 없이 바깥 주소만 두드린다) |
+| 스테이징 점검 32건 | `STAGING_BASE_URL=<주소> VERCEL_AUTOMATION_BYPASS_SECRET=<열쇠> npm run e2e:staging` (로컬 서버·DB 비우기 없이 바깥 주소만 두드린다) |
 
 통합·E2E 테스트는 DB가 켜져 있어야 한다. 환경 변수 키 이름과 첫 관리자 계정 만드는 방법은 `docs/LOCAL_DEV.md`.

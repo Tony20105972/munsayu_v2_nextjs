@@ -112,15 +112,17 @@ VERCEL_AUTOMATION_BYPASS_SECRET=<보호 우회 열쇠> \
   계정이 사라집니다. 사고가 날 수 있는 자리라 설정 자체를 갈라 막았습니다.
 - Vercel 로그인 보호를 지나가도록 `x-vercel-protection-bypass` 헤더를 붙입니다.
   이것이 없으면 모든 요청이 Vercel 로그인 화면으로 가서 점검이 전부 실패합니다.
-- `tests/staging/smoke.spec.ts` **30건**: 공개 화면 16개 200 · 운영 보안 헤더 ·
+- `tests/staging/smoke.spec.ts` **32건**: 공개 화면 16개 200 · 운영 보안 헤더 ·
   robots·sitemap 연결 · 308 표본 5건 · 410 표본 4건 · 관리자 경로 비로그인 401 ·
   파기 예약 경로 비밀값 없이 404.
 - **아무것도 만들지 않고 아무것도 지우지 않습니다.** 신청 각 1건·상태 변경·CSV·사진
   올리기·공지 작성은 사람이 도는 순서로 `migration-checklist.md` 3-2·3-3 에 있습니다.
 
-**로컬 운영 빌드로 돌려 30건 전부 통과했습니다** (`next build` → `next start` →
-`STAGING_BASE_URL=http://127.0.0.1:3100`). 스테이징 호스트가 아니므로 Gate 1번을
-채우지는 못하지만, 다음은 **운영 빌드에서 실제로 확인(`OBSERVED`)** 되었습니다.
+**로컬 운영 빌드로 돌려 32건 전부 통과했습니다** (`next build` → `next start` →
+`STAGING_BASE_URL=http://127.0.0.1:3100`). 실행 출력·응답 헤더·주소별 응답 코드를
+**증거로 남겼습니다 — `EV-0016`** (`docs/evidence/phase7/EV-0016-phase7-staging-smoke.md`).
+스테이징 호스트가 아니므로 Gate 1번을 채우지는 못하지만, 다음은 **운영 빌드에서
+실제로 확인(`OBSERVED`, EV-0016)** 되었습니다.
 
 | 확인된 것 | 내용 |
 |---|---|
@@ -162,7 +164,7 @@ VERCEL_AUTOMATION_BYPASS_SECRET=<보호 우회 열쇠> \
 | `npx next build` (운영 빌드) | **통과.** 예약 경로가 `ƒ (Dynamic)` 로 잡히는 것 확인 (5-4 참고) |
 | `tsc --noEmit` · `eslint` | 오류 0 |
 | 신규 테스트 | 11건 — 저장소 어댑터 선택·경로 경계 5+2, 예약 실행 인증 6 |
-| 스테이징 점검 묶음 | **30건 통과** (로컬 운영 빌드 기준. 스테이징 호스트는 아직 없다) |
+| 스테이징 점검 묶음 | **32건 통과** (로컬 운영 빌드 기준. 스테이징 호스트는 아직 없다) |
 | 설정 분기 확인 | `STAGING_BASE_URL` 을 넣지 않은 **평소 모드도 그대로** — 431·52·104 가 분기 전과 같다 |
 
 > 이 수치는 **로컬**에서 로컬 PostgreSQL·로컬 파일 저장소로 돌린 것입니다.
@@ -176,7 +178,7 @@ VERCEL_AUTOMATION_BYPASS_SECRET=<보호 우회 열쇠> \
 
 | # | 기준 | 판정 | 근거 |
 |---|---|---|---|
-| 1 | 스테이징 전체 E2E 통과 | **FAIL** | 스테이징을 세우지 못했습니다 (1-2). 로컬 E2E 52건·시각 104건 통과, 스테이징 점검 묶음 30건은 **로컬 운영 빌드**로 통과(1-5). 스테이징 호스트에서 돌린 것이 아니므로 미충족 |
+| 1 | 스테이징 전체 E2E 통과 | **FAIL** | 스테이징을 세우지 못했습니다 (1-2). 로컬 E2E 52건·시각 104건 통과, 스테이징 점검 묶음 32건은 **로컬 운영 빌드**로 통과(1-5). 스테이징 호스트에서 돌린 것이 아니므로 미충족 |
 | 2 | AD-015 이미지 저장소를 Vercel Blob 으로 전환 | **부분** | 아래 3-1 |
 | 3 | 이관 불가 기록 처리 방안 확정 | **PASS** | `docs/legacy-records-handling.md`. 보관 기한은 기본안(ASM-101)이고 원장님 확인 대기(`Q-ADM-21`) |
 | 4 | 롤백 절차를 스테이징에서 **한 번 실제로 실행** | **FAIL** | 스테이징이 없어 실행하지 못했습니다. 절차는 문서로 확정 |
@@ -223,7 +225,7 @@ Phase 7 을 `GATE_CHECK` 로 올리지 않고 `GATE_FAIL` 로 두는 것이 사�
 | # | 할 일 | 누가 |
 |---|---|---|
 | **1** | 터미널에 `npx vercel login` → `npx vercel link` (각 1회). 그러면 2~5를 이어서 진행합니다 | 사용자 |
-| 1-1 | 스테이징이 서면 바로: `STAGING_BASE_URL=<주소> VERCEL_AUTOMATION_BYPASS_SECRET=<열쇠> npm run e2e:staging` (30건). 열쇠는 Vercel → Settings → Deployment Protection → Protection Bypass for Automation | 개발 |
+| 1-1 | 스테이징이 서면 바로: `STAGING_BASE_URL=<주소> VERCEL_AUTOMATION_BYPASS_SECRET=<열쇠> npm run e2e:staging` (32건). 열쇠는 Vercel → Settings → Deployment Protection → Protection Bypass for Automation | 개발 |
 | **2** | Vercel 환경 변수에 **`CRON_SECRET` 추가** (없으면 자동 파기 예약이 404 로 막혀 동작하지 않습니다). 값은 무작위 32자 이상 | 사용자 |
 | **3** | `STORAGE_ADAPTER` 의 **production·preview** 를 `vercel-blob` 으로, **development** 는 `local` 로. 지금 값은 확인하지 않았습니다. `local` 이면 운영에서 올린 사진이 배포마다 사라집니다. 전체 표는 `migration-checklist.md` 1-10 | 사용자 |
 | **4** | 운영 DB 를 스테이징과 **따로 둘지 결정** (`migration-checklist.md` 1-7, 추천: 따로) | 원장님·사용자 |
@@ -267,7 +269,7 @@ Phase 7 을 `GATE_CHECK` 로 올리지 않고 `GATE_FAIL` 로 두는 것이 사�
   가드를 넣었습니다. 로컬·CI 에는 `VERCEL_ENV` 가 없어 영향이 없습니다.
 - 함께 수정: 로컬에서 `npm run db:deploy:direct` 가 되도록 `dotenv/config` 를 읽습니다.
 - 확인(로컬): `VERCEL_ENV=preview` → 건너뜀(exit 0) · 주소 없음 → 중단(exit 1) · 로컬 → 적용(exit 0).
-- 확인(`OBSERVED`, 실제 Vercel 빌드 기록 — PR #8 의 Preview 배포 `dpl_Gc1ej3Ba...`):
+- 확인(`OBSERVED`, **`EV-0017`** — 실제 Vercel 빌드 기록. `docs/evidence/phase7/EV-0017-phase7-preview-migrate-guard.md`):
 
   ```
   Running "node scripts/migrate-deploy.mjs && next build"
@@ -311,3 +313,49 @@ Phase 7 을 `GATE_CHECK` 로 올리지 않고 `GATE_FAIL` 로 두는 것이 사�
 (빌드가 거부합니다) `connection()` 을 기다리게 고쳤습니다. 이제 `ƒ (Dynamic)` 입니다.
 
 > `verify:all` 은 `next build` 를 돌리지 않습니다. 이 결함은 운영 빌드에서만 드러났습니다.
+
+---
+
+## 7. 2차 독립 리뷰 (스테이징 점검 증분) — 차단 1 / 권장 6 / 참고 5
+
+스테이징 점검 묶음과 설정 분기가 **데이터 삭제 가드를 건드리는 변경**이라 증분 diff 로
+한 번 더 리뷰했습니다. 차단 1건을 수정하고, 권장 6건 중 **6건 전부**, 참고 3건을 반영했습니다.
+
+### 7-1. 차단 (1건, 수정)
+
+**근거 등급을 `OBSERVED` 로 적었는데 증거 파일도 `EV-` ID 도 없었습니다.** `CLAUDE.md` 2장은
+`OBSERVED` 에 증거 파일을 요구합니다. 표기를 내리는 대신 **증거를 실제로 만들었습니다.**
+
+- `EV-0016` — 스테이징 점검 32건 실행 출력 · 홈 응답 헤더 6줄 · 주소별 응답 코드.
+  「이 기록으로 증명되지 않는 것」을 함께 적었습니다(스테이징 호스트·Blob 업로드·파기 성공 경로).
+- `EV-0017` — Preview 배포가 마이그레이션을 건너뛴 Vercel 빌드 기록 3줄(배포·빌드 ID 포함).
+- 둘 다 `docs/evidence/ledger.md` 에 등록했습니다.
+
+### 7-2. 권장 (6건 전부 반영)
+
+리뷰가 지적한 앞의 3건은 **리뷰가 돌는 동안 제가 스스로 찾아 이미 고쳐 둔 것**이었고
+(커밋 `4ae4374`), 리뷰가 같은 결론에 독립적으로 도달했습니다.
+
+| # | 지적 | 처리 |
+|---|---|---|
+| 1 | 추적 파일에 보호 우회 열쇠가 담긴다 (`CI=1` 재시도 시) | 스테이징 모드에서 `trace: "off"` |
+| 2 | 스테이징 모드에서도 `--project=e2e` 를 고를 수 있어 외부 호스트에 **쓰기**가 일어난다 | 스테이징 모드에서는 `staging` 묶음만 둔다. 다른 묶음을 지정하면 Playwright 가 바로 멈춘다 |
+| 3 | `e2e:staging` 이 `STAGING_BASE_URL` 없이도 돌아 로컬에서 **행을 지우는** 준비 단계까지 실행된다 | 스크립트에 사전 확인을 붙였다. 비어 있으면 명령 모양까지 알려 준다 |
+| 4 | 체크리스트의 「`--project=e2e` 를 지정하면 깨집니다」가 위험을 축소했고(실제로는 **쓰기**가 일어난다) 수정 후에는 사실과도 어긋난다 | 둘 다 반영. 이제 「막아 두었다」와 실제 오류 문구를 적었다 |
+| 5 | `.env.example` 에 `STAGING_BASE_URL`·`VERCEL_AUTOMATION_BYPASS_SECRET` 이름이 없다 | 추가 |
+| 6 | 파기 예약 404 단정은 경로 미배포·비밀값 공백에도 통과해 인증을 증명하지 못한다 | 한계를 테스트 주석·`EV-0016`·체크리스트에 적고, 성공 경로는 Vercel → Crons 기록으로 확인하도록 짝지었다 |
+
+### 7-3. 참고 (3건 반영)
+
+- 관리자 3경로를 한 테스트에서 순회해 첫 실패 뒤 나머지를 못 보던 것 → **경로마다 분리**(32건으로 늘었다).
+- 308 단정이 경로만 비교하던 것 → **출처(호스트)까지** 비교. 경로가 맞아도 다른 호스트로
+  보내면 방문자를 엉뚱한 사이트로 넘기는 것이다.
+- robots 의 `Sitemap:` 은 `SITE_ORIGIN`(운영 도메인)일 수 있어 「서로 이어진다」가 스테이징에서도
+  무조건 통과 → 단정 이름과 주석을 「줄이 있는지만 본다」로 내리고, 주소 확인은 사람 몫으로 넘겼다.
+
+### 7-4. 리뷰가 확인해 준 것
+
+- 스테이징 모드에서 `globalSetup` 키 자체가 빠지므로 **행 삭제 경로는 없다.**
+- `STAGING_BASE_URL` 없는 평소 모드는 `globalSetup`·`webServer`·`baseURL`·`trace` 가 **전과 동일**.
+- 스테이징 점검은 전부 상대 경로 요청이라 **운영 사이트(munsayu.com)를 두드리는 경로가 없다.**
+- `/uAdmin/` 의 「308 뒤 410」 서술은 Next 가 redirects 를 미들웨어보다 먼저 처리하므로 사실과 맞다.

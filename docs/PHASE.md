@@ -33,7 +33,7 @@
 | 4 | Backend Replacement | APPROVED | PASS (9/9 적용) | 차단 1 수정 / 권장 12 기록 | ☑ | `reports/phase-4-report.md` |
 | 5 | Legacy Parity Testing | APPROVED | PASS (4/5, 1건 방법 대체) | 차단 1 수정 / 권장 5 중 3 수정 | ☑ | `reports/phase-5-report.md` |
 | 6 | Performance & Security | APPROVED | PASS (2/3, 1건 방법 대체) | 차단 3 수정 / 권장 6 중 4 수정 | ☑ | `reports/phase-6-report.md` |
-| 7 | Cutover 준비 | GATE_FAIL | FAIL (1/5, 1건 부분·방법 대체 1건) | 차단 3 수정 / 권장 6 중 5 수정 | ☐ | `reports/phase-7-report.md` |
+| 7 | Cutover 준비 | GATE_FAIL | FAIL (1/5, 1건 부분·방법 대체 1건) | 1차 차단 3 수정 / 권장 6 중 5 · 2차 차단 1 수정 / 권장 6 전부 | ☐ | `reports/phase-7-report.md` |
 
 - Gate 칸: `PASS (n/n)` 또는 `FAIL (통과 수/전체)`
 - 독립 리뷰 칸: `차단 0 / 권장 n` 형식
@@ -145,7 +145,8 @@ Claude는 Phase 상태가 바뀔 때마다 한 줄씩 추가합니다. 위쪽이
 
 | 날짜 | Phase | 변경 | 작성 |
 |---|---|---|---|
-| 2026-11-15 | 7 | 스테이징 점검 묶음 준비(`tests/staging` 30건, `STAGING_BASE_URL` 모드 분리 — 스테이징에서 행을 지우는 준비 단계가 돌지 않게 막음). 로컬 운영 빌드로 30건 통과, 운영 보안 헤더·RT-001~004·파기 예약 404 를 실제 서버에서 확인. 체크리스트의 `/uAdmin/` 410 서술이 틀린 것(308 한 번 거친 뒤 410)을 찾아 고침. 환경 변수 쓰기는 자동 승인 정책에 막혀 사람이 할 일로 남김 | Claude Code |
+| 2026-11-15 | 7 | 2차 독립 리뷰(증분, 차단 1 / 권장 6 / 참고 5). 차단 1건 수정 — `OBSERVED` 표기에 증거가 없던 것을 **증거를 실제로 만들어** 해소(`EV-0016` 점검 32건 실행 기록, `EV-0017` Preview 마이그레이션 가드 빌드 기록, 둘 다 ledger 등록). 권장 6건 전부·참고 3건 반영(추적 끄기, 묶음 격리, 스크립트 사전 확인, 308 출처 비교, 관리자 경로 분리) | Claude Code |
+| 2026-11-15 | 7 | 스테이징 점검 묶음 준비(`tests/staging` 32건, `STAGING_BASE_URL` 모드 분리 — 스테이징에서 행을 지우는 준비 단계가 돌지 않게 막음). 로컬 운영 빌드로 32건 통과, 운영 보안 헤더·RT-001~004·파기 예약 404 를 실제 서버에서 확인. 체크리스트의 `/uAdmin/` 410 서술이 틀린 것(308 한 번 거친 뒤 410)을 찾아 고침. 환경 변수 쓰기는 자동 승인 정책에 막혀 사람이 할 일로 남김 | Claude Code |
 | 2026-11-15 | 7 | 전환 준비: Blob 저장 어댑터 신설(공개 public / 이력서·임시 private, 서명된 PUT 티켓) · 배포 시 마이그레이션 자동 실행 · 자동 파기 예약 경로 · 첫 관리자 생성 스크립트 · 문서 5종 신설과 `ADMIN_GUIDE` 완성. 로컬 `verify:all` 통과. 독립 리뷰 차단 3건 수정(예약 파기가 「자동 파기 사용」 스위치를 무시 · 모든 브랜치 배포가 같은 DB 를 마이그레이션 · 계약 문서 누락), 권장 6 중 5 수정. 운영 빌드에서 예약 경로가 정적 생성되던 결함도 함께 고침. **스테이징은 Vercel CLI 로그인 부재로 미구축** → Gate FAIL(1/5) → `GATE_FAIL` | Claude Code |
 | 2026-11-15 | 6→7 | **Phase 6 승인(사용자 지시)**, PR #7 squash 병합(`verify` CI 통과, GitGuardian 은 테스트용 가짜 값만 잡아 막는 사유로 보지 않음). Phase 7 시작, `release/phase-7` 브랜치 생성 | Claude Code |
 | 2026-11-15 | 6 | 성능: 배너 267KB→10KB, 모바일 LCP 2940~3484ms→604~636ms(기준 1/7→7/7). 보안: 보안 헤더 전무 → nonce CSP 등 추가, CSV 무제한 내보내기 상한(ASM-097), 만료 세션 테스트 50건. sitemap 신설. Gate 2/3(3번 방법 대체) → GATE_CHECK | Claude Code |

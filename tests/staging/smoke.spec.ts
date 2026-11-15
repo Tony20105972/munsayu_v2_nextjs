@@ -19,6 +19,12 @@ import { expect, test } from "@playwright/test";
  * (메일 파일을 읽는 비밀번호 재설정 흐름은 제외).
  */
 
+/**
+ * 리다이렉트의 출처를 비교할 기준. `STAGING_BASE_URL` 이 곧 점검 대상 주소다.
+ * 설정이 `baseURL` 로도 쓰는 값이라 둘이 어긋날 일은 없다.
+ */
+const stagingOrigin = process.env.STAGING_BASE_URL?.trim() || "http://127.0.0.1:3000";
+
 /** PG-001~014 공개 화면. 공지 상세는 글이 있어야 하므로 여기 넣지 않는다. */
 const PUBLIC_PATHS = [
   "/",
@@ -72,7 +78,13 @@ test.describe("스테이징 공개 화면", () => {
     expect(headers["x-powered-by"]).toBeUndefined();
   });
 
-  test("robots.txt 와 sitemap.xml 이 열리고 서로 이어진다", async ({ request }) => {
+  /*
+   * robots.txt 의 `Sitemap:` 줄은 `SITE_ORIGIN`(운영 도메인)을 쓴다. 스테이징에서는
+   * 그 주소가 스테이징이 아닌 운영 도메인을 가리킬 수 있다. 그래서 여기서는 **줄이
+   * 있는지**만 보고, 주소가 맞는지는 전환 당일 사람이 눈으로 본다
+   * (`docs/migration-checklist.md` 3-6).
+   */
+  test("robots.txt 와 sitemap.xml 이 열리고 sitemap 줄이 있다", async ({ request }) => {
     const robots = await request.get("/robots.txt");
     expect(robots.status()).toBe(200);
     const robotsBody = await robots.text();
@@ -99,9 +111,16 @@ test.describe("스테이징 레거시 주소 (RT-001~004)", () => {
     test(`${from} → 308 ${to}`, async ({ request }) => {
       const response = await request.get(from, { maxRedirects: 0 });
       expect(response.status()).toBe(308);
-      expect(new URL(response.headers()["location"], "https://x.test").pathname).toBe(
-        to,
-      );
+
+      /*
+       * 경로만 보지 않고 **출처까지** 본다. 경로가 맞아도 다른 호스트로 보내면
+       * 방문자를 엉뚱한 사이트로 넘기는 것이다. 보낸 주소를 기준으로 풀어서
+       * 상대 주소(`/notice`)와 절대 주소(`https://...`) 둘 다 같은 기준으로 비교한다.
+       */
+      const requested = new URL(from, stagingOrigin);
+      const location = new URL(response.headers()["location"], requested);
+      expect(location.pathname).toBe(to);
+      expect(location.origin).toBe(requested.origin);
     });
   }
 
@@ -133,20 +152,27 @@ test.describe("스테이징 관리자 경로", () => {
     expect(response.status()).toBe(200);
   });
 
-  test("로그인하지 않으면 관리자 자료를 주지 않는다", async ({ request }) => {
-    // 세션이 없으면 401 이어야 한다. 200 이면 개인정보가 그냥 나간다는 뜻이다.
-    for (const path of [
-      "/api/admin/applications",
-      "/api/admin/consultations",
-      "/api/admin/instructor-applications",
-    ]) {
+  // 한 테스트에 묶으면 첫 경로가 실패했을 때 나머지를 보지 못한다. 경로마다 따로 둔다.
+  for (const path of [
+    "/api/admin/applications",
+    "/api/admin/consultations",
+    "/api/admin/instructor-applications",
+  ] as const) {
+    test(`로그인하지 않으면 ${path} 가 자료를 주지 않는다`, async ({ request }) => {
+      // 200 이면 신청자 개인정보가 그냥 나간다는 뜻이다.
       const response = await request.get(path, { maxRedirects: 0 });
       expect([401, 403], `${path} 가 ${response.status()} 로 답했다`).toContain(
         response.status(),
       );
-    }
-  });
+    });
+  }
 
+  /*
+   * **한계** — 이 단정은 「막혔다」만 본다. 경로가 배포되지 않았거나 `CRON_SECRET` 이
+   * 비어 있어도 404 라서, 통과한다고 인증이 동작한다는 뜻은 아니다.
+   * 비밀값 비교 자체는 `tests/unit/cron-auth.test.ts` 6건이 고정하고, 성공 경로는
+   * 전환 후 Vercel → Crons 실행 기록으로 확인한다 (`docs/migration-checklist.md` 4장).
+   */
   test("파기 예약 경로는 비밀값 없이 통과하지 못한다", async ({ request }) => {
     // 경로의 존재를 드러내지 않으려고 404 로 답한다. (ASM-100)
     const response = await request.get("/api/cron/privacy-purge", { maxRedirects: 0 });
