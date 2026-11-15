@@ -80,6 +80,22 @@ function gone(): NextResponse {
 function securityHeaders(): Record<string, string> {
   const isProduction = process.env.NODE_ENV === "production";
 
+  /*
+   * **Blob 저장소를 쓰면 업로드가 `connect-src` 를 지난다.** (AD-015, ADR-008)
+   *
+   * 사진 바이트는 서버 함수를 거치지 않고 브라우저가 서명된 주소로 직접 PUT 한다.
+   * `@vercel/blob` 의 서명 주소는 `https://vercel.com/api/blob/...` 이라서, Phase 6 에서
+   * 넣은 `connect-src 'self' …` 가 그 요청을 **막는다.** 스테이징에서 실제로 막혔다 —
+   * 「사진을 올리지 못했습니다」와 CSP 위반 콘솔 오류 (OBSERVED 2026-11-15, EV-0019).
+   * `img-src` 만 Blob 호스트를 열어 둔 것으로는 **보기만 되고 올리기가 안 된다.**
+   *
+   * 로컬 파일 저장소에서는 열지 않는다. 어댑터가 `vercel-blob` 일 때만 더한다.
+   */
+  const blobUploadOrigins =
+    process.env.STORAGE_ADAPTER?.trim() === "vercel-blob"
+      ? " https://vercel.com https://*.public.blob.vercel-storage.com"
+      : "";
+
   const csp = [
     "default-src 'self'",
     // 개발 모드의 React 는 호출 스택 복원 같은 디버깅에 `eval` 을 쓴다. 운영 빌드는 쓰지
@@ -90,7 +106,7 @@ function securityHeaders(): Record<string, string> {
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob: https://*.public.blob.vercel-storage.com https://www.google-analytics.com",
     "font-src 'self'",
-    "connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com",
+    `connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com${blobUploadOrigins}`,
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'",

@@ -37,6 +37,13 @@ export function failure(message: string, fieldErrors?: FieldErrors): ActionFailu
  * Next 의 리다이렉트·`notFound()` 는 예외로 전달된다. 그것까지 삼키면 Server Action
  * 뒤의 화면 이동이 조용히 사라진다. 우리 오류를 보기 전에 먼저 돌려보낸다. (EV-0015)
  */
+/** 값이 섞일 수 없는 모양(대문자·숫자·밑줄, 64자 이하)일 때만 돌려준다. */
+function constantCode(error: unknown): string | undefined {
+  if (!(error instanceof Error)) return undefined;
+  const message = error.message.trim();
+  return /^[A-Z0-9_]{3,64}$/.test(message) ? message : undefined;
+}
+
 export function toFailure(error: unknown): ActionFailure {
   unstable_rethrow(error);
 
@@ -50,6 +57,19 @@ export function toFailure(error: unknown): ActionFailure {
 
   console.error("server_action_error", {
     name: error instanceof Error ? error.name : "Unknown",
+    /*
+     * **우리 코드가 던진 상수 코드일 때만** 메시지를 남긴다.
+     *
+     * 이름만 남기면 운영 기록에 `{ name: 'Error' }` 한 줄이 떨어져 **무엇이 깨졌는지
+     * 알 방법이 없다.** 스테이징에서 사진 올리기가 실패했을 때 기록이 이것뿐이어서
+     * 원인을 좁히지 못했다 (OBSERVED 2026-11-15, EV-0019).
+     *
+     * 그렇다고 메시지를 그대로 남기면 외부 라이브러리 오류에 입력값이 섞여 들어올 수
+     * 있다(`CLAUDE.md` 4장). 그래서 **대문자·숫자·밑줄로만 된 짧은 문자열**, 즉 우리가
+     * 코드에 박아 둔 상수(`MEDIA_PUBLIC_URL_MISSING` 같은 것)만 통과시킨다.
+     * 사람 이름·연락처·파일 이름은 이 모양을 만들 수 없다.
+     */
+    code: constantCode(error),
   });
 
   return failure(UNEXPECTED_MESSAGE);

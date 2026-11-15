@@ -32,11 +32,15 @@
     "postinstall": "prisma generate",
     "check:assets": "node scripts/check-public-assets.mjs",
     "import:notices": "node scripts/import-legacy-notices.mjs",
-    "build:media-registry": "tsx scripts/build-legacy-media-registry.ts"
+    "build:media-registry": "tsx scripts/build-legacy-media-registry.ts",
+    "bootstrap:admin": "tsx --conditions=react-server scripts/bootstrap-admin.ts",
+    "db:deploy:direct": "node scripts/migrate-deploy.mjs",
+    "e2e:staging": "node -e \"if(!(process.env.STAGING_BASE_URL||'').trim()){console.error('[e2e:staging] STAGING_BASE_URL 이 비어 있습니다. 스테이징 주소를 넣어 주세요.\\n  STAGING_BASE_URL=https://<주소> VERCEL_AUTOMATION_BYPASS_SECRET=<열쇠> npm run e2e:staging');process.exit(1)}\" && playwright test --project=staging"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.1",
     "@prisma/client": "7.10.1",
+    "@vercel/blob": "^2.9.0",
     "argon2": "^0.45.2",
     "next": "16.4.5",
     "pg": "^8.23.1",

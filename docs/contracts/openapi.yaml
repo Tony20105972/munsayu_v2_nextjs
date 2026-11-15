@@ -648,6 +648,32 @@ paths:
         "401": { description: 비로그인이고 비밀값도 없음 (UNAUTHENTICATED) }
         "403": { description: 관리자 아님 (FORBIDDEN) }
         "422": { description: 검증 실패 (VALIDATION_FAILED) }
+  /api/cron/privacy-purge:
+    get:
+      summary: >-
+        AD-013 파기 예약 실행 (Phase 7, ASM-100). Vercel Cron 이 하루 한 번
+        (18:00 UTC = 03:00 KST) 부른다. Authorization: Bearer <CRON_SECRET> 만
+        통과시키고, 비밀값이 설정되지 않았으면 아무도 통과하지 못한다.
+        관리자 설정의 「자동 파기 사용」이 꺼져 있으면 아무것도 지우지 않는다(기본값 꺼짐).
+        Vercel 예약 실행은 GET 만 보내고 본문을 싣지 못해 POST /api/admin/privacy/purge 와
+        경로를 따로 둔다.
+      parameters:
+        - {
+            name: Authorization,
+            in: header,
+            required: true,
+            schema: { type: string },
+            description: "Bearer <CRON_SECRET>",
+          }
+      responses:
+        "200":
+          description: >-
+            파기 건수 요약과 감사기록 ID, 또는 자동 파기가 꺼져 있을 때
+            { skipped: true, reason: "automatic-purge-disabled" }
+        "404":
+          description: >-
+            비밀값 미설정·헤더 없음·헤더 불일치. 경로의 존재를 드러내지 않기 위해
+            401 이 아니라 404 로 답한다.
   /api/auth/session:
     get:
       summary: 현재 세션 사용자 확인 — 화면이 로그인 상태를 읽는 단일 경로

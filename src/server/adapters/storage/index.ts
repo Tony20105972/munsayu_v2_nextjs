@@ -2,6 +2,7 @@ import "server-only";
 import { createHash, createHmac, randomUUID, timingSafeEqual } from "node:crypto";
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, join, normalize, resolve, sep } from "node:path";
+import { del, get, issueSignedToken, presignUrl, put } from "@vercel/blob";
 import { envValue, requireEnvValue } from "@/server/env";
 
 export type StoredObject = {
@@ -221,11 +222,242 @@ class LocalStorageAdapter implements StorageAdapter {
   }
 }
 
-const localAdapter = new LocalStorageAdapter();
+/**
+ * 공개 사진과 비공개 파일은 **서로 다른 Blob 저장소**에 들어간다.
+ *
+ * 저장소의 공개/비공개는 **만들 때 고정**되고(`vercel blob create-store --access`),
+ * 한 저장소가 둘을 함께 담지 못한다. private 저장소에 공개 사진을 올리면 저장소가
+ * 「Cannot use public access on a private store」로 **거부한다.** 그래서 어댑터가
+ * 영역에 따라 저장소를 바꿔 준다. 스테이징에서 실제로 막혀 찾은 것이다
+ * (OBSERVED 2026-11-15, EV-0019).
+ *
+ * 환경 변수 이름을 **영역별로 따로** 둔다. 공개 쪽은 `BLOB_PUBLIC_*` 만 보고,
+ * 비공개 저장소의 이름(`BLOB_READ_WRITE_TOKEN`·`BLOB_STORE_ID`)으로 흘러가는 길을
+ * 아예 만들지 않는다. 그 길이 있으면 이력서가 공개 저장소로, 또는 공개 사진이
+ * 비공개 저장소로 조용히 들어갈 수 있다.
+ *
+ * `token` 과 `storeId` 를 **둘 다** 넘긴다. SDK 는 OIDC(`VERCEL_OIDC_TOKEN`)가 있으면
+ * `BLOB_STORE_ID` 를 함께 보고 저장소를 정하는 길도 갖고 있어서, 토큰만 넘기면
+ * 환경에 따라 다른 저장소로 갈 수 있다.
+ */
+export type BlobTarget = { token: string; storeId: string };
 
+export function blobTargetForScope(scope: StorageScope): BlobTarget {
+  if (scope === "public") {
+    return {
+      token: requireEnvValue("BLOB_PUBLIC_READ_WRITE_TOKEN"),
+      storeId: requireEnvValue("BLOB_PUBLIC_STORE_ID"),
+    };
+  }
+
+  /*
+   * 비공개·임시 영역. `BLOB_PRIVATE_*` 를 먼저 보고, 없으면 Vercel 통합이 기본 접두사로
+   * 붙여 준 이름을 쓴다. 통합 연결을 `BLOB_PRIVATE` 접두사로 다시 붙이면 코드를 고치지
+   * 않고 이름만 바뀐다.
+   */
+  return {
+    token:
+      envValue("BLOB_PRIVATE_READ_WRITE_TOKEN") ??
+      requireEnvValue("BLOB_READ_WRITE_TOKEN"),
+    storeId: envValue("BLOB_PRIVATE_STORE_ID") ?? requireEnvValue("BLOB_STORE_ID"),
+  };
+}
+
+/**
+ * Vercel Blob 저장 구현. 운영·스테이징에서 쓴다. (ASM-008 · ADR-008 · Phase 7)
+ *
+ * 로컬 어댑터와 다른 점은 두 가지다.
+ *
+ * 1. **바이트가 우리 함수를 지나가지 않는다.** 올릴 자리는 Blob 이 서명한 `PUT` 주소다.
+ *    Vercel 함수 본문 상한(4.5MB)과 무관해져 20MB 사진도 올라간다. 용량 상한은
+ *    주소를 만들 때 `maximumSizeInBytes` 로 **저장소가** 지킨다. 우리 쪽 검사가
+ *    아니라 저장소 쪽 검사이므로 브라우저가 우회할 수 없다.
+ * 2. **공개·비공개가 저장소 수준으로 갈린다.** 이력서(`private`)와 검사 전 원본
+ *    (`staging`)은 `access: "private"` 으로 올라가 공개 주소가 아예 생기지 않는다.
+ *    공개 사진만 `access: "public"` 으로 올려 Blob CDN 이 직접 내려 준다.
+ *    (`next.config.ts` 의 `remotePatterns` 와 `proxy.ts` 의 `img-src` 가 그 호스트를 허용한다)
+ *
+ * 비밀값은 `BLOB_READ_WRITE_TOKEN`(또는 Vercel 의 OIDC + `BLOB_STORE_ID`)을 SDK 가
+ * 환경 변수에서 직접 읽는다. 이 파일은 토큰을 읽지도, 로그에 남기지도 않는다.
+ */
+class VercelBlobStorageAdapter implements StorageAdapter {
+  readonly name = "vercel-blob" as const;
+
+  /** 공개 영역만 `public`. 비공개·임시는 저장소 수준에서 비공개다. */
+  private accessFor(scope: StorageScope): "public" | "private" {
+    return scope === "public" ? "public" : "private";
+  }
+
+  /**
+   * 저장소 안의 경로. 영역을 맨 앞에 붙여 공개·비공개 파일이 섞이지 않게 한다.
+   *
+   * 영역 밖을 가리키는 키는 **조용히 고치지 않고 거절한다.** 고쳐서 쓰면
+   * `private/../public/x` 가 `public/x` 로 바뀌어, 비공개로 올린 줄 알았던 파일이
+   * 공개 영역에 들어갈 수 있다. 로컬 어댑터(`resolveSafePath`)도 같은 규칙으로 던진다.
+   */
+  private pathnameFor(scope: StorageScope, key: string): string {
+    const normalizedKey = normalize(key);
+    if (
+      normalizedKey === ".." ||
+      normalizedKey.startsWith("../") ||
+      normalizedKey.startsWith("..\\") ||
+      normalizedKey.startsWith("/") ||
+      normalizedKey.startsWith("\\") ||
+      normalizedKey.length === 0 ||
+      normalizedKey === "."
+    ) {
+      throw new Error("STORAGE_KEY_OUT_OF_SCOPE");
+    }
+    return `${scope}/${normalizedKey}`;
+  }
+
+  async put(
+    scope: StorageScope,
+    key: string,
+    body: Uint8Array,
+    contentType: string,
+  ): Promise<StoredObject> {
+    /*
+     * SDK 는 `Buffer` 를 받는다. 복사 없이 같은 메모리를 가리키게 감싼다.
+     * 사진이 20MB 까지 올 수 있어 한 번 더 복사하는 비용을 피한다.
+     */
+    const buffer = Buffer.from(body.buffer, body.byteOffset, body.byteLength);
+    const result = await put(this.pathnameFor(scope, key), buffer, {
+      ...blobTargetForScope(scope),
+      access: this.accessFor(scope),
+      contentType,
+      /*
+       * 키는 우리가 UUID 로 만든다(`createStorageKey`). 저장소가 접미사를 더 붙이면
+       * DB 에 적어 둔 키로 다시 찾을 수 없다.
+       */
+      addRandomSuffix: false,
+      /*
+       * 같은 키로 다시 올리는 경우는 재시도뿐이다. 기본값(`false`)이면 재시도가
+       * 충돌로 실패한다. 키가 UUID 라 다른 파일을 덮어쓸 일은 없다.
+       */
+      allowOverwrite: true,
+    });
+
+    return {
+      key,
+      // 공개 주소는 저장소가 돌려준 값을 그대로 쓴다. 우리가 조립하지 않는다.
+      url: scope === "public" ? result.url : null,
+      sizeBytes: body.byteLength,
+      contentType,
+    };
+  }
+
+  async get(scope: StorageScope, key: string): Promise<Uint8Array> {
+    const result = await get(this.pathnameFor(scope, key), {
+      ...blobTargetForScope(scope),
+      access: this.accessFor(scope),
+      /*
+       * 방금 올린 임시 원본을 바로 읽는다. CDN 캐시를 거치면 아직 없다고 나올 수
+       * 있어서 원본 저장소에서 읽는다.
+       */
+      useCache: false,
+    });
+
+    if (!result || result.statusCode !== 200) {
+      throw new Error("STORAGE_OBJECT_NOT_FOUND");
+    }
+    const buffer = await new Response(result.stream).arrayBuffer();
+    return new Uint8Array(buffer);
+  }
+
+  async remove(scope: StorageScope, key: string): Promise<void> {
+    // 없는 파일을 지워도 오류가 아니다. 로컬 어댑터의 `rm(..., { force: true })` 와 같다.
+    await del(this.pathnameFor(scope, key), blobTargetForScope(scope));
+  }
+
+  urlFor(scope: StorageScope, key: string): string | null {
+    // 비공개·임시 영역은 주소를 만들지 않는다. 관리자 인증 경로로만 내보낸다. (AD-011)
+    if (scope !== "public") return null;
+    /*
+     * 공개 주소의 호스트는 저장소마다 다르고 저장소 ID 에서 계산할 수 없다.
+     * 그래서 `put()` 이 돌려준 주소를 쓰는 것이 정답이고, 이 함수는 그 주소를
+     * 다시 만들어야 하는 자리에서만 쓴다. 기준 주소를 넣어 두지 않았으면
+     * 조용히 `null` 을 주지 않고 **멈춘다.** 깨진 사진 주소를 DB 에 적는 것보다 낫다.
+     */
+    // 키 검사를 먼저 한다. 설정이 있든 없든 잘못된 키는 거절해야 한다.
+    const pathname = this.pathnameFor(scope, key);
+    const base = envValue("BLOB_PUBLIC_BASE_URL");
+    if (!base) throw new Error("BLOB_PUBLIC_BASE_URL_MISSING");
+    return `${base.replace(/\/$/, "")}/${pathname}`;
+  }
+
+  async createUploadTicket(
+    scope: StorageScope,
+    key: string,
+    options: { maxBytes: number; ttlSeconds?: number },
+  ): Promise<DirectUploadTicket> {
+    const pathname = this.pathnameFor(scope, key);
+    const validUntil =
+      Date.now() + (options.ttlSeconds ?? UPLOAD_TICKET_TTL_SECONDS) * 1000;
+
+    /*
+     * 티켓은 이 **한 경로**, **올리기 한 가지**, **이 용량까지**로 좁힌다.
+     * 티켓이 새어 나가도 다른 파일을 읽거나 지우거나 큰 파일을 밀어 넣을 수 없다.
+     */
+    const signedToken = await issueSignedToken({
+      ...blobTargetForScope(scope),
+      pathname,
+      operations: ["put"],
+      validUntil,
+      maximumSizeInBytes: options.maxBytes,
+    });
+
+    const { presignedUrl } = await presignUrl(signedToken, {
+      operation: "put",
+      pathname,
+      access: this.accessFor(scope),
+      validUntil,
+      maximumSizeInBytes: options.maxBytes,
+      addRandomSuffix: false,
+      allowOverwrite: true,
+      /*
+       * 검사 전 원본은 하루 뒤 저장소가 스스로 지운다. 보관함에 등록이 끝나면
+       * 우리가 바로 지우지만(`finalizeMediaUpload`), 사용자가 창을 닫거나 등록이
+       * 실패하면 아무도 지우지 않는 원본이 남는다. 비공개여도 검사하지 않은 파일을
+       * 영구히 두지 않는다. 공개 영역에는 수명을 두지 않는다.
+       */
+      ...(scope === "staging" ? { ttlDays: 1 } : {}),
+    });
+
+    return {
+      url: presignedUrl,
+      method: "PUT",
+      /*
+       * 헤더를 지정하지 않는다. 브라우저가 고른 `Content-Type` 이 그대로 가고,
+       * 형식은 어차피 바이트를 보고 다시 판별한다(ASM-085, `normalizeUploadedImage`).
+       */
+      headers: {},
+      key,
+      maxBytes: options.maxBytes,
+      expiresAt: new Date(validUntil),
+    };
+  }
+}
+
+const localAdapter = new LocalStorageAdapter();
+const vercelBlobAdapter = new VercelBlobStorageAdapter();
+
+/**
+ * `STORAGE_ADAPTER` 로 저장 구현을 고른다. 비어 있으면 로컬이다(개발 기본값).
+ *
+ * 모르는 이름이면 **던진다.** 오타 하나로 운영이 조용히 로컬 파일 저장으로 떨어지면
+ * 올린 사진이 배포마다 사라진다(Vercel 함수의 파일 시스템은 요청이 끝나면 없어진다).
+ */
 export function getStorageAdapter(): StorageAdapter {
-  // 지금은 로컬 구현 하나뿐이다. 운영 전환은 Phase 7에서 이 분기만 늘린다. (ADR-008)
-  return localAdapter;
+  const selected = envValue("STORAGE_ADAPTER") ?? "local";
+  switch (selected) {
+    case "local":
+      return localAdapter;
+    case "vercel-blob":
+      return vercelBlobAdapter;
+    default:
+      throw new Error(`UNKNOWN_STORAGE_ADAPTER:${selected}`);
+  }
 }
 
 /** 같은 파일을 두 번 올렸는지 알아보는 용도. 내용 자체는 저장하지 않는다. */
