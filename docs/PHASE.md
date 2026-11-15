@@ -11,11 +11,11 @@
 
 | 항목 | 값 |
 |---|---|
-| 현재 Phase | **5 — Legacy Parity Testing** |
+| 현재 Phase | **6 — Performance & Security** |
 | 상태 | `GATE_CHECK` |
-| 마지막 갱신 | 2026-11-14 |
-| 다음 행동 | 사람 승인 대기. Gate 2번 기준(REA `compare_web_captures`)을 방법 대체로 둘지 사람 판단 필요 |
-| 막힌 것 | 원장님 답 6건(`Q-ADM-15`~`20`) 대기. 기능에는 영향 없고 문구·주소 확정만 남았다 |
+| 마지막 갱신 | 2026-11-15 |
+| 다음 행동 | 사람 승인 대기. Gate 3번(스테이징 부하 테스트)을 방법 대체로 둘지 사람 판단 필요 |
+| 막힌 것 | 원장님 답 6건(`Q-ADM-15`~`20`) 대기. 문구·주소 확정만 남았고 Phase 6 작업에는 영향 없다 |
 
 상태 값: `NOT_STARTED` → `IN_PROGRESS` → `GATE_CHECK` → `IN_REVIEW` → `APPROVED`
 (Gate 실패 시 `GATE_FAIL` → 수정 후 다시 `GATE_CHECK`)
@@ -31,8 +31,8 @@
 | 2 | Migration Contract | APPROVED | PASS (7/7) | 차단 3 수정 / 권장 반영 | ☑ | `reports/phase-2-report.md` |
 | 3 | Frontend Reconstruction | APPROVED | PASS (5/5) | 차단 1 수정 / 권장 12 기록 | ☑ | `reports/phase-3-report.md` |
 | 4 | Backend Replacement | APPROVED | PASS (9/9 적용) | 차단 1 수정 / 권장 12 기록 | ☑ | `reports/phase-4-report.md` |
-| 5 | Legacy Parity Testing | GATE_CHECK | PASS (4/5, 1건 방법 대체) | 차단 1 수정 / 권장 5 중 3 수정 | ☐ | `reports/phase-5-report.md` |
-| 6 | Performance & Security | NOT_STARTED | — | — | ☐ | `reports/phase-6-report.md` |
+| 5 | Legacy Parity Testing | APPROVED | PASS (4/5, 1건 방법 대체) | 차단 1 수정 / 권장 5 중 3 수정 | ☑ | `reports/phase-5-report.md` |
+| 6 | Performance & Security | GATE_CHECK | PASS (2/3, 1건 방법 대체) | 차단 3 수정 / 권장 6 중 4 수정 | ☐ | `reports/phase-6-report.md` |
 | 7 | Cutover 준비 | NOT_STARTED | — | — | ☐ | `reports/phase-7-report.md` |
 
 - Gate 칸: `PASS (n/n)` 또는 `FAIL (통과 수/전체)`
@@ -144,6 +144,8 @@ Claude는 Phase 상태가 바뀔 때마다 한 줄씩 추가합니다. 위쪽이
 
 | 날짜 | Phase | 변경 | 작성 |
 |---|---|---|---|
+| 2026-11-15 | 6 | 성능: 배너 267KB→10KB, 모바일 LCP 2940~3484ms→604~636ms(기준 1/7→7/7). 보안: 보안 헤더 전무 → nonce CSP 등 추가, CSV 무제한 내보내기 상한(ASM-097), 만료 세션 테스트 50건. sitemap 신설. Gate 2/3(3번 방법 대체) → GATE_CHECK | Claude Code |
+| 2026-11-15 | 5→6 | **Phase 5 승인(사용자 지시)**, PR #6 squash 병합. `verify` CI 통과(GitGuardian 은 테스트용 가짜 값만 잡아 막는 사유로 보지 않음). Phase 6 시작 | Claude Code |
 | 2026-11-14 | 5 | 독립 리뷰(차단 1 / 권장 5 / 참고 4). 차단 1건(숨은 배너 슬라이드가 클릭·초점을 가로챔) 수정·브라우저로 확인, 권장 3건 수정. `reports/phase-5-review.md` | Claude Code |
 | 2026-11-14 | 5 | 남은 비교 2건 완료(접혀 있던 분당점 탭·학원 소개 3번 탭 본문을 관찰값으로 채움). ASM-081·049 해소, 048 부분 해소. E2E 서버 재사용 결함 수정. Gate 판정 4/5(2번은 방법 대체) → GATE_CHECK | Claude Code |
 | 2026-11-14 | 5 | 레거시 동등성 검증 1단계: 공개 16경로 전수 대조. 버그 9건 수정(홈 배너 2·3, 4대 차별화 섹션, 메뉴 링크 미노출, Next 내부 예외 삼킴, E2E 수화 차단 등), 의도된 변경 7건, 원장님 질문 6건 등록. ASM-040 해소·ASM-043 반증·ASM-095/096 신설. Chrome 9222 끊겨 중단 | Claude Code |

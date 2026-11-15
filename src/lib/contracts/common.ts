@@ -67,6 +67,18 @@ export function maskSchoolName(schoolName: string): string {
 }
 
 /** 응답 본문과 로그에 쓰는 오류 코드. 개인정보를 담지 않는다. (BLUEPRINT 10장) */
+/**
+ * CSV 한 번에 내보낼 수 있는 최대 줄 수.
+ *
+ * 내보내기는 「현재 필터 결과 **전체**」를 담는다(ASM-006). 상한이 없으면 필터 없이
+ * 누른 한 번의 요청이 표 전체를 메모리에 올려 함수가 죽을 수 있고, 개인정보가 담긴
+ * 파일이 통째로 한 번에 빠져나간다.
+ *
+ * 그래서 조용히 잘라내지 않는다. 결과가 이 수를 넘으면 **거절하고 범위를 좁히라고
+ * 알려 준다.** 잘라내면 「전체」라는 약속이 거짓이 되기 때문이다. // ASM-097
+ */
+export const CSV_EXPORT_MAX_ROWS = 20_000;
+
 export const ERROR_CODES = {
   VALIDATION_FAILED: "VALIDATION_FAILED",
   INTAKE_CLOSED: "INTAKE_CLOSED",

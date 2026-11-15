@@ -15,6 +15,7 @@ import {
   type ConsultationTypeUpsertInput,
 } from "@/lib/contracts";
 import { db, isUniqueViolation } from "@/server/db";
+import { takeForExport } from "@/server/lib/csv-export";
 import { notFound, validationFailed } from "@/server/errors";
 import { notifyQuietly } from "@/server/adapters/notify";
 import { csvRows } from "@/server/lib/csv";
@@ -337,11 +338,14 @@ export async function exportConsultationsCsv(
   actorUserId: string,
   filter: ConsultationExportInput,
 ): Promise<{ csv: string; rowCount: number; auditId: string }> {
-  const rows = await db.consultationApplication.findMany({
-    where: consultationWhere(filter),
-    orderBy: { createdAt: "desc" },
-    include: { consultationType: { select: { label: true } } },
-  });
+  const rows = await takeForExport((take) =>
+    db.consultationApplication.findMany({
+      where: consultationWhere(filter),
+      orderBy: { createdAt: "desc" },
+      take,
+      include: { consultationType: { select: { label: true } } },
+    }),
+  );
 
   const csv = csvRows(
     [

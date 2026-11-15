@@ -12,6 +12,7 @@ import {
   type EventReservationTotals,
 } from "@/lib/contracts";
 import { db } from "@/server/db";
+import { takeForExport } from "@/server/lib/csv-export";
 import { notFound } from "@/server/errors";
 import { csvRows } from "@/server/lib/csv";
 import { summarizeFilter, writeAuditLog } from "@/server/services/audit";
@@ -237,13 +238,16 @@ export async function exportApplicationsCsv(
   let rowCount: number;
 
   if (filter.kind === "course") {
-    const rows = await db.courseApplication.findMany({
-      where: courseWhere(filter),
-      orderBy: { createdAt: "desc" },
-      include: {
-        course: { select: { title: true, campus: { select: { name: true } } } },
-      },
-    });
+    const rows = await takeForExport((take) =>
+      db.courseApplication.findMany({
+        where: courseWhere(filter),
+        orderBy: { createdAt: "desc" },
+        take,
+        include: {
+          course: { select: { title: true, campus: { select: { name: true } } } },
+        },
+      }),
+    );
     rowCount = rows.length;
     csv = csvRows(
       [
@@ -274,13 +278,16 @@ export async function exportApplicationsCsv(
       ]),
     );
   } else {
-    const rows = await db.eventReservation.findMany({
-      where: eventWhere(filter),
-      orderBy: { createdAt: "desc" },
-      include: {
-        event: { select: { title: true, campus: { select: { name: true } } } },
-      },
-    });
+    const rows = await takeForExport((take) =>
+      db.eventReservation.findMany({
+        where: eventWhere(filter),
+        orderBy: { createdAt: "desc" },
+        take,
+        include: {
+          event: { select: { title: true, campus: { select: { name: true } } } },
+        },
+      }),
+    );
     rowCount = rows.length;
     csv = csvRows(
       [

@@ -6,8 +6,12 @@
 ## 1. 프로젝트와 현재 상태
 
 - 원본 `https://munsayu.com` (PHP) → 목표 Next.js 16 App Router + TS strict + Prisma/PostgreSQL. PHP 소스·DB 접근 불가, **블랙박스 마이그레이션**(관찰된 HTML·JS·HTTP·흐름 근거로 재구현).
-- 현재 Phase **5 — Legacy Parity Testing / `GATE_CHECK`** (Gate 4/5 충족, 2번은 방법 대체 — 사람 판단 필요). 보고서 `docs/reports/phase-5-report.md`.
-- 브랜치 `feat/admin-media` — AD-015 관리자 이미지 관리(ADR-008) 구현분 + Phase 5 선행 수정. Phase 0~4 승인·병합 완료.
+- 현재 Phase **6 — Performance & Security / `GATE_CHECK`** (Gate 2/3 충족, 3번은 방법 대체 — 사람 판단 필요). 보고서 `docs/reports/phase-6-report.md`.
+- Phase 5 **승인·병합 완료**(2026-11-15, PR #6). 보고서 `docs/reports/phase-5-report.md`.
+- Phase 6 결과: 모바일 LCP **2940~3484ms → 604~636ms**(기준 통과 1/7 → 7/7). 원인은 모든 하위 화면이 쓰는 267KB 배너를 CSS 배경으로 넣어 휴대폰도 원본을 받던 것 → `next/image`+AVIF 로 **10KB**.
+- Phase 6 보안: **보안 헤더가 하나도 없었다** → `proxy.ts` 에 nonce CSP·HSTS·nosniff 등 추가. **CSV 내보내기 무제한** → 2만 줄 상한(ASM-097). 관리자 경로 50개에 만료 세션 401 테스트 추가. 의존성 높음 이상 0건.
+- 새 도구: `scripts/measure-web-vitals.ts`(Lighthouse 없이 CDP 측정) · `scripts/load-test-applications.ts`(로컬 전용 부하).
+- 브랜치 `perf/phase-6` — Phase 6 성능·보안. Phase 0~5 승인·병합 완료.
 - Phase 5 0단계(선행 수정) **완료**(2026-11-14). 1단계 레거시 동등성 검증 **대부분 완료** — 보고서 `docs/reports/legacy-parity-report.md`, 근거 `docs/evidence/parity/EV-0015-phase5-parity.md`.
 - 1단계 결과: 버그 12건 고침 · 의도된 변경 7건 · 원장님 질문 6건(`Q-ADM-15`~`20`) · 시드 데이터 차이 4건. 내부 링크 404 0, 절대 주소 0, 깨진 이미지 0.
 - **메인 화면 원본 HTML 반영 완료** — 배너 슬라이드 2·3, 「4대 차별화 시스템」 섹션, PROJECT COSMO 문구를 레거시 관찰값으로 복원.
@@ -94,6 +98,7 @@
 - ASM-094 다중 프레임 GIF는 전체를 저장하되 한 장 높이 계산에 자동 검증 없음
 - ASM-095 공개 화면 title·description·canonical·og 는 화면별로 다르게 (레거시는 전 화면 동일)
 - ASM-096 `/sub/about` 상담·진단 신청 폼은 사용자 재확인 전까지 되살리지 않음
+- ASM-097 CSV 내보내기는 한 번에 2만 줄까지, 넘으면 거절하고 범위를 좁히라고 안내
 
 해소·무효: ASM-040·049·081(EV-0015 관찰값으로 교체) · ASM-007(AD-010·AD-011 범위 포함) · 015(AD-014 구현) · 020 · 024(→025) · 047(AD-010 구현) · 058 · 074 · 076.
 

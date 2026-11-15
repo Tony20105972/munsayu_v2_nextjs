@@ -3,6 +3,11 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   cacheComponents: true,
+  /*
+   * `X-Powered-By: Next.js` 를 지운다. 어떤 틀로 만들었는지 굳이 알릴 필요가 없다.
+   * 나머지 보안 헤더는 요청마다 다른 nonce 가 필요해 `proxy.ts` 에서 붙인다.
+   */
+  poweredByHeader: false,
   /**
    * AD-015 사진 저장 위치.
    * 로컬은 `/uploads/...`(같은 출처)라 설정이 필요 없고, 운영에서 Vercel Blob 어댑터로
@@ -20,6 +25,16 @@ const nextConfig: NextConfig = {
    */
   allowedDevOrigins: ["127.0.0.1"],
   images: {
+    /*
+     * 기본값은 WebP 하나뿐이다. AVIF 를 앞에 두면 받아 주는 브라우저에 더 작은 파일이
+     * 간다(같은 배너에서 WebP 32KB → AVIF 16KB). 못 받는 브라우저는 WebP 로 내려간다.
+     */
+    formats: ["image/avif", "image/webp"],
+    /*
+     * Next 16 은 여기 적은 품질만 쓴다. 적지 않으면 `quality` 를 넘겨도 기본값 75 로
+     * 돌아간다. 배너 사진은 75~90% 덮개에 가려 분위기만 내므로 55 로 충분하다.
+     */
+    qualities: [55, 75],
     remotePatterns: [
       {
         protocol: "https",

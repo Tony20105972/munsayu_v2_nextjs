@@ -1,0 +1,69 @@
+{
+ "base": "http://127.0.0.1:3100",
+ "runs": 3,
+ "rows": [
+  {
+   "id": "PG-001",
+   "label": "홈",
+   "path": "/",
+   "lcp": 600,
+   "cls": 0,
+   "tbt": 24,
+   "domContentLoaded": 597
+  },
+  {
+   "id": "PG-008",
+   "label": "대치본원 시간표",
+   "path": "/sub/schedule.n",
+   "lcp": 636,
+   "cls": 0,
+   "tbt": 9,
+   "domContentLoaded": 581
+  },
+  {
+   "id": "PG-010",
+   "label": "현장설명회 예약",
+   "path": "/sub/Presentation",
+   "lcp": 636,
+   "cls": 0,
+   "tbt": 10,
+   "domContentLoaded": 581
+  },
+  {
+   "id": "PG-012",
+   "label": "공지사항 목록",
+   "path": "/notice",
+   "lcp": 636,
+   "cls": 0,
+   "tbt": 13,
+   "domContentLoaded": 586
+  },
+  {
+   "id": "PG-002",
+   "label": "학원 소개",
+   "path": "/sub/about",
+   "lcp": 620,
+   "cls": 0,
+   "tbt": 17,
+   "domContentLoaded": 587
+  },
+  {
+   "id": "PG-004",
+   "label": "시설안내",
+   "path": "/sub/Facility",
+   "lcp": 636,
+   "cls": 0,
+   "tbt": 6,
+   "domContentLoaded": 589
+  },
+  {
+   "id": "PG-013",
+   "label": "로그인",
+   "path": "/login",
+   "lcp": 624,
+   "cls": 0,
+   "tbt": 6,
+   "domContentLoaded": 592
+  }
+ ]
+}

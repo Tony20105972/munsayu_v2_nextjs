@@ -8,6 +8,10 @@ import { hideDevOverlay, PUBLIC_PAGES, waitForPage } from "./public-pages";
  * - CSS background: `background-image` 가 `none` 이 아니어야 한다.
  * - 1440 / 390 두 폭에서 모두 돌아간다. `next/image` 는 폭에 따라 다른 파일을 요청한다.
  * - 외부 호스트를 가리키는 이미지가 없는지도 함께 확인한다. (운영 사이트 직링크 금지)
+ *
+ * 상단 배너는 Phase 6 에서 CSS 배경 → `next/image` 로 바꿨다(LCP 개선). 그래서 「배경이
+ * 하나 이상 있다」를 CSS 배경 개수로만 세면 안 된다. 화면을 꽉 채우는 배경 역할의
+ * 그림이 있는지를 **방식과 무관하게** 센다.
  */
 test.describe("공개 화면 이미지", () => {
   for (const testCase of PUBLIC_PAGES) {
@@ -48,11 +52,22 @@ test.describe("공개 화면 이미지", () => {
           document.querySelectorAll<HTMLElement>("[style*='background-image']"),
         ).map((element) => window.getComputedStyle(element).backgroundImage);
 
+        // `next/image` 의 `fill` 배경(부모를 꽉 채우는 절대 위치 그림)도 배경으로 센다.
+        const fillBackdrops = images.filter((image) => {
+          const style = window.getComputedStyle(image);
+          return (
+            style.position === "absolute" &&
+            style.objectFit === "cover" &&
+            image.naturalWidth > 0
+          );
+        }).length;
+
         return {
           total: images.length,
           broken,
           external,
           backgrounds,
+          backdropCount: backgrounds.length + fillBackdrops,
           emptyBackgrounds: backgrounds.filter((value) => value === "none").length,
         };
       });
@@ -65,8 +80,9 @@ test.describe("공개 화면 이미지", () => {
       expect(report.emptyBackgrounds).toBe(0);
 
       // 모든 공개 화면에는 적어도 로고 1장과 상단 배경 1개가 있다.
+      // 배경은 CSS `background-image` 든 `next/image` 의 `fill` 이든 상관없이 센다.
       expect(report.total).toBeGreaterThan(0);
-      expect(report.backgrounds.length).toBeGreaterThan(0);
+      expect(report.backdropCount).toBeGreaterThan(0);
     });
   }
 

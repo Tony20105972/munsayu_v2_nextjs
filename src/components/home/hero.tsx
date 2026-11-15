@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { CSSProperties } from "react";
 import { DEFAULT_HOME_BANNERS, type HomeBannerView } from "@/lib/images";
@@ -97,11 +98,23 @@ export function HomeHero({
               aria-hidden={index > 0 ? "true" : undefined}
               className="home-hero-slide relative col-start-1 row-start-1"
             >
+              {/*
+                CSS 배경 대신 `next/image` 를 쓴다. 배경은 화면 크기에 맞춰 줄여 주지
+                않아 휴대폰도 원본을 그대로 받는다. 첫 장에만 `priority` 를 주어
+                LCP 를 앞당기고, 나머지 두 장은 느긋하게 받는다. (Phase 6 성능)
+                사진 위에 75~90% 덮개가 깔리므로 품질을 낮춰도 티가 나지 않는다.
+              */}
               {banner.backgroundUrl ? (
-                <div
+                <Image
+                  src={banner.backgroundUrl}
+                  alt=""
                   aria-hidden="true"
-                  className="absolute inset-0 bg-cover bg-center"
-                  style={{ backgroundImage: `url(${banner.backgroundUrl})` }}
+                  fill
+                  priority={index === 0}
+                  loading={index === 0 ? undefined : "lazy"}
+                  sizes="100vw"
+                  quality={55}
+                  className="object-cover object-center"
                 />
               ) : null}
               <div

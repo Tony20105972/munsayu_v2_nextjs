@@ -20,6 +20,7 @@ import {
 import { createStorageKey, getStorageAdapter } from "@/server/adapters/storage";
 import { notifyQuietly } from "@/server/adapters/notify";
 import { db, isUniqueViolation } from "@/server/db";
+import { takeForExport } from "@/server/lib/csv-export";
 import { notFound, validationFailed } from "@/server/errors";
 import { csvRows } from "@/server/lib/csv";
 import { detectResumeFormat, isAllowedResumeFormat } from "@/server/lib/file-format";
@@ -480,10 +481,13 @@ export async function exportInstructorApplicationsCsv(
   actorUserId: string,
   filter: InstructorApplicationExportInput,
 ): Promise<{ csv: string; rowCount: number; auditId: string }> {
-  const rows = await db.instructorApplication.findMany({
-    where: instructorWhere(filter),
-    orderBy: { createdAt: "desc" },
-  });
+  const rows = await takeForExport((take) =>
+    db.instructorApplication.findMany({
+      where: instructorWhere(filter),
+      orderBy: { createdAt: "desc" },
+      take,
+    }),
+  );
 
   const csv = csvRows(
     [

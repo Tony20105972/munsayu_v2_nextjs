@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { SITE_ORIGIN } from "@/lib/site-config";
 
 /**
  * `/robots.txt`.
@@ -16,8 +17,8 @@ import type { MetadataRoute } from "next";
  * 막는 것은 색인 요청일 뿐 접근 제어가 아니다. 권한은 서버에서 매 요청 확인한다.
  * (CLAUDE.md 4장)
  *
- * sitemap 은 적지 않는다. 레거시도 `/sitemap.xml` 이 404 였다(EV-0004). 신규에도 없다.
- * (제안: 공개 경로가 14개뿐이라 `app/sitemap.ts` 를 두면 색인에 도움이 된다 — 범위 밖)
+ * Phase 6 에서 `app/sitemap.ts` 를 만들어 여기서 가리킨다. 레거시는 `/sitemap.xml` 이
+ * 404 였지만(EV-0004) 공개 경로가 14개뿐이라 올려 두는 편이 색인에 낫다.
  */
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -25,5 +26,6 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       disallow: ["/admin", "/api", "/uploads", "/account", "/uAdmin/", "/adm/"],
     },
+    sitemap: `${SITE_ORIGIN}/sitemap.xml`,
   };
 }

@@ -13,6 +13,7 @@ import {
 } from "@/lib/contracts";
 import { notifyQuietly } from "@/server/adapters/notify";
 import { db, isUniqueViolation } from "@/server/db";
+import { takeForExport } from "@/server/lib/csv-export";
 import { notFound } from "@/server/errors";
 import { csvRows } from "@/server/lib/csv";
 import { summarizeFilter, writeAuditLog } from "@/server/services/audit";
@@ -205,10 +206,13 @@ export async function exportSmsSubscriptionsCsv(
   actorUserId: string,
   filter: SmsSubscriptionExportInput,
 ): Promise<{ csv: string; rowCount: number; auditId: string }> {
-  const rows = await db.smsSubscription.findMany({
-    where: smsWhere(filter),
-    orderBy: { createdAt: "desc" },
-  });
+  const rows = await takeForExport((take) =>
+    db.smsSubscription.findMany({
+      where: smsWhere(filter),
+      orderBy: { createdAt: "desc" },
+      take,
+    }),
+  );
 
   const csv = csvRows(
     ["신청ID", "학년", "학생 이름", "학교명", "보호자 연락처", "신청일시"],
